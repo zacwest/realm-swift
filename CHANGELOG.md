@@ -37,7 +37,7 @@ NOTE: This version bumps the Realm file format to version 10. It is not possible
 
 ### Compatibility
 
-* File format: Generates Realms with format v9 (Reads and upgrades all previous formats)
+* File format: Generates Realms with format v10 (Reads and upgrades all previous formats)
 * Realm Object Server: 3.21.0 or later.
 * APIs are backwards compatible with all previous releases in the 5.x.y series.
 * Carthage release for Swift is built with Xcode 11.3.
