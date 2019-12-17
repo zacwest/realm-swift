@@ -3,6 +3,8 @@
 
 Based on 4.1.1 and also includes all changes since 4.1.0.
 
+NOTE: This version bumps the Realm file format to version 10. It is not possible to downgrade version 9 or earlier. Files created with older versions of Realm will be automatically upgraded.
+
 ### Enhancements
 
 * String primary keys no longer require a separate index, improving insertion
