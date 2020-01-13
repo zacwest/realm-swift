@@ -74,8 +74,6 @@ xctest() {
     if [[ ! -d "$DIRECTORY" ]]; then
         DIRECTORY="${DIRECTORY/swift/swift-$REALM_SWIFT_VERSION}"
     fi
-    PROJECT="$DIRECTORY/$NAME.xcodeproj"
-    WORKSPACE="$DIRECTORY/$NAME.xcworkspace"
     if [[ $PLATFORM == ios ]]; then
         sh "$(dirname "$0")/../../scripts/reset-simulators.sh"
     fi
@@ -114,20 +112,21 @@ xctest() {
             DESTINATION="-destination id=$(xcrun simctl list devices | grep -v unavailable | grep 'iPhone Xs' | grep -m 1 -o '[0-9A-F\-]\{36\}')"
         fi
     fi
-    CMD="-project $PROJECT"
+
+    PROJECT="-project $DIRECTORY/$NAME.xcodeproj"
+    WORKSPACE="$DIRECTORY/$NAME.xcworkspace"
     if [ -d $WORKSPACE ]; then
-        CMD="-workspace $WORKSPACE"
+        PROJECT="-workspace $WORKSPACE"
     fi
-    ACTION=""
-    if [[ $PLATFORM == watchos ]]; then
-        ACTION="build"
-    else
-        ACTION="build test"
+    xcodebuild $PROJECT -scheme $NAME clean build $DESTINATION CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO
+    if [[ $PLATFORM != watchos ]]; then
+        xcodebuild $PROJECT -scheme $NAME test $DESTINATION CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO
     fi
-    if [[ $PLATFORM == ios ]]; then
-        xcodebuild $CMD -scheme $NAME clean $ACTION $DESTINATION CODE_SIGN_IDENTITY=
-    else
-        xcodebuild $CMD -scheme $NAME clean $ACTION $DESTINATION CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO
+
+    if [[ $NAME == CocoaPods* ]]; then
+        [[ $PLATFORM == 'ios' ]] && SDK=iphoneos || SDK=$PLATFORM
+        [[ $LANG == 'swift' ]] && SCHEME=RealmSwift || SCHEME=Realm
+        xcodebuild $PROJECT -scheme $SCHEME -sdk $SDK ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= build
     fi
 }
 
