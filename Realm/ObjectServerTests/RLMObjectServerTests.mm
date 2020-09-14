@@ -131,15 +131,22 @@
 }
 
 - (void)testLogoutSpecificUser {
-    RLMUser *syncUser = self.anonymousUser;
+    RLMApp *app = self.app;
+    RLMUser *syncUserA = [self anonymousUser];
+    RLMUser *syncUserB = [self userForTest:_cmd];
+
+    XCTAssertNotEqualObjects(syncUserA.identity, syncUserB.identity);
+    XCTAssertNotEqualObjects(app.currentUser.identity, syncUserA.identity);
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"should log out current user"];
-    [syncUser logOutWithCompletion:^(NSError *error) {
+    [syncUserA logOutWithCompletion:^(NSError *error) {
         XCTAssertNil(error);
-        XCTAssertEqual(syncUser.state, RLMUserStateRemoved);
+        XCTAssertEqual(syncUserA.state, RLMUserStateRemoved);
         [expectation fulfill];
     }];
-
     [self waitForExpectationsWithTimeout:60.0 handler:nil];
+
+    XCTAssertEqual(syncUserB.state, RLMUserStateLoggedIn);
 }
 
 - (void)testSwitchUser {
