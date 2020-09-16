@@ -1,0 +1,50 @@
+functions:
+  "fetch_source":
+    - command: git.get_project
+      params:
+        directory: "realm-cocoa"
+  "setup_swiftlint":
+    - command: shell.exec
+      params:
+        script: |
+          set -e
+          export DEVELOPER_DIR=/Applications/Xcode10.2.app
+          mkdir -p SwiftLint
+          pushd SwiftLint
+          curl -o swiftlint.zip -L https://github.com/realm/SwiftLint/releases/download/0.29.1/portable_swiftlint.zip
+          unzip swiftlint.zip
+          popd
+tasks:
+  - name: lint
+    commands:
+      - func: "fetch_source"
+      - func: "setup_swiftlint"
+      - command: shell.exec
+        params:
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode11.3.app
+            pushd SwiftLint
+            export PATH=`pwd`:$PATH
+            popd
+            cd realm-cocoa
+            sh build.sh verify-swiftlint
+  - name: test-ios-swift
+    commands:
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            source ./creds
+            export DEVELOPER_DIR=/Applications/Xcode11.3.app
+            cd realm-cocoa
+            sh build.sh test-ios-swift
+buildvariants:
+- name: macos-1014
+  display_name: macos-1014
+  run_on:
+    - macos-1014
+  tasks:
+    - name: test-ios-swift
+    - name: lint
