@@ -36,7 +36,6 @@ tasks:
           shell: "bash"
           script: |
             set -e
-            source ./creds
             export DEVELOPER_DIR=/Applications/Xcode11.3.app
             cd realm-cocoa
             sh build.sh test-ios-swift
