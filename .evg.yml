@@ -8,10 +8,10 @@ functions:
       params:
         script: |
           set -e
-          export DEVELOPER_DIR=/Applications/Xcode10.2.app
+          export DEVELOPER_DIR=/Applications/Xcode11.3.app
           mkdir -p SwiftLint
           pushd SwiftLint
-          curl -o swiftlint.zip -L https://github.com/realm/SwiftLint/releases/download/0.29.1/portable_swiftlint.zip
+          curl -o swiftlint.zip -L https://github.com/realm/SwiftLint/releases/download/0.40.2/portable_swiftlint.zip
           unzip swiftlint.zip
           popd
 tasks:
@@ -31,6 +31,7 @@ tasks:
             sh build.sh verify-swiftlint
   - name: test-ios-swift
     commands:
+      - func: "fetch_source"
       - command: shell.exec
         params:
           shell: "bash"
