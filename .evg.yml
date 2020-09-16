@@ -3,19 +3,35 @@ functions:
     - command: git.get_project
       params:
         directory: "realm-cocoa"
+    - command: shell.exec
+      params:
+        shell: "bash"
+        script: |
+          set -e
+          cd realm-cocoa
+          git submodule update --init --recursive
   "setup_swiftlint":
     - command: shell.exec
       params:
         script: |
           set -e
-          export DEVELOPER_DIR=/Applications/Xcode11.3.app
           mkdir -p SwiftLint
           pushd SwiftLint
           curl -o swiftlint.zip -L https://github.com/realm/SwiftLint/releases/download/0.40.2/portable_swiftlint.zip
           unzip swiftlint.zip
           popd
+  "setup_jazzy":
+    - command: shell.exec
+      params:
+        script: |
+          set -e
+          mkdir -p Jazzy
+          pushd Jazzy
+          curl -o jazzy.zip -L https://github.com/realm/jazzy/archive/v0.13.5.zip
+          unzip jazzy.zip
+          popd
 tasks:
-  - name: lint
+  - name: swiftlint
     commands:
       - func: "fetch_source"
       - func: "setup_swiftlint"
@@ -23,12 +39,53 @@ tasks:
         params:
           script: |
             set -e
-            export DEVELOPER_DIR=/Applications/Xcode11.3.app
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
             pushd SwiftLint
             export PATH=`pwd`:$PATH
             popd
             cd realm-cocoa
+            export CONFIGURATION=${configuration}
             sh build.sh verify-swiftlint
+  - name: docs
+    commands:
+    - func: "setup_jazzy"
+    - func: "fetch_source"
+    - command: shell.exec
+      params:
+        shell: "bash"
+        script: |
+          set -e
+          export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+          pushd Jazzy
+          export PATH=`pwd`:$PATH
+          popd
+          cd realm-cocoa
+          export CONFIGURATION=${configuration}
+          sh build.sh docs
+  - name: test-ios-static
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-ios-static
+  - name: test-ios-dynamic
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-ios-dynamic
   - name: test-ios-swift
     commands:
       - func: "fetch_source"
@@ -37,14 +94,236 @@ tasks:
           shell: "bash"
           script: |
             set -e
-            export DEVELOPER_DIR=/Applications/Xcode11.3.app
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
             cd realm-cocoa
+            export CONFIGURATION=${configuration}
             sh build.sh test-ios-swift
+  - name: test-tvos
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-tvos
+  - name: test-tvos-swift
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-tvos
+  - name: test-osx
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-osx
+  - name: test-osx-swift
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-osx-swift
+  - name: test-catalyst
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-catalyst
+  - name: test-catalyst-swift
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-catalyst-swift
+  - name: test-swiftpm
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh test-swiftpm
+  - name: examples-ios
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh examples-ios
+  - name: examples-ios-swift
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh examples-ios-swift
+  - name: examples-osx
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh examples-osx
+  - name: xcframework
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh xcframework
+  - name: verify-osx-object-server
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh verify-osx-object-server
+  - name: watchos
+    commands:
+      - func: "fetch_source"
+      - command: shell.exec
+        params:
+          shell: "bash"
+          script: |
+            set -e
+            export DEVELOPER_DIR=/Applications/Xcode${xcode_version}.app
+            cd realm-cocoa
+            export CONFIGURATION=${configuration}
+            sh build.sh watchos
+variables:
+- &cocoa-tasks
+    tasks:
+      - name: watchos
+      - name: test-ios-static
+      - name: test-ios-dynamic
+      - name: test-ios-swift
+      - name: test-tvos
+      - name: test-tvos-swift
+      - name: test-osx
+      - name: test-osx-swift
+      - name: test-catalyst
+      - name: test-catalyst-swift
+      - name: test-swiftpm
+      - name: examples-ios
+      - name: examples-ios-swift
+      - name: examples-osx
+      - name: xcframework
+      - name: verify-osx-object-server
+
+- &cocoa-tasks-lint-docs
+    tasks:
+      - name: watchos
+      - name: test-ios-static
+      - name: test-ios-dynamic
+      - name: test-ios-swift
+      - name: test-tvos
+      - name: test-tvos-swift
+      - name: test-osx
+      - name: test-osx-swift
+      - name: test-catalyst
+      - name: test-catalyst-swift
+      - name: test-swiftpm
+      - name: examples-ios
+      - name: examples-ios-swift
+      - name: examples-osx
+      - name: xcframework
+      - name: verify-osx-object-server
+      - name: docs
+      - name: swiftlint
 buildvariants:
-- name: macos-1014
-  display_name: macos-1014
-  run_on:
-    - macos-1014
-  tasks:
-    - name: test-ios-swift
-    - name: lint
+  - name: debug_10_2
+    display_name: "10.2 Debug"
+    run_on:
+      - macos-1014
+    expansions:
+      configuration: Debug
+      xcode_version: 10.2
+    <<: *cocoa-tasks
+  - name: release_10_2
+    display_name: "10.2 Release"
+    run_on:
+      - macos-1014
+    expansions:
+      configuration: Release
+      xcode_version: 10.2
+    <<: *cocoa-tasks
+  - name: debug_11_3
+    display_name: "11.3 Debug"
+    run_on:
+      - macos-1014
+    expansions:
+      configuration: Debug
+      xcode_version: 11.3
+    <<: *cocoa-tasks
+  - name: release_11_3
+    display_name: "11.3 Release"
+    run_on:
+      - macos-1014
+    expansions:
+      configuration: Release
+      xcode_version: 11.3
+    <<: *cocoa-tasks-lint-docs
