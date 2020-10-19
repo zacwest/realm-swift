@@ -18,19 +18,12 @@
 
 #import <Foundation/Foundation.h>
 
-#import <vector>
-
 namespace realm {
-    class Group;
-    class Query;
-    class SortDescriptor;
+class Group;
+class Query;
 }
 
-@class RLMObjectSchema, RLMProperty, RLMSchema, RLMSortDescriptor;
-class RLMClassInfo;
-
-extern NSString * const RLMPropertiesComparisonTypeMismatchException;
-extern NSString * const RLMUnsupportedTypesFoundInPropertyComparisonException;
+@class RLMObjectSchema, RLMProperty, RLMSchema;
 
 realm::Query RLMPredicateToQuery(NSPredicate *predicate, RLMObjectSchema *objectSchema,
                                  RLMSchema *schema, realm::Group &group);

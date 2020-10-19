@@ -154,7 +154,10 @@ RLM_ARRAY_TYPE(CircularArrayObject)
     [realm addObject:owner];
     [realm commitWriteTransaction];
 
-    XCTAssertThrows([OwnerObject objectsInRealm:realm where:@"dog.dogName.first = 'Fifo'"], @"3 levels of relationship");
+    RLMAssertThrowsWithReason([OwnerObject objectsInRealm:realm where:@"dog.dogName.first = 'Fifo'"],
+                              @"Unsupported predicate expression [NSSymbolicExpression] FIRST");
+    RLMAssertThrowsWithReason([OwnerObject objectsInRealm:realm where:@"dog.dogName.firstObject = 'Fifo'"],
+                              @"Property 'dogName' is not a link in object of type 'DogObject'");
 }
 
 - (void)testBidirectionalRelationship {

@@ -1604,7 +1604,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                             oldName:[beforeProperties[0] name]
                             newName:[afterProperties[0] name]];
 
-    [self assertPropertyRenameError:@"Cannot rename property 'MigrationLinkObject.before_array' to 'array' because it would change from type 'array<MigrationLinkObject>' to 'array<MigrationTestObject>'."
+    [self assertPropertyRenameError:@"Cannot rename property 'MigrationLinkObject.before_array' to 'array' because it would change from type 'list<MigrationLinkObject>' to 'list<MigrationTestObject>'."
                       objectSchemas:@[objectSchema, migrationObjectSchema]
                           className:MigrationLinkObject.className
                             oldName:[beforeProperties[1] name]

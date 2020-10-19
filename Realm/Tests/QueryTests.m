@@ -187,14 +187,22 @@
     // These are things which are valid predicates, but which we do not support
 
     // Aggregate operators on non-arrays
-    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"ANY age > 5"], @"Aggregate operations can only.*array property");
-    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"ALL age > 5"], @"ALL modifier not supported");
-    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"SOME age > 5"], @"Aggregate operations can only.*array property");
-    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"NONE age > 5"], @"Aggregate operations can only.*array property");
-    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"ANY person.age > 5"], @"Aggregate operations can only.*array property");
-    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"ALL person.age > 5"], @"ALL modifier not supported");
-    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"SOME person.age > 5"], @"Aggregate operations can only.*array property");
-    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"NONE person.age > 5"], @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"ANY age > 5"],
+                                      @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"ALL age > 5"],
+                                      @"The ALL modifier is not supported");
+    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"SOME age > 5"],
+                                      @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonObject objectsWhere:@"NONE age > 5"],
+                                      @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"ANY person.age > 5"],
+                                      @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"ALL person.age > 5"],
+                                      @"The ALL modifier is not supported");
+    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"SOME person.age > 5"],
+                                      @"Aggregate operations can only.*array property");
+    RLMAssertThrowsWithReasonMatching([PersonLinkObject objectsWhere:@"NONE person.age > 5"],
+                                      @"Aggregate operations can only.*array property");
 
     // nil on LHS of comparison with nullable property
     XCTAssertThrows([AllOptionalTypes objectsWhere:@"nil = boolObj"]);
@@ -227,19 +235,22 @@
     XCTAssertThrows(([ArrayOfAllTypesObject objectsWhere:@"ANY array = array"]));
 
     // Unsupported variants of subqueries.
-    RLMAssertThrowsWithReasonMatching(([ArrayOfAllTypesObject objectsWhere:@"SUBQUERY(array, $obj, $obj.intCol = 5).@count == array.@count"]), @"SUBQUERY.*compared with a constant number");
-    RLMAssertThrowsWithReasonMatching(([ArrayOfAllTypesObject objectsWhere:@"SUBQUERY(array, $obj, $obj.intCol = 5) == 0"]), @"SUBQUERY.*immediately followed by .@count");
-    RLMAssertThrowsWithReasonMatching(([ArrayOfAllTypesObject objectsWhere:@"SELF IN SUBQUERY(array, $obj, $obj.intCol = 5)"]), @"Predicate with IN operator must compare.*aggregate$");
+    RLMAssertThrowsWithReason(([ArrayOfAllTypesObject objectsWhere:@"SUBQUERY(array, $obj, $obj.intCol = 5).@count == array.@count"]),
+                                      @"SUBQUERY(...).@count is only supported when compared with a constant integer.");
+    RLMAssertThrowsWithReason(([ArrayOfAllTypesObject objectsWhere:@"SUBQUERY(array, $obj, $obj.intCol = 5) == 0"]),
+                              @"SUBQUERY is only supported when immediately followed by .@count");
+    RLMAssertThrowsWithReason(([ArrayOfAllTypesObject objectsWhere:@"SELF IN SUBQUERY(array, $obj, $obj.intCol = 5)"]),
+                              @"Predicate with IN operator must compare a KeyPath with an aggregate");
 
     // block-based predicate
     NSPredicate *pred = [NSPredicate predicateWithBlock:^BOOL (__unused id obj, __unused NSDictionary *bindings) {
         return true;
     }];
-    XCTAssertThrows([IntObject objectsWithPredicate:pred]);
+    RLMAssertThrowsWithReason([IntObject objectsWithPredicate:pred],
+                              @"Unsupported predicate [NSBlockPredicate] BLOCKPREDICATE");
 }
 
-- (void)testPredicateMisuse
-{
+- (void)testPredicateMisuse {
     RLMRealm *realm = [RLMRealm defaultRealm];
 
     NSString *className = PersonObject.className;
@@ -250,11 +261,12 @@
     // wrong/invalid data types
     RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age != xyz"],
                                       @"'xyz' not found in .* 'PersonObject'");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"name == 3"],
-                                      @"type string .* property 'name' .* 'PersonObject'.*: 3");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age IN {'xyz'}"],
-                                      @"type int .* property 'age' .* 'PersonObject'.*: xyz");
-    XCTAssertThrows([realm objects:className where:@"name IN {3}"], @"invalid type");
+    RLMAssertThrowsWithReason([realm objects:className where:@"name == 3"],
+                              @"Expected object of type 'string' for property 'PersonObject.name', but received: 3");
+    RLMAssertThrowsWithReason([realm objects:className where:@"age IN {'xyz'}"],
+                                      @"Expected object of type 'int' in IN clause for property 'PersonObject.age', but received: \"xyz\"");
+    RLMAssertThrowsWithReason([realm objects:className where:@"name IN {3}"],
+                              @"Expected object of type 'string' in IN clause for property 'PersonObject.name', but received: 3");
 
     className = AllTypesObject.className;
 
@@ -280,7 +292,8 @@
     XCTAssertThrows([realm objects:className where:@"()"], @"parens");
 
     // Misspelled keypath (should be %K)
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"@K == YES"], @"'@K' is not a valid key path'");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"@K == YES"],
+                                      @"Invalid key path '@K'");
 
     // not a link column
     RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age.age == 25"],
@@ -288,36 +301,58 @@
     XCTAssertThrows([realm objects:className where:@"age.age.age == 25"]);
 
     // abuse of BETWEEN
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN 25"], @"type NSArray for BETWEEN");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN Foo"], @"BETWEEN operator must compare a KeyPath with an aggregate");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {age, age}"], @"must be constant values");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {age, 0}"], @"must be constant values");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {0, age}"], @"must be constant values");
-    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {0, {1, 10}}"], @"must be constant values");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN 25"],
+                                      @"BETWEEN operation requires an array with exactly two values");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN Foo"],
+                                      @"BETWEEN operator must compare a KeyPath with an aggregate");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {age, age}"],
+                                      @"Expected constant value but got expression");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {age, 0}"],
+                                      @"Expected constant value but got expression");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {0, age}"],
+                                      @"Expected constant value but got expression");
+    RLMAssertThrowsWithReasonMatching([realm objects:className where:@"age BETWEEN {0, {1, 10}}"],
+                                      @"Expected constant value but got expression");
 
     NSPredicate *pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @[@1]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"exactly two objects");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred], @"exactly two values");
 
     pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @[@1, @2, @3]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"exactly two objects");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred], @"exactly two values");
 
     pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @[@"Foo", @"Bar"]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"type int for BETWEEN");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred], @"type 'int' for BETWEEN");
 
     pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @[@1.5, @2.5]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"type int for BETWEEN");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred], @"type 'int' for BETWEEN");
 
     pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @[@1, @[@2, @3]]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"type int for BETWEEN");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred], @"type 'int' for BETWEEN");
 
     pred = [NSPredicate predicateWithFormat:@"age BETWEEN %@", @{@25 : @35}];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"type NSArray for BETWEEN");
+    RLMAssertThrowsWithReason([realm objects:className withPredicate:pred],
+                              @"BETWEEN operation requires an array with exactly two values");
 
     pred = [NSPredicate predicateWithFormat:@"height BETWEEN %@", @[@25, @35]];
-    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred], @"'height' not found .* 'PersonObject'");
+    RLMAssertThrowsWithReasonMatching([realm objects:className withPredicate:pred],
+                                      @"'height' not found .* 'PersonObject'");
 
     // bad type in link IN
     XCTAssertThrows([PersonLinkObject objectsInRealm:realm where:@"person.age IN {'Tim'}"]);
+
+    // Bad arguments for linkingobjects comparison
+    RLMAssertThrowsWithReason([PersonObject objectsWhere:@"parents == NULL"],
+                              @"Key paths that include an array property must use aggregate operations");
+    RLMAssertThrowsWithReason([PersonObject objectsWhere:@"ANY parents == NULL"],
+                              @"Expected object of type 'PersonObject' for property 'PersonObject.parents', but received: <null>");
+    RLMAssertThrowsWithReason([PersonObject objectsWhere:@"ANY parents == 1"],
+                              @"Expected object of type 'PersonObject' for property 'PersonObject.parents', but received: 1");
+    RLMAssertThrowsWithReason([PersonObject objectsWhere:@"ANY parents == 'abc'"],
+                              @"Expected object of type 'PersonObject' for property 'PersonObject.parents', but received: \"abc\"");
+    RLMAssertThrowsWithReason(([PersonObject objectsWhere:@"ANY parents == %@", pred]),
+                              @"Unsupported value 'height BETWEEN {25, 35}' for query");
+    RLMAssertThrowsWithReason(([PersonObject objectsWhere:@"ANY parents == %@", [IntObject new]]),
+                              @"Expected object of type 'PersonObject' for property 'PersonObject.parents', but received: IntObject");
 }
 
 - (void)testStringUnsupportedOperations
@@ -354,15 +389,18 @@
 }
 
 - (void)testLinkQueryInvalid {
-    XCTAssertThrows([LinkToAllTypesObject objectsWhere:@"allTypesCol.binaryCol = 'a'"], @"Binary data not supported");
-    XCTAssertThrows([LinkToAllTypesObject objectsWhere:@"allTypesCol.invalidCol = 'a'"], @"Invalid column name should throw");
+    RLMAssertThrowsWithReason(([LinkToAllTypesObject objectsWhere:@"allTypesCol.binaryCol = %@", NSData.data]),
+                              @"data properties cannot be queried over an object link.");
+    RLMAssertThrowsWithReason([LinkToAllTypesObject objectsWhere:@"allTypesCol.invalidCol = 'a'"],
+                              @"Property 'invalidCol' not found in object of type 'AllTypesObject'");
 
     XCTAssertThrows([LinkToAllTypesObject objectsWhere:@"allTypesCol.longCol = 'a'"], @"Wrong data type should throw");
 
     RLMAssertThrowsWithReasonMatching([ArrayPropertyObject objectsWhere:@"intArray.intCol > 5"], @"Key paths.*array property.*aggregate operations");
     RLMAssertThrowsWithReasonMatching([LinkToCompanyObject objectsWhere:@"company.employees.age > 5"], @"Key paths.*array property.*aggregate operations");
 
-    RLMAssertThrowsWithReasonMatching([LinkToAllTypesObject objectsWhere:@"allTypesCol.intCol = allTypesCol.doubleCol"], @"Property type mismatch");
+    RLMAssertThrowsWithReason([LinkToAllTypesObject objectsWhere:@"allTypesCol.intCol = allTypesCol.doubleCol"],
+                              @"Comparison between 'int' and 'double' properties is not supported");
 }
 
 - (void)testNumericOperatorsOnClass:(Class)class property:(NSString *)property value:(id)value {
@@ -482,16 +520,16 @@
 
     RLMResults *allObjects = [AllTypesObject allObjectsInRealm:realm];
     RLMAssertThrowsWithReason([allObjects objectsWhere:@"boolCol BETWEEN {true, false}"],
-                              @"not supported for type bool");
+                              @"not supported for type 'bool'");
     RLMAssertThrowsWithReason([allObjects objectsWhere:@"stringCol BETWEEN {'', ''}"],
                               @"not supported for string type");
     RLMAssertThrowsWithReason(([allObjects objectsWhere:@"binaryCol BETWEEN %@", @[NSData.data, NSData.data]]),
                               @"not supported for binary type");
     RLMAssertThrowsWithReason([allObjects objectsWhere:@"cBoolCol BETWEEN {true, false}"],
-                              @"not supported for type bool");
+                              @"not supported for type 'bool'");
     RLMAssertThrowsWithReason(([allObjects objectsWhere:@"objectIdCol BETWEEN %@",
                                 @[[RLMObjectId objectId], [RLMObjectId objectId]]]),
-                              @"not supported for type object id");
+                              @"not supported for type 'object id'");
 }
 
 - (void)testQueryWithDates {
@@ -911,21 +949,21 @@
     RLMAssertCount(self.queryObjectClass, 4U, @"objectId1 != objectId2");
 
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"int1 == float1"],
-                                      @"Property type mismatch between int and float");
+                                      @"Comparison between 'int' and 'float' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"float2 >= double1"],
-                                      @"Property type mismatch between float and double");
+                                      @"Comparison between 'float' and 'double' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"double2 <= int2"],
-                                      @"Property type mismatch between double and int");
+                                      @"Comparison between 'double' and 'int' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"int2 != string1"],
-                                      @"Property type mismatch between int and string");
+                                      @"Comparison between 'int' and 'string' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"float1 > string1"],
-                                      @"Property type mismatch between float and string");
+                                      @"Comparison between 'float' and 'string' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"double1 < string1"],
-                                      @"Property type mismatch between double and string");
+                                      @"Comparison between 'double' and 'string' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"double1 LIKE string1"],
-                                      @"Property type mismatch between double and string");
+                                      @"Comparison between 'double' and 'string' properties is not supported");
     RLMAssertThrowsWithReasonMatching([self.queryObjectClass objectsWhere:@"string1 LIKE double1"],
-                                      @"Property type mismatch between string and double");
+                                      @"Comparison between 'string' and 'double' properties is not supported");
 }
 
 - (void)testBooleanPredicate
@@ -936,10 +974,8 @@
     XCTAssertThrows([BoolObject objectsWhere:@"boolCol == NULL"]);
     XCTAssertThrows([BoolObject objectsWhere:@"boolCol != NULL"]);
 
-    XCTAssertThrowsSpecificNamed([BoolObject objectsWhere:@"boolCol >= TRUE"],
-                                 NSException,
-                                 @"Invalid operator type",
-                                 @"Invalid operator in bool predicate.");
+    RLMAssertThrowsWithReason([BoolObject objectsWhere:@"boolCol >= TRUE"],
+                              @"Operator '>=' not supported for type 'bool'");
 }
 
 - (void)testStringBeginsWith
@@ -2246,7 +2282,8 @@
     XCTAssertEqualObjects(asArray(r13), (@[ hannah, elijah, mark, jason, diane, carol ]));
 
     // Linking objects cannot contain null so their members cannot be compared with null.
-    XCTAssertThrows([PersonObject objectsWhere:@"ANY parents == NULL"]);
+    RLMAssertThrowsWithReason([PersonObject objectsWhere:@"ANY parents == NULL"],
+                              @"Expected object of type 'PersonObject' for property 'PersonObject.parents', but received: <null>");
 
     // People that have a parent under the age of 31 where that parent has a parent over the age of 35 whose name is Michael.
     RLMResults *r14 = [PersonObject objectsWhere:@"SUBQUERY(parents, $p1, $p1.age < 31 AND SUBQUERY($p1.parents, $p2, $p2.age > 35 AND $p2.name == 'Michael').@count > 0).@count > 0"];

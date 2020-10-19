@@ -339,8 +339,10 @@ class RealmCollectionTypeTests: TestCase {
         XCTAssertEqual(NSDate(timeIntervalSince1970: 1), collection.min(ofProperty: "dateCol") as NSDate?)
         XCTAssertEqual(Date(timeIntervalSince1970: 1), collection.min(ofProperty: "dateCol") as Date?)
 
-        assertThrows(collection.min(ofProperty: "noSuchCol") as NSNumber?, named: "Invalid property name")
-        assertThrows(collection.min(ofProperty: "noSuchCol") as Float?, named: "Invalid property name")
+        assertThrows(collection.min(ofProperty: "noSuchCol") as NSNumber?,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
+        assertThrows(collection.min(ofProperty: "noSuchCol") as Float?,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
     }
 
     func testMax() {
@@ -362,8 +364,10 @@ class RealmCollectionTypeTests: TestCase {
         XCTAssertEqual(NSDate(timeIntervalSince1970: 2), collection.max(ofProperty: "dateCol") as NSDate?)
         XCTAssertEqual(Date(timeIntervalSince1970: 2), collection.max(ofProperty: "dateCol") as Date?)
 
-        assertThrows(collection.max(ofProperty: "noSuchCol") as NSNumber?, named: "Invalid property name")
-        assertThrows(collection.max(ofProperty: "noSuchCol") as Float?, named: "Invalid property name")
+        assertThrows(collection.max(ofProperty: "noSuchCol") as NSNumber?,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
+        assertThrows(collection.max(ofProperty: "noSuchCol") as Float?,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
     }
 
     func testSum() {
@@ -385,8 +389,10 @@ class RealmCollectionTypeTests: TestCase {
                                    accuracy: 0.001)
         XCTAssertEqual(5.55, collection.sum(ofProperty: "doubleCol") as Double, accuracy: 0.001)
 
-        assertThrows(collection.sum(ofProperty: "noSuchCol") as NSNumber, named: "Invalid property name")
-        assertThrows(collection.sum(ofProperty: "noSuchCol") as Float, named: "Invalid property name")
+        assertThrows(collection.sum(ofProperty: "noSuchCol") as NSNumber,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
+        assertThrows(collection.sum(ofProperty: "noSuchCol") as Float,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
     }
 
     func testAverage() {
@@ -399,7 +405,8 @@ class RealmCollectionTypeTests: TestCase {
         XCTAssertEqual(1.8333, collection.average(ofProperty: "floatCol")!, accuracy: 0.001)
         XCTAssertEqual(1.85, collection.average(ofProperty: "doubleCol")!, accuracy: 0.001)
 
-        assertThrows(collection.average(ofProperty: "noSuchCol") as Double?, named: "Invalid property name")
+        assertThrows(collection.average(ofProperty: "noSuchCol") as Double?,
+                     reason: "Property 'noSuchCol' not found in object of type 'CTTAggregateObject'")
     }
 
     func testFastEnumeration() {
