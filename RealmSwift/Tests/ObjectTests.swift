@@ -1002,4 +1002,25 @@ class ObjectTests: TestCase {
         XCTAssertEqual(Array(listObj.dataOpt), Array(frozenListObj.dataOpt))
         XCTAssertEqual(Array(listObj.dateOpt), Array(frozenListObj.dateOpt))
     }
+    
+    func testShouldUpdateObject() {
+        let realm = try! Realm()
+
+        try! realm.write {
+            let business = Business()
+            business.name = UUID().uuidString
+            business.addresses.append(Address(value: ["addressLine": "string"]))
+            realm.add(business)
+        }
+
+        let b = realm.objects(Business.self).first!
+
+        //make an unmanaged copy of a business
+        let someBusiness = Business(value: b)
+        someBusiness.name = "New Business Name"
+
+        try! realm.write {
+            realm.add(someBusiness, update: .modified)
+        }
+    }
 }

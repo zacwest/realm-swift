@@ -654,3 +654,17 @@ class EmbeddedTreeObject3: EmbeddedObject, EmbeddedTreeObject {
     let parent3 = LinkingObjects(fromType: EmbeddedTreeObject2.self, property: "child")
     let parent4 = LinkingObjects(fromType: EmbeddedTreeObject2.self, property: "children")
 }
+
+class Address: EmbeddedObject {
+    @objc dynamic var addressLine: String? = nil
+}
+
+class Business: Object {
+    @objc dynamic var _id = ObjectId.generate()
+    @objc dynamic var name = ""
+    let addresses = List<Address>() // Embed an array of objects
+
+    override static func primaryKey() -> String? {
+        return "_id"
+    }
+}
