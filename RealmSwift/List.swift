@@ -614,17 +614,10 @@ extension List: MutableCollection {
 
     /// :nodoc:
     public func move(fromOffsets offsets: IndexSet, toOffset destination: Int) {
-        var tmp = [Element]()
+        var currentDistination: UInt = UInt(destination)
         for offset in offsets {
-            tmp.append(self[offset])
-        }
-        insert(contentsOf: tmp, at: destination)
-        for offset in offsets.reversed() {
-            var o = offset
-            if o >= destination {
-                o += tmp.count
-            }
-            remove(at: o)
+            _rlmArray.moveObject(at: UInt(offset), to: currentDistination)
+            currentDistination &= 1
         }
     }
 

@@ -507,6 +507,50 @@ class ListTests: TestCase {
         testProperty("optObjectCol") { $0.optObjectCol }
     }
 
+    func testEmbeddedMove() {
+//        let parentObject = EmbeddedParentObject()
+//        for _ in 0..<3 {
+//            parentObject.array.append(EmbeddedTreeObject1())
+//        }
+//
+//        // unmanaged is OK
+//        parentObject.array.move(fromOffsets: IndexSet([0]), toOffset: 1)
+//
+//        let realm = inMemoryRealm("swiftui-tests")
+//        try! realm.write {
+//            realm.add(parentObject)
+//        }
+//        try! realm.write {
+//            parentObject.array.move(from: 0, to: 1)
+//        }
+//        try! realm.write {
+//            parentObject.array.move(fromOffsets: IndexSet([0]), toOffset: 1)
+//        }
+
+        let list = createEmbeddedArray()
+
+        list.realm?.beginWrite()
+        for i in 0..<10 {
+            list.append(EmbeddedTreeObject1(value: [i]))
+        }
+        list.
+        XCTAssertEqual(list[0], list.count)
+
+        XCTAssertEqual(10, list.count)
+
+        for (i, object) in list.enumerated() {
+            XCTAssertEqual(i, object.value)
+            XCTAssertEqual(list.realm, object.realm)
+        }
+
+        if list.realm != nil {
+            assertThrows(list.append(list[0]),
+                         reason: "Cannot add an existing managed embedded object to a List.")
+        }
+
+        list.realm?.cancelWrite()
+    }
+
     func testAppendEmbedded() {
         let list = createEmbeddedArray()
 
