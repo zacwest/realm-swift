@@ -20,7 +20,9 @@
 
 #import "RLMAccessor.h"
 #import "RLMArray_Private.hpp"
+#import "RLMSet_Private.hpp"
 #import "RLMListBase.h"
+#import "RLMSetBase.h"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMObject_Private.hpp"
 #import "RLMProperty_Private.h"
@@ -187,6 +189,12 @@ void RLMObservationInfo::recordObserver(realm::Obj& objectRow, RLMClassInfo *obj
         array->_key = key;
         array->_parentObject = object;
     }
+    else if (prop && prop.set) {
+        id value = valueForKey(key);
+        RLMSet *set = [value isKindOfClass:[RLMSetBase class]] ? [value _rlmSet] : value;
+        set->_key = key;
+        set->_parentObject = object;
+    }
     else if (auto swiftIvar = prop.swiftIvar) {
         if (auto optional = RLMDynamicCast<RLMOptionalBase>(object_getIvar(object, swiftIvar))) {
             RLMInitializeUnmanagedOptional(optional, object, prop);
@@ -224,8 +232,8 @@ id RLMObservationInfo::valueForKey(NSString *key) {
     // We need to return the same object each time for observing over keypaths
     // to work, so we store a cache of them here. We can't just cache them on
     // the object as that leads to retain cycles.
-    if (lastProp.array) {
-        RLMArray *value = cachedObjects[key];
+    if (lastProp.collection) {
+        id value = cachedObjects[key];
         if (!value) {
             value = getSuper();
             if (!cachedObjects) {
@@ -521,8 +529,12 @@ void RLMWillChange(std::vector<realm::BindingContext::ObserverState> const& obse
         NSMutableIndexSet *indexes = [NSMutableIndexSet new];
         for (auto const& o : observed) {
             forEach(o, [&](realm::ColKey colKey, auto const& change, RLMObservationInfo *info) {
-                info->willChange(info->columnName(colKey),
-                                 convert(change.kind), convert(change.indices, indexes));
+                if (colKey.is_set()) {
+                    info->willChange(info->columnName(colKey));
+                } else {
+                    info->willChange(info->columnName(colKey),
+                                     convert(change.kind), convert(change.indices, indexes));
+                }
             });
         }
     }
@@ -538,7 +550,11 @@ void RLMDidChange(std::vector<realm::BindingContext::ObserverState> const& obser
         NSMutableIndexSet *indexes = [NSMutableIndexSet new];
         for (auto const& o : reverse(observed)) {
             forEach(o, [&](realm::ColKey col, auto const& change, RLMObservationInfo *info) {
-                info->didChange(info->columnName(col), convert(change.kind), convert(change.indices, indexes));
+                if (col.is_set()) {
+                    info->willChange(info->columnName(col));
+                } else {
+                    info->didChange(info->columnName(col), convert(change.kind), convert(change.indices, indexes));
+                }
             });
         }
     }

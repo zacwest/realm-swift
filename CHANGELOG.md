@@ -4,6 +4,7 @@ x.y.z Release notes (yyyy-MM-dd)
 * None.
 
 ### Fixed
+* <How to hit and notice issue? what was the impact?> ([#????](https://github.com/realm/realm-cocoa/issues/????), since v?.?.?)
 * Inserting a date into a synced collection via `AnyBSON.datetime(...)` would be of type `Timestamp` and not `Date`. 
   This could break synced objects with a `Date` property  ([#6654](https://github.com/realm/realm-cocoa/issues/6654), since v10.0.0).
 * Fixed an issue where creating an object after file format upgrade may fail
@@ -30,6 +31,7 @@ x.y.z Release notes (yyyy-MM-dd)
 * Add support for queries which have nil on the left side and a keypath on the
   right side (e.g. "nil == name" rather than "name == nil" as was previously
   required).
+* Add `RLMSet` / `MutableSet<>` datatype. This is a Set collection type used for storing distinct values in a collection.
 
 ### Fixed
 
@@ -118,6 +120,7 @@ x.y.z Release notes (yyyy-MM-dd)
 * CocoaPods: 1.10 or later.
 
 ### Internal
+* Upgraded realm-core from v10.0.1 to v10.2.0
 
 * Upgraded realm-core from v10.1.3 to v10.1.4
 * Upgraded realm-sync from v10.1.4 to v10.1.5

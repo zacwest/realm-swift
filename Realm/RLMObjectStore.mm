@@ -20,7 +20,9 @@
 
 #import "RLMAccessor.hpp"
 #import "RLMArray_Private.hpp"
+#import "RLMSet_Private.hpp"
 #import "RLMListBase.h"
+#import "RLMSetBase.h"
 #import "RLMObservation.hpp"
 #import "RLMObject_Private.hpp"
 #import "RLMObjectSchema_Private.hpp"
@@ -99,6 +101,11 @@ void RLMInitializeSwiftAccessorGenerics(__unsafe_unretained RLMObjectBase *const
             id ivar = object_getIvar(object, prop.swiftIvar);
             RLMArray *array = [[RLMManagedArray alloc] initWithParent:object property:prop];
             [ivar set_rlmArray:array];
+        }
+        else if (prop.set) {
+            id ivar = object_getIvar(object, prop.swiftIvar);
+            RLMSet *set = [[RLMManagedSet alloc] initWithParent:object property:prop];
+            [ivar set_rlmSet:set];
         }
         else {
             id ivar = object_getIvar(object, prop.swiftIvar);

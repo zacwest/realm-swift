@@ -20,7 +20,9 @@
 
 #import "RLMAccessor.hpp"
 #import "RLMArray_Private.hpp"
+#import "RLMSet_Private.hpp"
 #import "RLMListBase.h"
+#import "RLMSetBase.h"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMObjectStore.h"
 #import "RLMObject_Private.hpp"
@@ -29,6 +31,7 @@
 #import <realm/object-store/collection_notifications.hpp>
 #import <realm/object-store/list.hpp>
 #import <realm/object-store/results.hpp>
+#import <realm/object-store/set.hpp>
 
 static const int RLMEnumerationBufferSize = 16;
 
@@ -65,6 +68,27 @@ static const int RLMEnumerationBufferSize = 16;
         }
         else {
             _snapshot = list.as_results();
+            _collection = collection;
+            [_realm registerEnumerator:self];
+        }
+        _results = &_snapshot;
+    }
+    return self;
+}
+
+- (instancetype)initWithSet:(realm::object_store::Set&)set
+                 collection:(id)collection
+                  classInfo:(RLMClassInfo&)info
+{
+    self = [super init];
+    if (self) {
+        _info = &info;
+        _realm = _info->realm;
+        if (_realm.inWriteTransaction) {
+            _snapshot = set.snapshot();
+        }
+        else {
+            _snapshot = set.as_results();
             _collection = collection;
             [_realm registerEnumerator:self];
         }
@@ -211,6 +235,22 @@ NSArray *RLMCollectionValueForKey(Collection& collection, NSString *key, RLMClas
                 [array addObject:list];
             }
             return array;
+        } else if (prop && prop.set && prop.swiftIvar) {
+            // Grab the actual class for the generic Set from an instance of it
+            // so that we can make instances of the Set without creating a new
+            // object accessor each time
+            Class cls = [object_getIvar(accessor, prop.swiftIvar) class];
+            RLMAccessorContext context(info);
+            for (size_t i = 0; i < count; ++i) {
+                RLMSetBase *set = [[cls alloc] init];
+                set._rlmSet = [[RLMManagedSet alloc] initWithSet:realm::object_store::Set(info.realm->_realm,
+                                                                                          collection.get(i),
+                                                                                          info.tableColumn(prop))
+                                                      parentInfo:&info
+                                                        property:prop];
+                [array addObject:set];
+            }
+            return array;
         }
     }
 
@@ -224,6 +264,7 @@ NSArray *RLMCollectionValueForKey(Collection& collection, NSString *key, RLMClas
 
 template NSArray *RLMCollectionValueForKey(realm::Results&, NSString *, RLMClassInfo&);
 template NSArray *RLMCollectionValueForKey(realm::List&, NSString *, RLMClassInfo&);
+template NSArray *RLMCollectionValueForKey(realm::object_store::Set&, NSString *, RLMClassInfo&);
 
 void RLMCollectionSetValueForKey(id<RLMFastEnumerable> collection, NSString *key, id value) {
     realm::TableView tv = [collection tableView];
@@ -457,4 +498,5 @@ RLMNotificationToken *RLMAddNotificationBlock(RLMCollection *collection,
 
 // Explicitly instantiate the templated function for the two types we'll use it on
 template RLMNotificationToken *RLMAddNotificationBlock<>(RLMManagedArray *, void (^)(id, RLMCollectionChange *, NSError *), dispatch_queue_t);
+template RLMNotificationToken *RLMAddNotificationBlock<>(RLMManagedSet *, void (^)(id, RLMCollectionChange *, NSError *), dispatch_queue_t);
 template RLMNotificationToken *RLMAddNotificationBlock<>(RLMResults *, void (^)(id, RLMCollectionChange *, NSError *), dispatch_queue_t);
