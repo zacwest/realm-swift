@@ -20,6 +20,7 @@
 
 #import <Realm/RLMArray.h>
 #import <Realm/RLMSet.h>
+#import <Realm/RLMDictionary.h>
 #import <Realm/RLMDecimal128.h>
 #import <Realm/RLMEmbeddedObject.h>
 #import <Realm/RLMMigration.h>
