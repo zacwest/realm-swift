@@ -185,13 +185,13 @@ void RLMObservationInfo::recordObserver(realm::Obj& objectRow, RLMClassInfo *obj
     RLMProperty *prop = objectSchema[key];
     if (prop && prop.array) {
         id value = valueForKey(key);
-        RLMArray *array = [value isKindOfClass:[RLMListBase class]] ? [value _rlmArray] : value;
+        RLMArray *array = [value isKindOfClass:[RLMListBase class]] ? [value _rlmCollection] : value;
         array->_key = key;
         array->_parentObject = object;
     }
     else if (prop && prop.set) {
         id value = valueForKey(key);
-        RLMSet *set = [value isKindOfClass:[RLMSetBase class]] ? [value _rlmSet] : value;
+        RLMSet *set = [value isKindOfClass:[RLMSetBase class]] ? [value _rlmCollection] : value;
         set->_key = key;
         set->_parentObject = object;
     }
@@ -531,7 +531,8 @@ void RLMWillChange(std::vector<realm::BindingContext::ObserverState> const& obse
             forEach(o, [&](realm::ColKey colKey, auto const& change, RLMObservationInfo *info) {
                 if (colKey.is_set()) {
                     info->willChange(info->columnName(colKey));
-                } else {
+                }
+                else {
                     info->willChange(info->columnName(colKey),
                                      convert(change.kind), convert(change.indices, indexes));
                 }
@@ -552,7 +553,8 @@ void RLMDidChange(std::vector<realm::BindingContext::ObserverState> const& obser
             forEach(o, [&](realm::ColKey col, auto const& change, RLMObservationInfo *info) {
                 if (col.is_set()) {
                     info->willChange(info->columnName(col));
-                } else {
+                }
+                else {
                     info->didChange(info->columnName(col), convert(change.kind), convert(change.indices, indexes));
                 }
             });

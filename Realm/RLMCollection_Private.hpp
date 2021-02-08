@@ -22,16 +22,18 @@
 
 namespace realm {
     class List;
+    class Obj;
     class Results;
     class TableView;
     struct CollectionChangeSet;
     struct NotificationToken;
     namespace object_store {
         class Set;
+        class Collection;
     }
 }
 class RLMClassInfo;
-@class RLMFastEnumerator, RLMManagedArray, RLMManagedSet;
+@class RLMFastEnumerator, RLMManagedArray, RLMManagedSet, RLMProperty;
 
 @protocol RLMFastEnumerable
 @property (nonatomic, readonly) RLMRealm *realm;
@@ -43,15 +45,14 @@ class RLMClassInfo;
 @end
 
 // An object which encapulates the shared logic for fast-enumerating RLMArray
-// and RLMResults, and has a buffer to store strong references to the current
+// RLMSet and RLMResults, and has a buffer to store strong references to the current
 // set of enumerated items
 @interface RLMFastEnumerator : NSObject
-- (instancetype)initWithList:(realm::List&)list
-                  collection:(id)collection
-                   classInfo:(RLMClassInfo&)info;
-- (instancetype)initWithSet:(realm::object_store::Set&)set
-                 collection:(id)collection
-                  classInfo:(RLMClassInfo&)info;
+
+- (instancetype)initWithBackingCollection:(realm::object_store::Collection const&)backingCollection
+                               collection:(id)collection
+                                classInfo:(RLMClassInfo&)info;
+
 - (instancetype)initWithResults:(realm::Results&)results
                      collection:(id)collection
                       classInfo:(RLMClassInfo&)info;
@@ -87,3 +88,8 @@ template<typename Collection>
 NSArray *RLMCollectionValueForKey(Collection& collection, NSString *key, RLMClassInfo& info);
 
 std::vector<std::pair<std::string, bool>> RLMSortDescriptorsToKeypathArray(NSArray<RLMSortDescriptor *> *properties);
+
+template<typename Collection, typename RLMCollection>
+id RLMManagedCollectionFromCollection(RLMClassInfo* info, realm::Obj&& obj, RLMProperty *prop);
+template<typename Fn>
+void get_collection_type(RLMProperty *prop, Fn&& func);
