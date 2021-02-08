@@ -144,6 +144,8 @@ public protocol RealmCollectionValue: Hashable {
     /// :nodoc:
     static func _rlmSet() -> RLMSet<AnyObject>
     /// :nodoc:
+    static func _rlmDictionary() -> RLMDictionary<AnyObject>
+    /// :nodoc:
     static func _nilValue() -> Self
 }
 
@@ -155,6 +157,10 @@ extension RealmCollectionValue {
     /// :nodoc:
     public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .int, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmDictionary() -> RLMDictionary<AnyObject> {
+        fatalError("Not implemented")
     }
     /// :nodoc:
     public static func _nilValue() -> Self {
@@ -196,6 +202,23 @@ private func setType<T>(_ type: T.Type) -> RLMSet<AnyObject> {
     }
 }
 
+private func dictionaryType<T>(_ type: T.Type) -> RLMDictionary<AnyObject> {
+    switch type {
+    case is Int.Type, is Int8.Type, is Int16.Type, is Int32.Type, is Int64.Type:
+        return RLMDictionary(objectType: .int, optional: true)
+    case is Bool.Type:       return RLMDictionary(objectType: .bool, optional: true)
+    case is Float.Type:      return RLMDictionary(objectType: .float, optional: true)
+    case is Double.Type:     return RLMDictionary(objectType: .double, optional: true)
+    case is String.Type:     return RLMDictionary(objectType: .string, optional: true)
+    case is Data.Type:       return RLMDictionary(objectType: .data, optional: true)
+    case is Date.Type:       return RLMDictionary(objectType: .date, optional: true)
+    case is Decimal128.Type: return RLMDictionary(objectType: .decimal128, optional: true)
+    case is ObjectId.Type:   return RLMDictionary(objectType: .objectId, optional: true)
+    case is UUID.Type:       return RLMDictionary(objectType: .UUID, optional: true)
+    default: fatalError("Unsupported type for MutableSet: \(type)?")
+    }
+}
+
 extension Optional: RealmCollectionValue where Wrapped: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmArray() -> RLMArray<AnyObject> {
@@ -204,6 +227,10 @@ extension Optional: RealmCollectionValue where Wrapped: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmSet() -> RLMSet<AnyObject> {
         return setType(Wrapped.self)
+    }
+    /// :nodoc:
+    public static func _rlmDictionary() -> RLMDictionary<AnyObject> {
+        return dictionaryType(Wrapped.self)
     }
     /// :nodoc:
     public static func _nilValue() -> Optional {
@@ -1236,6 +1263,13 @@ extension MutableSet: ObservableCollection {
     internal typealias BackingObjcCollection = RLMSet<AnyObject>
     internal func isSameObjcCollection(_ rlmSet: BackingObjcCollection) -> Bool {
         return _rlmSet === rlmSet
+    }
+}
+
+extension Map: ObservableCollection {
+    internal typealias BackingObjcCollection = RLMDictionary<AnyObject>
+    internal func isSameObjcCollection(_ rlmDictionary: BackingObjcCollection) -> Bool {
+        return _rlmDictionary === rlmDictionary
     }
 }
 

@@ -87,6 +87,7 @@ static inline NSString *RLMTypeToString(RLMPropertyType type) {
 @property (nonatomic, readwrite) BOOL optional;
 @property (nonatomic, readwrite) BOOL array;
 @property (nonatomic, readwrite) BOOL set;
+@property (nonatomic, readwrite) BOOL dictionary;
 @property (nonatomic, copy, nullable) NSString *objectClassName;
 @property (nonatomic, copy, nullable) NSString *linkOriginPropertyName;
 

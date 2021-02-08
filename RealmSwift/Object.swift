@@ -686,6 +686,17 @@ extension MutableSet: _ManagedPropertyType where Element: _ManagedPropertyType {
 }
 
 /// :nodoc:
+extension Map: _ManagedPropertyType where Element: _ManagedPropertyType {
+    // swiftlint:disable:next identifier_name
+    public static func _rlmProperty(_ prop: RLMProperty) {
+        prop.dictionary = true
+        Element._rlmProperty(prop)
+    }
+    // swiftlint:disable:next identifier_name
+    public static func _rlmRequireObjc() -> Bool { return false }
+}
+
+/// :nodoc:
 class LinkingObjectsAccessor<Element: ObjectBase>: RLMManagedPropertyAccessor where Element: RealmCollectionValue {
     @objc override class func initializeObject(_ ptr: UnsafeMutableRawPointer,
                                                parent: RLMObjectBase, property: RLMProperty) {
