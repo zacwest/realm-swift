@@ -144,7 +144,7 @@ public protocol RealmCollectionValue: Hashable {
     /// :nodoc:
     static func _rlmCollection() -> RLMSet<AnyObject>
     /// :nodoc:
-    static func _rlmDictionary() -> RLMDictionary<AnyObject>
+    static func _rlmCollection() -> RLMDictionary<AnyObject>
     /// :nodoc:
     static func _nilValue() -> Self
 }
@@ -159,7 +159,7 @@ extension RealmCollectionValue {
         return RLMSet(objectType: .int, optional: false)
     }
     /// :nodoc:
-    public static func _rlmDictionary() -> RLMDictionary<AnyObject> {
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
         fatalError("Not implemented")
     }
     /// :nodoc:
@@ -215,7 +215,7 @@ private func dictionaryType<T>(_ type: T.Type) -> RLMDictionary<AnyObject> {
     case is Decimal128.Type: return RLMDictionary(objectType: .decimal128, optional: true)
     case is ObjectId.Type:   return RLMDictionary(objectType: .objectId, optional: true)
     case is UUID.Type:       return RLMDictionary(objectType: .UUID, optional: true)
-    default: fatalError("Unsupported type for MutableSet: \(type)?")
+    default: fatalError("Unsupported type for Map: \(type)?")
     }
 }
 
@@ -1269,7 +1269,7 @@ extension MutableSet: ObservableCollection {
 extension Map: ObservableCollection {
     internal typealias BackingObjcCollection = RLMDictionary<AnyObject>
     internal func isSameObjcCollection(_ rlmDictionary: BackingObjcCollection) -> Bool {
-        return _rlmDictionary === rlmDictionary
+        return _rlmCollection === rlmDictionary
     }
 }
 
