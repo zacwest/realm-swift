@@ -252,6 +252,10 @@ extension Float: RealmCollectionValue {
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .float, optional: false)
     }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .float, optional: false)
+    }
 }
 extension Double: RealmCollectionValue {
     /// :nodoc:
@@ -262,6 +266,10 @@ extension Double: RealmCollectionValue {
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .double, optional: false)
     }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .double, optional: false)
+    }
 }
 extension Bool: RealmCollectionValue {
     /// :nodoc:
@@ -271,6 +279,10 @@ extension Bool: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .bool, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .bool, optional: false)
     }
 }
 
@@ -283,6 +295,10 @@ extension String: RealmCollectionValue {
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .string, optional: false)
     }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .string, optional: false)
+    }
 }
 extension Date: RealmCollectionValue {
     /// :nodoc:
@@ -292,6 +308,10 @@ extension Date: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .date, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .date, optional: false)
     }
 }
 extension Data: RealmCollectionValue {
@@ -303,6 +323,10 @@ extension Data: RealmCollectionValue {
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .data, optional: false)
     }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .data, optional: false)
+    }
 }
 extension Decimal128: RealmCollectionValue {
     /// :nodoc:
@@ -312,6 +336,10 @@ extension Decimal128: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .decimal128, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .decimal128, optional: false)
     }
 }
 extension ObjectId: RealmCollectionValue {
@@ -323,6 +351,10 @@ extension ObjectId: RealmCollectionValue {
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .objectId, optional: false)
     }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .objectId, optional: false)
+    }
 }
 extension UUID: RealmCollectionValue {
     /// :nodoc:
@@ -332,6 +364,10 @@ extension UUID: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmCollection() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .UUID, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmCollection() -> RLMDictionary<AnyObject> {
+        return RLMDictionary(objectType: .UUID, optional: false)
     }
 }
 
