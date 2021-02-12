@@ -160,7 +160,7 @@ extension RealmCollectionValue {
     }
     /// :nodoc:
     public static func _rlmDictionary() -> RLMDictionary<AnyObject> {
-        fatalError("Not implemented")
+        return RLMDictionary(objectType: .int, optional: false)
     }
     /// :nodoc:
     public static func _nilValue() -> Self {
@@ -378,11 +378,7 @@ public protocol _RealmCollectionEnumerator {
 }
 
 /// :nodoc:
-public protocol RealmCollectionBase: RandomAccessCollection, LazyCollectionProtocol, CustomStringConvertible, ThreadConfined where Element: RealmCollectionValue {
-    // This typealias was needed with Swift 3.1. It no longer is, but remains
-    // just in case someone was depending on it
-    typealias ElementType = Element
-}
+public protocol RealmCollectionBase: RandomAccessCollection, LazyCollectionProtocol, CustomStringConvertible, ThreadConfined where Element: RealmCollectionValue { }
 
 /**
  A homogenous collection of `Object`s which can be retrieved, filtered, sorted, and operated upon.
