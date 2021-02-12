@@ -140,9 +140,9 @@ private func forceCast<A, U>(_ from: A, to type: U.Type) -> U {
 /// supporting more types.
 public protocol RealmCollectionValue: Hashable {
     /// :nodoc:
-    static func _rlmCollection() -> RLMArray<AnyObject>
+    static func _rlmArray() -> RLMArray<AnyObject>
     /// :nodoc:
-    static func _rlmCollection() -> RLMSet<AnyObject>
+    static func _rlmSet() -> RLMSet<AnyObject>
     /// :nodoc:
     static func _rlmCollection() -> RLMDictionary<AnyObject>
     /// :nodoc:
@@ -151,11 +151,11 @@ public protocol RealmCollectionValue: Hashable {
 
 extension RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .int, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .int, optional: false)
     }
     /// :nodoc:
@@ -221,11 +221,11 @@ private func dictionaryType<T>(_ type: T.Type) -> RLMDictionary<AnyObject> {
 
 extension Optional: RealmCollectionValue where Wrapped: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return arrayType(Wrapped.self)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return setType(Wrapped.self)
     }
     /// :nodoc:
@@ -245,11 +245,11 @@ extension Int32: RealmCollectionValue {}
 extension Int64: RealmCollectionValue {}
 extension Float: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .float, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .float, optional: false)
     }
     /// :nodoc:
@@ -259,11 +259,11 @@ extension Float: RealmCollectionValue {
 }
 extension Double: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .double, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .double, optional: false)
     }
     /// :nodoc:
@@ -273,11 +273,11 @@ extension Double: RealmCollectionValue {
 }
 extension Bool: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .bool, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .bool, optional: false)
     }
     /// :nodoc:
@@ -288,11 +288,11 @@ extension Bool: RealmCollectionValue {
 
 extension String: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .string, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .string, optional: false)
     }
     /// :nodoc:
@@ -302,11 +302,11 @@ extension String: RealmCollectionValue {
 }
 extension Date: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .date, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .date, optional: false)
     }
     /// :nodoc:
@@ -316,11 +316,11 @@ extension Date: RealmCollectionValue {
 }
 extension Data: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .data, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .data, optional: false)
     }
     /// :nodoc:
@@ -330,11 +330,11 @@ extension Data: RealmCollectionValue {
 }
 extension Decimal128: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .decimal128, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .decimal128, optional: false)
     }
     /// :nodoc:
@@ -344,11 +344,11 @@ extension Decimal128: RealmCollectionValue {
 }
 extension ObjectId: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .objectId, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .objectId, optional: false)
     }
     /// :nodoc:
@@ -358,11 +358,11 @@ extension ObjectId: RealmCollectionValue {
 }
 extension UUID: RealmCollectionValue {
     /// :nodoc:
-    public static func _rlmCollection() -> RLMArray<AnyObject> {
+    public static func _rlmArray() -> RLMArray<AnyObject> {
         return RLMArray(objectType: .UUID, optional: false)
     }
     /// :nodoc:
-    public static func _rlmCollection() -> RLMSet<AnyObject> {
+    public static func _rlmSet() -> RLMSet<AnyObject> {
         return RLMSet(objectType: .UUID, optional: false)
     }
     /// :nodoc:
