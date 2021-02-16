@@ -444,6 +444,8 @@
 		CF986D8F25AE3C980039D287 /* MutableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF986D8E25AE3C980039D287 /* MutableSet.swift */; };
 		CF986DE225AE3EC70039D287 /* MutableSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF986DE125AE3EC70039D287 /* MutableSetTests.swift */; };
 		CF986DF625AE3EDF0039D287 /* PrimitiveMutableSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF986DF525AE3EDF0039D287 /* PrimitiveMutableSetTests.swift */; };
+		CF9881C125DABC6500BD7E4F /* RLMManagedDictionary.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF9881C025DABC6500BD7E4F /* RLMManagedDictionary.mm */; };
+		CF9881C225DABC6500BD7E4F /* RLMManagedDictionary.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF9881C025DABC6500BD7E4F /* RLMManagedDictionary.mm */; };
 		CFAEF761242B5F9A00EAF721 /* RLMAPIKeyAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAEF75F242B5F9A00EAF721 /* RLMAPIKeyAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CFAEF762242B5F9A00EAF721 /* RLMAPIKeyAuth.mm in Sources */ = {isa = PBXBuildFile; fileRef = CFAEF760242B5F9A00EAF721 /* RLMAPIKeyAuth.mm */; };
 		CFAEF765242B672700EAF721 /* RLMUserAPIKey.h in Headers */ = {isa = PBXBuildFile; fileRef = CFAEF763242B672700EAF721 /* RLMUserAPIKey.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -639,7 +641,6 @@
 		02B8EF5B19E7048D0045A93D /* RLMCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMCollection.h; sourceTree = "<group>"; };
 		02E334C21A5F3C45009F8810 /* Realm.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = Realm.modulemap; sourceTree = "<group>"; };
 		02E334C41A5F4923009F8810 /* RLMRealm_Private.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RLMRealm_Private.hpp; sourceTree = "<group>"; };
-		0C074C292552E98700CA56C2 /* realm-core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "realm-core"; path = "../realm-core"; sourceTree = "<group>"; };
 		0C3BD4B125C1BDF1007CFDD3 /* RLMDictionary.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RLMDictionary.mm; sourceTree = "<group>"; };
 		0C3BD4B225C1BDF1007CFDD3 /* RLMDictionary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RLMDictionary.h; sourceTree = "<group>"; };
 		0C3BD4D225C1C5AB007CFDD3 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
@@ -883,6 +884,8 @@
 		CF986D8E25AE3C980039D287 /* MutableSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableSet.swift; sourceTree = "<group>"; };
 		CF986DE125AE3EC70039D287 /* MutableSetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableSetTests.swift; sourceTree = "<group>"; };
 		CF986DF525AE3EDF0039D287 /* PrimitiveMutableSetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrimitiveMutableSetTests.swift; sourceTree = "<group>"; };
+		CF9881C025DABC6500BD7E4F /* RLMManagedDictionary.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RLMManagedDictionary.mm; sourceTree = "<group>"; };
+		CF9881CB25DABDE900BD7E4F /* RLMDictionary_Private.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RLMDictionary_Private.hpp; sourceTree = "<group>"; };
 		CFAE926A24A0A7F40033CB31 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		CFAEF75F242B5F9A00EAF721 /* RLMAPIKeyAuth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RLMAPIKeyAuth.h; sourceTree = "<group>"; };
 		CFAEF760242B5F9A00EAF721 /* RLMAPIKeyAuth.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RLMAPIKeyAuth.mm; sourceTree = "<group>"; };
@@ -1471,6 +1474,8 @@
 				3F4F3AD123F71C790048DB43 /* RLMDecimal128_Private.hpp */,
 				0C3BD4B225C1BDF1007CFDD3 /* RLMDictionary.h */,
 				0C3BD4B125C1BDF1007CFDD3 /* RLMDictionary.mm */,
+				CF9881C025DABC6500BD7E4F /* RLMManagedDictionary.mm */,
+				CF9881CB25DABDE900BD7E4F /* RLMDictionary_Private.hpp */,
 				0C3BD50125C1DE6F007CFDD3 /* RLMDictionary_Private.h */,
 				3FC3F910241808B300E27322 /* RLMEmbeddedObject.h */,
 				3FC3F911241808B300E27322 /* RLMEmbeddedObject.mm */,
@@ -2272,6 +2277,7 @@
 				1A84132F1D4BCCE600C5326F /* RLMSyncUtil.mm in Sources */,
 				3F67DB3E1E26D69C0024533D /* RLMThreadSafeReference.mm in Sources */,
 				5D659E9A1BE04556006515A0 /* RLMUpdateChecker.mm in Sources */,
+				CF9881C125DABC6500BD7E4F /* RLMManagedDictionary.mm in Sources */,
 				CF76F7DD24816AAB00890DD2 /* RLMUpdateResult.mm in Sources */,
 				1ABDCDB01D793008003489E3 /* RLMUser.mm in Sources */,
 				CFAEF766242B672700EAF721 /* RLMUserAPIKey.mm in Sources */,
@@ -2415,6 +2421,7 @@
 				1A7003091D5270C700FD9EE3 /* RLMSyncUtil.mm in Sources */,
 				3F67DB411E26D6AD0024533D /* RLMThreadSafeReference.mm in Sources */,
 				5DD755981BE056DE002800DA /* RLMUpdateChecker.mm in Sources */,
+				CF9881C225DABC6500BD7E4F /* RLMManagedDictionary.mm in Sources */,
 				CF76F7DE24816AAB00890DD2 /* RLMUpdateResult.mm in Sources */,
 				17051FCE1D93DA0A00EF8E67 /* RLMUser.mm in Sources */,
 				3F275EC32433B77C00161E7F /* RLMUserAPIKey.mm in Sources */,
