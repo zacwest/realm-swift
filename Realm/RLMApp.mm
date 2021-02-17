@@ -66,7 +66,7 @@ namespace {
                 // Convert the RLMResponse to an app:Response and pass downstream to
                 // the object store
                 completion({
-                    .body = response.body ? util::make_optional<std::string>(response.body.UTF8String) : util::Optional<std::string>(),
+                    .body = response.body.UTF8String,
                     .headers = bridgingHeaders,
                     .http_status_code = static_cast<int>(response.httpStatusCode),
                     .custom_status_code = static_cast<int>(response.customStatusCode)
