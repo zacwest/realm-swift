@@ -93,8 +93,11 @@ public:
     }
 
     template<typename Func>
-    void enumerate_dictionary(__unsafe_unretained const id, Func&&) {
-        REALM_COMPILER_HINT_UNREACHABLE();
+    void enumerate_dictionary(__unsafe_unretained const id v, Func&& func) {
+        id enumerable = RLMAsFastEnumeration(v) ?: v;
+        [enumerable enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *) {
+            func(unbox<realm::StringData>(key), obj);
+        }];
     }
 
     template<typename T>

@@ -19,6 +19,7 @@
 #import "RLMAccessor.hpp"
 
 #import "RLMArray_Private.hpp"
+#import "RLMDictionary_Private.hpp"
 #import "RLMObjectId_Private.hpp"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMObjectStore.h"
@@ -165,8 +166,10 @@ void setValue(__unsafe_unretained RLMObjectBase *const obj, ColKey key,
 id<RLMCollection> getCollection(__unsafe_unretained RLMObjectBase *const obj, NSUInteger propIndex) {
     RLMVerifyAttached(obj);
     auto prop = obj->_info->rlmObjectSchema.properties[propIndex];
-    return prop.array ? [[RLMManagedArray alloc] initWithParent:obj property:prop]
-                        : [[RLMManagedSet alloc] initWithParent:obj property:prop];
+    if (prop.array) { return [[RLMManagedArray alloc] initWithParent:obj property:prop]; }
+    if (prop.set) { return [[RLMManagedSet alloc] initWithParent:obj property:prop]; }
+    if (prop.dictionary) { return [[RLMManagedDictionary alloc] initWithParent:obj property:prop]; }
+    REALM_UNREACHABLE();
 }
 
 template <typename Collection>
@@ -195,9 +198,18 @@ void setValue(__unsafe_unretained RLMObjectBase *const obj, ColKey key,
                      obj,
                      prop,
                      value);
-    } else if (prop.set) {
+    }
+    else if (prop.set) {
         assign_value(realm::object_store::Set(obj->_realm->_realm,
                                               obj->_row, key),
+                     obj->_info,
+                     obj,
+                     prop,
+                     value);
+    }
+    else if (prop.dictionary) {
+        assign_value(realm::object_store::Dictionary(obj->_realm->_realm,
+                                                     obj->_row, key),
                      obj->_info,
                      obj,
                      prop,
@@ -763,8 +775,12 @@ id RLMAccessorContext::box(realm::object_store::Set&& s) {
                                                    property:currentProperty];
 }
 
-id RLMAccessorContext::box(realm::object_store::Dictionary&&) {
-    REALM_UNREACHABLE();
+id RLMAccessorContext::box(realm::object_store::Dictionary&& d) {
+    REALM_ASSERT(_parentObjectInfo);
+    REALM_ASSERT(currentProperty);
+    return [[RLMManagedDictionary alloc] initWithBackingCollection:std::move(d)
+                                                        parentInfo:_parentObjectInfo
+                                                          property:currentProperty];
 }
 
 id RLMAccessorContext::box(realm::Object&& o) {
@@ -831,10 +847,6 @@ realm::UUID RLMAccessorContext::unbox(id v, CreatePolicy, ObjKey) {
 }
 template<>
 realm::Mixed RLMAccessorContext::unbox(id, CreatePolicy, ObjKey) {
-    REALM_UNREACHABLE();
-}
-template<>
-realm::object_store::Dictionary RLMAccessorContext::unbox(id, CreatePolicy, ObjKey) {
     REALM_UNREACHABLE();
 }
 
@@ -1011,8 +1023,8 @@ bool RLMAccessorContext::is_same_set(realm::object_store::Set const& set, __unsa
     return [v respondsToSelector:@selector(isBackedBySet:)] && [v isBackedBySet:set];
 }
 
-bool RLMAccessorContext::is_same_dictionary(realm::object_store::Dictionary const&, __unsafe_unretained id const) const noexcept {
-    REALM_UNREACHABLE();
+bool RLMAccessorContext::is_same_dictionary(realm::object_store::Dictionary const& dict, __unsafe_unretained id const v) const noexcept {
+    return [v respondsToSelector:@selector(isBackedByDictionary:)] && [v isBackedByDictionary:dict];
 }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"

@@ -402,6 +402,8 @@
 		C042A48E1B7522A900771ED2 /* RealmConfigurationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C042A48C1B7522A900771ED2 /* RealmConfigurationTests.mm */; };
 		C0CDC0821B38DABA00C5716D /* UtilTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021A88311AAFB5BE00EEAC84 /* UtilTests.mm */; };
 		C0CDC0831B38DABB00C5716D /* UtilTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021A88311AAFB5BE00EEAC84 /* UtilTests.mm */; };
+		CF052EFB25DEB671008EEF86 /* DictionaryPropertyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CF052EFA25DEB671008EEF86 /* DictionaryPropertyTests.m */; };
+		CF052EFC25DEB671008EEF86 /* DictionaryPropertyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CF052EFA25DEB671008EEF86 /* DictionaryPropertyTests.m */; };
 		CF330BBE24E57D5F00F07EE2 /* RLMWatchTestUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = CF330BBD24E57D5F00F07EE2 /* RLMWatchTestUtility.m */; };
 		CF6E0482242A141200DB7F14 /* RLMEmailPasswordAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = CF6E0480242A141200DB7F14 /* RLMEmailPasswordAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CF6E0483242A141200DB7F14 /* RLMEmailPasswordAuth.mm in Sources */ = {isa = PBXBuildFile; fileRef = CF6E0481242A141200DB7F14 /* RLMEmailPasswordAuth.mm */; };
@@ -882,6 +884,7 @@
 		C0D2DD051B6BDEA1004E8919 /* RLMRealmConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMRealmConfiguration.h; sourceTree = "<group>"; };
 		C0D2DD061B6BDEA1004E8919 /* RLMRealmConfiguration.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RLMRealmConfiguration.mm; sourceTree = "<group>"; };
 		C0D2DD0F1B6BE0DD004E8919 /* RLMRealmConfiguration_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RLMRealmConfiguration_Private.h; sourceTree = "<group>"; };
+		CF052EFA25DEB671008EEF86 /* DictionaryPropertyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DictionaryPropertyTests.m; sourceTree = "<group>"; };
 		CF330BBB24E56E3A00F07EE2 /* RLMNetworkTransport_Private.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RLMNetworkTransport_Private.hpp; sourceTree = "<group>"; };
 		CF330BBC24E57D5F00F07EE2 /* RLMWatchTestUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RLMWatchTestUtility.h; path = Realm/ObjectServerTests/RLMWatchTestUtility.h; sourceTree = "<group>"; };
 		CF330BBD24E57D5F00F07EE2 /* RLMWatchTestUtility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RLMWatchTestUtility.m; path = Realm/ObjectServerTests/RLMWatchTestUtility.m; sourceTree = "<group>"; };
@@ -1413,6 +1416,7 @@
 		E81A20061955FE1600FDED82 /* Objective-C */ = {
 			isa = PBXGroup;
 			children = (
+				CF052EFA25DEB671008EEF86 /* DictionaryPropertyTests.m */,
 				E81A1FB81955FE0100FDED82 /* ArrayPropertyTests.m */,
 				3F7556731BE95A050058BC7E /* AsyncTests.mm */,
 				E8DA16F71E81210D0055141C /* CompactionTests.m */,
@@ -2637,6 +2641,7 @@
 				3F572C961F2BDAB100F6C9AB /* PrimitiveArrayPropertyTests.m in Sources */,
 				02AFB4641A80343600E11938 /* PropertyTests.m in Sources */,
 				E856D21D195615A900FB2FCF /* QueryTests.m in Sources */,
+				CF052EFC25DEB671008EEF86 /* DictionaryPropertyTests.m in Sources */,
 				CF986D6625AE3C540039D287 /* SwiftSetPropertyTests.swift in Sources */,
 				C042A48E1B7522A900771ED2 /* RealmConfigurationTests.mm in Sources */,
 				E856D21E195615A900FB2FCF /* RealmTests.mm in Sources */,
@@ -2679,6 +2684,7 @@
 				027A4D2C1AB1012500AA46F9 /* InterprocessTests.m in Sources */,
 				3F1F47821B9612B300CD99A3 /* KVOTests.mm in Sources */,
 				5D432B8D1CC0713F00A610A9 /* LinkingObjectsTests.mm in Sources */,
+				CF052EFB25DEB671008EEF86 /* DictionaryPropertyTests.m in Sources */,
 				E81A1FDD1955FE0100FDED82 /* LinkTests.m in Sources */,
 				0207AB87195DFA15007EFB12 /* MigrationTests.mm in Sources */,
 				3F2E66641CA0BA11004761D5 /* NotificationTests.m in Sources */,

@@ -20,6 +20,7 @@
 
 #import "RLMAccessor.hpp"
 #import "RLMArray_Private.hpp"
+#import "RLMDictionary_Private.hpp"
 #import "RLMObservation.hpp"
 #import "RLMObject_Private.hpp"
 #import "RLMObjectSchema_Private.hpp"
@@ -103,7 +104,11 @@ void RLMInitializeSwiftAccessorGenerics(__unsafe_unretained RLMObjectBase *const
                 cls = [RLMManagedArray class];
             } else if (prop.set) {
                 cls = [RLMManagedSet class];
-            } else {
+            }
+            else if (prop.dictionary) {
+                cls = [RLMManagedDictionary class];
+            }
+            else {
                 REALM_UNREACHABLE();
             }
             id managedCollection = [[cls alloc] initWithParent:object property:prop];
