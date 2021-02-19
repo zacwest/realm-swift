@@ -20,6 +20,7 @@
 
 #import "RLMAccessor.hpp"
 #import "RLMArray_Private.hpp"
+#import "RLMDictionary_Private.hpp"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMObjectStore.h"
 #import "RLMObject_Private.hpp"
@@ -233,6 +234,9 @@ void RLMGetCollectionType(RLMProperty *prop, Fn&& func) {
     }
     else if (prop.set) {
         func(((realm::object_store::Set *)0), ((RLMManagedSet *)0));
+    }
+    else if (prop.dictionary) {
+        func(((realm::object_store::Dictionary *)0), ((RLMManagedDictionary *)0));
     }
     else {
         REALM_UNREACHABLE();
