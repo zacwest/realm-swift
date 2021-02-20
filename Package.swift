@@ -160,6 +160,7 @@ let package = Package(
                 "TestHost",
                 "PrimitiveArrayPropertyTests.tpl.m",
                 "PrimitiveSetPropertyTests.tpl.m",
+                "PrimitiveDictionaryPropertyTests.tpl.m",
             ],
             cxxSettings: testCxxSettings
         ),
