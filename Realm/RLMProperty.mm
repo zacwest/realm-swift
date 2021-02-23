@@ -269,7 +269,19 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
             collectionName = @"RLMSet";
         }
         else if (_dictionary) {
-            prefixLen = dictionaryPrefixLen;
+
+            // work backwards because we have two types.
+
+            size_t typeLen = 0;
+            size_t codeSize = strlen(code);
+            for (size_t i = codeSize; i > 0; i--) {
+                if (code[i] == '>' && i != (codeSize-2)) {
+                    typeLen = i;
+                    break;
+                }
+            }
+
+            prefixLen = typeLen+2;//dictionaryPrefixLen;
             collectionName = @"RLMDictionary";
         }
 
