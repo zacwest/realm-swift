@@ -716,7 +716,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
         p.type |= realm::PropertyType::Set;
     }
     if (_dictionary) {
-        p.type |= realm::PropertyType::Dictionary;
+        p.type |= realm::PropertyType::Dictionary | realm::PropertyType::Nullable;
     }
     if (_optional) {
         p.type |= realm::PropertyType::Nullable;
