@@ -46,7 +46,7 @@ func combineFlags() -> [SwiftSetting]? {
 }
 
 let package = Package(
-    name: "Realm",
+    name: "RealmPackageName",
     platforms: [
         .macOS(.v10_10),
         .iOS(.v11),
@@ -55,7 +55,7 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "Realm",
+            name: "RealmProductName",
             targets: ["Realm"]),
         .library(
             name: "RealmSwift",
@@ -67,7 +67,9 @@ let package = Package(
     targets: [
       .target(
             name: "Realm",
-            dependencies: ["RealmObjectStore"],
+            dependencies: [
+                .product(name: "RealmObjectStore", package: "RealmDatabase")
+                         ],
             path: ".",
             sources: [
                 "Realm/RLMAccessor.mm",
@@ -130,7 +132,9 @@ let package = Package(
         ),
         .target(
             name: "RealmSwift",
-            dependencies: ["Realm"],
+            dependencies: [
+                .target(name: "Realm")
+            ],
             path: "RealmSwift",
             exclude: [
                 "Tests",
@@ -140,13 +144,18 @@ let package = Package(
         ),
         .target(
             name: "RealmTestSupport",
-            dependencies: ["Realm"],
+            dependencies: [
+                .target(name: "Realm")
+            ],
             path: "Realm/TestUtils",
             cxxSettings: testCxxSettings
         ),
         .testTarget(
             name: "RealmTests",
-            dependencies: ["Realm", "RealmTestSupport"],
+            dependencies: [
+                .target(name: "Realm"),
+                .target(name: "RealmTestSupport")
+            ],
             path: "Realm/Tests",
             exclude: [
                 "Swift",
@@ -159,12 +168,18 @@ let package = Package(
         ),
         .testTarget(
             name: "RealmObjcSwiftTests",
-            dependencies: ["Realm", "RealmTestSupport"],
+            dependencies: [
+                .target(name: "Realm"),
+                .target(name: "RealmTestSupport")
+            ],
             path: "Realm/Tests/Swift"
         ),
         .testTarget(
             name: "RealmSwiftTests",
-            dependencies: ["RealmSwift", "RealmTestSupport"],
+            dependencies: [
+                .target(name: "RealmSwift"),
+                .target(name: "RealmTestSupport")
+            ],
             path: "RealmSwift/Tests",
             exclude: ["TestUtils.mm"],
             swiftSettings: combineFlags()
@@ -176,14 +191,22 @@ let package = Package(
         // different targest.
         .target(
             name: "RealmSyncTestSupport",
-            dependencies: ["Realm", "RealmSwift", "RealmTestSupport"],
+            dependencies: [
+                .target(name: "Realm"),
+                .target(name: "RealmSwift"),
+                .target(name: "RealmTestSupport")
+            ],
             path: "Realm/ObjectServerTests",
             sources: ["RLMSyncTestCase.mm", "RLMUser+ObjectServerTests.mm"],
             cxxSettings: testCxxSettings
         ),
         .target(
             name: "RealmSwiftSyncTestSupport",
-            dependencies: ["RealmSwift", "RealmTestSupport", "RealmSyncTestSupport"],
+            dependencies: [
+                .target(name: "RealmSwift"),
+                .target(name: "RealmTestSupport"),
+                .target(name: "RealmSyncTestSupport")
+            ],
             path: "Realm/ObjectServerTests",
             sources: [
                  "SwiftSyncTestCase.swift",
@@ -194,7 +217,12 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftObjectServerTests",
-            dependencies: ["RealmSwift", "RealmTestSupport", "RealmSyncTestSupport", "RealmSwiftSyncTestSupport"],
+            dependencies: [
+                .target(name: "RealmSwift"),
+                .target(name: "RealmTestSupport"),
+                .target(name: "RealmSyncTestSupport"),
+                .target(name: "RealmSwiftSyncTestSupport")
+            ],
             path: "Realm/ObjectServerTests",
             sources: [
                  "SwiftObjectServerTests.swift",
@@ -204,7 +232,11 @@ let package = Package(
         ),
         .testTarget(
             name: "ObjcObjectServerTests",
-            dependencies: ["RealmTestSupport", "RealmSyncTestSupport", "RealmSwiftSyncTestSupport"],
+            dependencies: [
+                .target(name: "RealmTestSupport"),
+                .target(name: "RealmSyncTestSupport"),
+                .target(name: "RealmSwiftSyncTestSupport")
+            ],
             path: "Realm/ObjectServerTests",
             sources: [
                 "RLMBSONTests.mm",
