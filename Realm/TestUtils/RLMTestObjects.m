@@ -159,6 +159,12 @@
 @implementation AllOptionalPrimitiveSets
 @end
 
+@implementation AllPrimitiveDictionaries
+@end
+
+@implementation AllOptionalPrimitiveDictionaries
+@end
+
 @implementation AllOptionalTypesPK
 + (NSString *)primaryKey {
     return @"pk";
