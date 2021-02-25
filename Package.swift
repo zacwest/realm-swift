@@ -59,7 +59,8 @@ let package = Package(
             targets: ["Realm"]),
         .library(
             name: "RealmSwift",
-            targets: ["RealmSwift"]),
+            type: .dynamic,
+            targets: ["Realm", "RealmSwift"]),
     ],
     dependencies: [
         .package(url: "https://github.com/realm/realm-core", .exact(Version(coreVersionStr)!))
