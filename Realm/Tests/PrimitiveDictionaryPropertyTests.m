@@ -257,24 +257,84 @@ static double average(NSArray *values) {
 #pragma clang diagnostic ignored "-Wnonnull"
 
 - (void)testSetObject {
-//    // a
-//    RLMAssertThrowsWithReason([unmanaged.boolObj setObject:@NO forKey:nil],
-//                              @"Invalid nil key for dictionary expecting key of type 'string'.");
-//    RLMAssertThrowsWithReason([unmanaged.intObj setObject:@2 forKey:nil],
-//                              @"Invalid nil key for dictionary expecting key of type 'string'.");
-//    RLMAssertThrowsWithReason([optUnmanaged.boolObj setObject:@NO forKey:nil],
-//                              @"Invalid nil key for dictionary expecting key of type 'string'.");
-//    RLMAssertThrowsWithReason([optUnmanaged.intObj setObject:@2 forKey:nil],
-//                              @"Invalid nil key for dictionary expecting key of type 'string'.");
-//    // b
-//    RLMAssertThrowsWithReason([managed.boolObj setObject:@NO forKey:nil],
-//                              @"Unsupported key type (null) in key array");
-//    RLMAssertThrowsWithReason([managed.intObj setObject:@2 forKey:nil],
-//                              @"Unsupported key type (null) in key array");
-//    RLMAssertThrowsWithReason([optManaged.boolObj setObject:@NO forKey:nil],
-//                              @"Unsupported key type (null) in key array");
-//    RLMAssertThrowsWithReason([optManaged.intObj setObject:@2 forKey:nil],
-//                              @"Unsupported key type (null) in key array");
+    // Managed non-optional
+    XCTAssertNil(managed.boolObj[@"testVal"]);
+    XCTAssertNil(managed.intObj[@"testVal"]);
+    XCTAssertNoThrow(managed.boolObj[@"testVal"] = @NO);
+    XCTAssertNoThrow(managed.intObj[@"testVal"] = @2);
+    XCTAssertEqual(managed.boolObj[@"testVal"], @NO);
+    XCTAssertEqual(managed.intObj[@"testVal"], @2);
+    RLMAssertThrowsWithReason(managed.boolObj[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type 'bool'.");
+    RLMAssertThrowsWithReason(managed.intObj[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type 'int'.");
+    XCTAssertNoThrow(managed.boolObj[@"testVal"] = nil);
+    XCTAssertNoThrow(managed.intObj[@"testVal"] = nil);
+    XCTAssertNil(managed.boolObj[@"testVal"]);
+    XCTAssertNil(managed.intObj[@"testVal"]);
+
+    // Managed optional
+    XCTAssertNil(optManaged.boolObj[@"testVal"]);
+    XCTAssertNil(optManaged.intObj[@"testVal"]);
+    XCTAssertNoThrow(optManaged.boolObj[@"testVal"] = @NO);
+    XCTAssertNoThrow(optManaged.intObj[@"testVal"] = @2);
+    XCTAssertEqual(optManaged.boolObj[@"testVal"], @NO);
+    XCTAssertEqual(optManaged.intObj[@"testVal"], @2);
+    XCTAssertNoThrow(optManaged.boolObj[@"testVal"] = NSNull.null);
+    XCTAssertNoThrow(optManaged.intObj[@"testVal"] = NSNull.null);
+    XCTAssertEqual(optManaged.boolObj[@"testVal"], NSNull.null);
+    XCTAssertEqual(optManaged.intObj[@"testVal"], NSNull.null);
+    XCTAssertNoThrow(optManaged.boolObj[@"testVal"] = nil);
+    XCTAssertNoThrow(optManaged.intObj[@"testVal"] = nil);
+    XCTAssertNil(optManaged.boolObj[@"testVal"]);
+    XCTAssertNil(optManaged.intObj[@"testVal"]);
+
+    // Unmanaged non-optional
+    XCTAssertNil(unmanaged.boolObj[@"testVal"]);
+    XCTAssertNil(unmanaged.intObj[@"testVal"]);
+    XCTAssertNoThrow(unmanaged.boolObj[@"testVal"] = @NO);
+    XCTAssertNoThrow(unmanaged.intObj[@"testVal"] = @2);
+    XCTAssertEqual(unmanaged.boolObj[@"testVal"], @NO);
+    XCTAssertEqual(unmanaged.intObj[@"testVal"], @2);
+    RLMAssertThrowsWithReason(unmanaged.boolObj[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type 'bool'.");
+    RLMAssertThrowsWithReason(unmanaged.intObj[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type 'int'.");
+    XCTAssertNoThrow(unmanaged.boolObj[@"testVal"] = nil);
+    XCTAssertNoThrow(unmanaged.intObj[@"testVal"] = nil);
+    XCTAssertNil(unmanaged.boolObj[@"testVal"]);
+    XCTAssertNil(unmanaged.intObj[@"testVal"]);
+
+    // Unmanaged optional
+    XCTAssertNil(optUnmanaged.boolObj[@"testVal"]);
+    XCTAssertNil(optUnmanaged.intObj[@"testVal"]);
+    XCTAssertNoThrow(optUnmanaged.boolObj[@"testVal"] = @NO);
+    XCTAssertNoThrow(optUnmanaged.intObj[@"testVal"] = @2);
+    XCTAssertEqual(optUnmanaged.boolObj[@"testVal"], @NO);
+    XCTAssertEqual(optUnmanaged.intObj[@"testVal"], @2);
+    XCTAssertNoThrow(optUnmanaged.boolObj[@"testVal"] = NSNull.null);
+    XCTAssertNoThrow(optUnmanaged.intObj[@"testVal"] = NSNull.null);
+    XCTAssertEqual(optUnmanaged.boolObj[@"testVal"], NSNull.null);
+    XCTAssertEqual(optUnmanaged.intObj[@"testVal"], NSNull.null);
+    XCTAssertNoThrow(optUnmanaged.boolObj[@"testVal"] = nil);
+    XCTAssertNoThrow(optUnmanaged.intObj[@"testVal"] = nil);
+    XCTAssertNil(optUnmanaged.boolObj[@"testVal"]);
+    XCTAssertNil(optUnmanaged.intObj[@"testVal"]);
+
+    // Fail with nil key on unmanaged
+    RLMAssertThrowsWithReason([unmanaged.boolObj setObject:@NO forKey:nil],
+                              @"Invalid nil key for dictionary expecting key of type 'string'.");
+    RLMAssertThrowsWithReason([unmanaged.intObj setObject:@2 forKey:nil],
+                              @"Invalid nil key for dictionary expecting key of type 'string'.");
+    RLMAssertThrowsWithReason([optUnmanaged.boolObj setObject:@NO forKey:nil],
+                              @"Invalid nil key for dictionary expecting key of type 'string'.");
+    RLMAssertThrowsWithReason([optUnmanaged.intObj setObject:@2 forKey:nil],
+                              @"Invalid nil key for dictionary expecting key of type 'string'.");
+    // Fail with nil key on managed
+    RLMAssertThrowsWithReason([managed.boolObj setObject:@NO forKey:nil],
+                              @"Unsupported key type (null) in key array");
+    RLMAssertThrowsWithReason([managed.intObj setObject:@2 forKey:nil],
+                              @"Unsupported key type (null) in key array");
+    RLMAssertThrowsWithReason([optManaged.boolObj setObject:@NO forKey:nil],
+                              @"Unsupported key type (null) in key array");
+    RLMAssertThrowsWithReason([optManaged.intObj setObject:@2 forKey:nil],
+                              @"Unsupported key type (null) in key array");
     // c
     RLMAssertThrowsWithReason([unmanaged.boolObj setObject:NSNull.null forKey: @"testVal"],
                               @"Invalid value '<null>' of type 'NSNull' for expected type 'bool'");

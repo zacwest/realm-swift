@@ -346,7 +346,7 @@
 - (void)setObject:(id)obj forKeyedSubscript:(id<RLMDictionaryKey>)key {
     RLMDictionaryValidateMatchingObjectType(self, key, obj);
     changeDictionary(self, ^{
-        [_backingCollection setObject:obj forKey:(id)key];
+        _backingCollection[(id)key] = obj;
     });
 }
 
@@ -397,14 +397,13 @@ void RLMDictionaryValidateMatchingObjectType(__unsafe_unretained RLMDictionary *
         @throw RLMException(@"Invalid nil key for dictionary expecting key of type '%@'.",
                             dictionary->_objectClassName ?: RLMTypeToString(dictionary->_keyType));
     }
-    if (!value && !dictionary->_optional) {
-        @throw RLMException(@"Invalid nil value for dictionary of expected type '%@'.",
-                            dictionary->_objectClassName ?: RLMTypeToString(dictionary->_type));
-    }
     if (![key conformsToProtocol:@protocol(RLMDictionaryKey)] ||
         !RLMValidateValue(key, dictionary->_keyType, false, false, nil)) {
         @throw RLMException(@"Invalid key '%@' of type '%@' for expected type '%@'.",
                             key, [key class], RLMTypeToString(dictionary->_keyType));
+    }
+    if (!value) {
+        return;
     }
     if (dictionary->_type != RLMPropertyTypeObject) {
         if (!RLMValidateValue(value, dictionary->_type, dictionary->_optional, false, nil)) {
@@ -412,7 +411,7 @@ void RLMDictionaryValidateMatchingObjectType(__unsafe_unretained RLMDictionary *
                                 value, [value class], RLMTypeToString(dictionary->_type),
                                 dictionary->_optional ? "?" : "");
         }
-//        return;
+        return;
     }
     auto valueObject = RLMDynamicCast<RLMObjectBase>(value);
     if (!valueObject) {

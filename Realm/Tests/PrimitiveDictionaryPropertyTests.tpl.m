@@ -227,6 +227,40 @@ static double average(NSArray *values) {
 #pragma clang diagnostic ignored "-Wnonnull"
 
 - (void)testSetObject {
+    // Managed non-optional
+    %man %r XCTAssertNil($dictionary[@"testVal"]);
+    %man %r XCTAssertNoThrow($dictionary[@"testVal"] = $first);
+    %man %r XCTAssertEqual($dictionary[@"testVal"], $first);
+    %man %r RLMAssertThrowsWithReason($dictionary[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type '$type'.");
+    %man %r XCTAssertNoThrow($dictionary[@"testVal"] = nil);
+    %man %r XCTAssertNil($dictionary[@"testVal"]);
+
+    // Managed optional
+    %man %o XCTAssertNil($dictionary[@"testVal"]);
+    %man %o XCTAssertNoThrow($dictionary[@"testVal"] = $first);
+    %man %o XCTAssertEqual($dictionary[@"testVal"], $first);
+    %man %o XCTAssertNoThrow($dictionary[@"testVal"] = NSNull.null);
+    %man %o XCTAssertEqual($dictionary[@"testVal"], NSNull.null);
+    %man %o XCTAssertNoThrow($dictionary[@"testVal"] = nil);
+    %man %o XCTAssertNil($dictionary[@"testVal"]);
+
+    // Unmanaged non-optional
+    %unman %r XCTAssertNil($dictionary[@"testVal"]);
+    %unman %r XCTAssertNoThrow($dictionary[@"testVal"] = $first);
+    %unman %r XCTAssertEqual($dictionary[@"testVal"], $first);
+    %unman %r RLMAssertThrowsWithReason($dictionary[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type '$type'.");
+    %unman %r XCTAssertNoThrow($dictionary[@"testVal"] = nil);
+    %unman %r XCTAssertNil($dictionary[@"testVal"]);
+
+    // Unmanaged optional
+    %unman %o XCTAssertNil($dictionary[@"testVal"]);
+    %unman %o XCTAssertNoThrow($dictionary[@"testVal"] = $first);
+    %unman %o XCTAssertEqual($dictionary[@"testVal"], $first);
+    %unman %o XCTAssertNoThrow($dictionary[@"testVal"] = NSNull.null);
+    %unman %o XCTAssertEqual($dictionary[@"testVal"], NSNull.null);
+    %unman %o XCTAssertNoThrow($dictionary[@"testVal"] = nil);
+    %unman %o XCTAssertNil($dictionary[@"testVal"]);
+
     // Fail with nil key on unmanaged
     %unman RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:nil], ^n @"Invalid nil key for dictionary expecting key of type 'string'.");
     // Fail with nil key on managed
