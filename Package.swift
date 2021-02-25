@@ -33,7 +33,7 @@ let testCxxSettings: [CXXSetting] = cxxSettings + [
     // relative to the package root, while Xcode resolves them
     // relative to the target root, so we need both.
     .headerSearchPath("Realm"),
-    .headerSearchPath(".."),
+    .headerSearchPath("..")
 ]
 
 // SPM is supposed to weak-link frameworks that rely on a newer deployment
@@ -69,64 +69,12 @@ let package = Package(
             name: "Realm",
             dependencies: ["RealmObjectStore"],
             path: ".",
+        exclude: ["Realm/ObjectServerTests", "Realm/Swift", "Realm/Tests", "Realm/TestUtils"],
             sources: [
-                "Realm/RLMAccessor.mm",
-                "Realm/RLMAnalytics.mm",
-                "Realm/RLMArray.mm",
-                "Realm/RLMClassInfo.mm",
-                "Realm/RLMCollection.mm",
-                "Realm/RLMConstants.m",
-                "Realm/RLMDecimal128.mm",
-                "Realm/RLMEmbeddedObject.mm",
-                "Realm/RLMListBase.mm",
-                "Realm/RLMManagedArray.mm",
-                "Realm/RLMMigration.mm",
-                "Realm/RLMObject.mm",
-                "Realm/RLMObjectBase.mm",
-                "Realm/RLMObjectId.mm",
-                "Realm/RLMObjectSchema.mm",
-                "Realm/RLMObjectStore.mm",
-                "Realm/RLMObservation.mm",
-                "Realm/RLMOptionalBase.mm",
-                "Realm/RLMPredicateUtil.mm",
-                "Realm/RLMProperty.mm",
-                "Realm/RLMQueryUtil.mm",
-                "Realm/RLMRealm.mm",
-                "Realm/RLMRealmConfiguration.mm",
-                "Realm/RLMRealmUtil.mm",
-                "Realm/RLMResults.mm",
-                "Realm/RLMSchema.mm",
-                "Realm/RLMSwiftSupport.m",
-                "Realm/RLMThreadSafeReference.mm",
-                "Realm/RLMUpdateChecker.mm",
-                "Realm/RLMUtil.mm",
-
-                // Sync source files
-                "Realm/NSError+RLMSync.m",
-                "Realm/RLMApp.mm",
-                "Realm/RLMAPIKeyAuth.mm",
-                "Realm/RLMBSON.mm",
-                "Realm/RLMCredentials.mm",
-                "Realm/RLMEmailPasswordAuth.mm",
-                "Realm/RLMFindOneAndModifyOptions.mm",
-                "Realm/RLMFindOptions.mm",
-                "Realm/RLMMongoClient.mm",
-                "Realm/RLMMongoCollection.mm",
-                "Realm/RLMNetworkTransport.mm",
-                "Realm/RLMProviderClient.mm",
-                "Realm/RLMPushClient.mm",
-                "Realm/RLMRealm+Sync.mm",
-                "Realm/RLMRealmConfiguration+Sync.mm",
-                "Realm/RLMSyncConfiguration.mm",
-                "Realm/RLMSyncManager.mm",
-                "Realm/RLMSyncSession.mm",
-                "Realm/RLMSyncUtil.mm",
-                "Realm/RLMUpdateResult.mm",
-                "Realm/RLMUser.mm",
-                "Realm/RLMUserAPIKey.mm"
+                "Realm"
             ],
             publicHeadersPath: "include",
-            cxxSettings: cxxSettings
+            cxxSettings: cxxSettings /*+ [.unsafeFlags(["-fmodule-map-file=Realm/Realm.modulemap"])]*/
         ),
         .target(
             name: "RealmSwift",
