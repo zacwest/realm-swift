@@ -59,7 +59,6 @@ let package = Package(
             targets: ["Realm"]),
         .library(
             name: "RealmSwift",
-            type: .dynamic,
             targets: ["Realm", "RealmSwift"]),
     ],
     dependencies: [
