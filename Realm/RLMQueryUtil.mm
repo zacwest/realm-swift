@@ -521,6 +521,10 @@ public:
     void do_add_constraint(RLMPropertyType type, NSPredicateOperatorType operatorType,
                            NSComparisonPredicateOptions predicateOptions, ColumnReference const& column, T&& value);
 
+    template <typename T>
+    void do_add_constraint(RLMPropertyType type, NSPredicateOperatorType operatorType,
+                           NSComparisonPredicateOptions predicateOptions, ColumnReference const& column, T&& value);
+
     void add_between_constraint(const ColumnReference& column, id value);
 
     void add_link_constraint(NSPredicateOperatorType operatorType, const Columns<Link>& column, RLMObjectBase *obj);
@@ -647,28 +651,39 @@ void QueryBuilder::add_diacritic_sensitive_string_constraint(NSPredicateOperator
                                                              Columns<C>&& column,
                                                              T value) {
     bool caseSensitive = !(predicateOptions & NSCaseInsensitivePredicateOption);
-    switch (operatorType) {
-        case NSBeginsWithPredicateOperatorType:
-            add_substring_constraint(value, column.begins_with(value, caseSensitive));
-            break;
-        case NSEndsWithPredicateOperatorType:
-            add_substring_constraint(value, column.ends_with(value, caseSensitive));
-            break;
-        case NSContainsPredicateOperatorType:
-            add_substring_constraint(value, column.contains(value, caseSensitive));
-            break;
-        case NSEqualToPredicateOperatorType:
-            m_query.and_query(column.equal(value, caseSensitive));
-            break;
-        case NSNotEqualToPredicateOperatorType:
-            m_query.and_query(column.not_equal(value, caseSensitive));
-            break;
-        case NSLikePredicateOperatorType:
-            m_query.and_query(column.like(value, caseSensitive));
-            break;
-        default: {
-            constexpr auto propertyType = is_any_v<C, String, Lst<String>> ? RLMPropertyTypeString : RLMPropertyTypeData;
-            unsupportedOperator(propertyType, operatorType);
+    // FIXME: Columns<C> can represent Columns<Lst<StringData>> for example
+    // This leaves us with an issue because dictionary is not a templated type
+    // we need to figure out how to achieve Dictionary<StringData> so we can invoke methods such as
+    // begins_with etc.
+    if constexpr (std::is_same_v<C, Dictionary>) {
+
+        // TODO: Ask in channel how to achieve Dictionary.begins_with etc.
+
+        return;
+    } else {
+        switch (operatorType) {
+            case NSBeginsWithPredicateOperatorType:
+                add_substring_constraint(value, column.begins_with(value, caseSensitive));
+                break;
+            case NSEndsWithPredicateOperatorType:
+                add_substring_constraint(value, column.ends_with(value, caseSensitive));
+                break;
+            case NSContainsPredicateOperatorType:
+                add_substring_constraint(value, column.contains(value, caseSensitive));
+                break;
+            case NSEqualToPredicateOperatorType:
+                m_query.and_query(column.equal(value, caseSensitive));
+                break;
+            case NSNotEqualToPredicateOperatorType:
+                m_query.and_query(column.not_equal(value, caseSensitive));
+                break;
+            case NSLikePredicateOperatorType:
+                m_query.and_query(column.like(value, caseSensitive));
+                break;
+            default: {
+                constexpr auto propertyType = is_any_v<C, String, Lst<String>> ? RLMPropertyTypeString : RLMPropertyTypeData;
+                unsupportedOperator(propertyType, operatorType);
+            }
         }
     }
 }
@@ -691,7 +706,8 @@ void QueryBuilder::add_string_constraint(NSPredicateOperatorType operatorType,
         [](BinaryData value) { return make_subexpr<ConstantStringValue>(StringData(value.data(), value.size())); },
         [](const Columns<BinaryData>& c) { return c.clone(); },
         [](const Columns<Lst<BinaryData>>& c) { return c.clone(); },
-        [](const Columns<Set<BinaryData>>& c) { return c.clone(); }
+        [](const Columns<Set<BinaryData>>& c) { return c.clone(); },
+        [](const Columns<Dictionary>& c) { return c.clone(); },
     };
     auto left = as_subexpr(column);
     auto right = as_subexpr(value);
@@ -909,6 +925,80 @@ void convert_null(T&& value, Fn&& fn) {
     }
 }
 
+template <typename T>
+void QueryBuilder::do_add_constraint(RLMPropertyType type, NSPredicateOperatorType operatorType,
+                                     NSComparisonPredicateOptions predicateOptions, ColumnReference const& column, T&& value)
+{
+    switch (type) {
+        case RLMPropertyTypeBool:
+            convert_null(value, [&](auto&& value) {
+                add_bool_constraint(type, operatorType, column.resolve<Dictionary>(), value_of_type<bool>(value));
+            });
+            break;
+        case RLMPropertyTypeObjectId:
+            convert_null(value, [&](auto&& value) {
+                add_bool_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                    value_of_type<ObjectId>(value));
+            });
+            break;
+        case RLMPropertyTypeDate:
+            convert_null(value, [&](auto&& value) {
+                add_numeric_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                       value_of_type<Timestamp>(value));
+            });
+            break;
+        case RLMPropertyTypeDouble:
+            convert_null(value, [&](auto&& value) {
+                add_numeric_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                       value_of_type<Double>(value));
+            });
+            break;
+        case RLMPropertyTypeFloat:
+            convert_null(value, [&](auto&& value) {
+                add_numeric_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                       value_of_type<Float>(value));
+            });
+            break;
+        case RLMPropertyTypeInt:
+            convert_null(value, [&](auto&& value) {
+                add_numeric_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                       value_of_type<Int>(value));
+            });
+            break;
+        case RLMPropertyTypeDecimal128:
+            convert_null(value, [&](auto&& value) {
+                add_numeric_constraint(type, operatorType, column.resolve<Dictionary>(),
+                                       value_of_type<Decimal128>(value));
+            });
+            break;
+        case RLMPropertyTypeString:
+            add_string_constraint(operatorType, predicateOptions,
+                                  column.resolve<Dictionary>(),
+                                  value_of_type<String>(value));
+            break;
+        case RLMPropertyTypeData:
+//            add_string_constraint(operatorType, predicateOptions,
+//                                  column.resolve<Dictionary>(),
+//                                  value_of_type<Binary>(value));
+            break;
+        case RLMPropertyTypeObject:
+        case RLMPropertyTypeLinkingObjects:
+            convert_null(value, [&](auto&& value) {
+                add_link_constraint(operatorType, column.resolve<Link>(), value);
+            });
+            break;
+        case RLMPropertyTypeUUID:
+            convert_null(value, [&](auto&& value) {
+                add_bool_constraint(type, operatorType,
+                                    column.resolve<Dictionary>(), value_of_type<UUID>(value));
+            });
+            break;
+        case RLMPropertyTypeAny:
+            throwException(@"Unsupported predicate value type",
+                           @"Object type '%@' not supported", RLMTypeToString(type));
+    }
+}
+
 template <template<typename> typename W, typename T>
 void QueryBuilder::do_add_constraint(RLMPropertyType type, NSPredicateOperatorType operatorType,
                        NSComparisonPredicateOptions predicateOptions, ColumnReference const& column, T&& value)
@@ -994,6 +1084,9 @@ void QueryBuilder::add_constraint(NSPredicateOperatorType operatorType,
     }
     else if (column.property().set) {
         do_add_constraint<Set>(type, operatorType, predicateOptions, column, rhs);
+    }
+    else if (column.property().dictionary) {
+        do_add_constraint(type, operatorType, predicateOptions, column, rhs);
     }
     else {
         do_add_constraint<Identity>(type, operatorType, predicateOptions, column, rhs);
