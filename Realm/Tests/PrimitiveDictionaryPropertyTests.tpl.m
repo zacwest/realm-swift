@@ -48,13 +48,15 @@ static void count(NSArray *values, double *sum, NSUInteger *count) {
         }
     }
 }
-static double sum(NSArray *values) {
+static double sum(NSDictionary *dictionary) {
+    NSArray *values = dictionary.allValues;
     double sum = 0;
     NSUInteger c = 0;
     count(values, &sum, &c);
     return sum;
 }
-static double average(NSArray *values) {
+static double average(NSDictionary *dictionary) {
+    NSArray *values = dictionary.allValues;
     double sum = 0;
     NSUInteger c = 0;
     count(values, &sum, &c);
@@ -200,8 +202,8 @@ static double average(NSArray *values) {
 }
 
 - (void)testDeleteObjectsInRealm {
-    RLMAssertThrowsWithReason([realm deleteObjects:$dictionary], @"Cannot delete objects from RLMDictionary");
-//    RLMAssertThrowsWithReason([realm deleteObjects:$allDictionaries], @"Cannot delete objects from RLMDictionary");
+    %unman RLMAssertThrowsWithReason([realm deleteObjects:$dictionary], @"Cannot delete objects from RLMDictionary");
+    %man RLMAssertThrowsWithReason([realm deleteObjects:$dictionary], @"Cannot delete objects from RLMManagedDictionary<RLMString, $type>: only RLMObjects can be deleted.");
 }
 
 - (void)testObjectAtIndex {
@@ -937,16 +939,17 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
 #define RLMAssertCount(cls, expectedCount, ...) \
     XCTAssertEqual(expectedCount, ([cls objectsInRealm:realm where:__VA_ARGS__].count))
 
-- (void)createObjectWithValueIndex:(NSUInteger)index {
-//    NSRange range = {index, 1};
-//    id obj = [AllPrimitiveDictionaries createInRealm:realm withValue:@{
-//        %r %man @"$prop": [$values subarrayWithRange:range],
-//    }];
-//    [LinkToAllPrimitiveDictionaries createInRealm:realm withValue:@[obj]];
-//    obj = [AllOptionalPrimitiveDictionaries createInRealm:realm withValue:@{
-//        %o %man @"$prop": [$values subarrayWithRange:range],
-//    }];
-//    [LinkToAllOptionalPrimitiveDictionaries createInRealm:realm withValue:@[obj]];
+- (void)createObjectWithKey:(NSString *)key {
+    %r %man id $prop = [$values dictionaryWithValuesForKeys:@[key]];
+    
+    id obj = [AllPrimitiveDictionaries createInRealm:realm withValue: @{
+        %r %man @"$prop": $prop,
+    }];
+    [LinkToAllPrimitiveDictionaries createInRealm:realm withValue:@[obj]];
+    obj = [AllOptionalPrimitiveDictionaries createInRealm:realm withValue:@{
+        %o %man @"$prop": $prop,
+    }];
+    [LinkToAllOptionalPrimitiveDictionaries createInRealm:realm withValue:@[obj]];
 }
 
 - (void)testQueryBasicOperators {
@@ -959,7 +962,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %man %minmax RLMAssertCount($class, 0, @"ANY $prop < %@", $v0);
     %man %minmax RLMAssertCount($class, 0, @"ANY $prop <= %@", $v0);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     %man RLMAssertCount($class, 0, @"ANY $prop = %@", $v1);
     %man RLMAssertCount($class, 1, @"ANY $prop = %@", $v0);
@@ -971,7 +974,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %man %minmax RLMAssertCount($class, 1, @"ANY $prop < %@", $v1);
     %man %minmax RLMAssertCount($class, 1, @"ANY $prop <= %@", $v0);
 
-    [self createObjectWithValueIndex:1];
+    [self createObjectWithKey:@"1"];
 
     %man RLMAssertCount($class, 1, @"ANY $prop = %@", $v0);
     %man RLMAssertCount($class, 1, @"ANY $prop = %@", $v1);
@@ -994,7 +997,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
 
     %man %minmax RLMAssertCount($class, 0, @"ANY $prop BETWEEN %@", @[$v0, $v1]);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     %man %minmax RLMAssertCount($class, 1, @"ANY $prop BETWEEN %@", @[$v0, $v0]);
     %man %minmax RLMAssertCount($class, 1, @"ANY $prop BETWEEN %@", @[$v0, $v1]);
@@ -1006,7 +1009,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
 
     %man RLMAssertCount($class, 0, @"ANY $prop IN %@", @[$v0, $v1]);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     %man RLMAssertCount($class, 0, @"ANY $prop IN %@", @[$v1]);
     %man RLMAssertCount($class, 1, @"ANY $prop IN %@", @[$v0, $v1]);
@@ -1151,13 +1154,13 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@min == nil");
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@min == %@", NSNull.null);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     // One object where v0 is min and zero with v1
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@min == %@", $v0);
     %minmax %man RLMAssertCount($class, 0U, @"$prop.@min == %@", $v1);
 
-    [self createObjectWithValueIndex:1];
+    [self createObjectWithKey:@"1"];
 
     // One object where v0 is min and one with v1
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@min == %@", $v0);
@@ -1195,13 +1198,13 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@max == nil");
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@max == %@", NSNull.null);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     // One object where v0 is min and zero with v1
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@max == %@", $v0);
     %minmax %man RLMAssertCount($class, 0U, @"$prop.@max == %@", $v1);
 
-    [self createObjectWithValueIndex:1];
+    [self createObjectWithKey:@"1"];
 
     // One object where v0 is min and one with v1
     %minmax %man RLMAssertCount($class, 1U, @"$prop.@max == %@", $v0);
@@ -1229,7 +1232,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %man %minmax RLMAssertCount(LinkTo$class, 0, @"ANY link.$prop < %@", $v0);
     %man %minmax RLMAssertCount(LinkTo$class, 0, @"ANY link.$prop <= %@", $v0);
 
-    [self createObjectWithValueIndex:0];
+    [self createObjectWithKey:@"0"];
 
     %man RLMAssertCount(LinkTo$class, 0, @"ANY link.$prop = %@", $v1);
     %man RLMAssertCount(LinkTo$class, 1, @"ANY link.$prop = %@", $v0);
@@ -1241,7 +1244,7 @@ static NSArray *sortedDistinctUnion(id array, NSString *type, NSString *prop) {
     %man %minmax RLMAssertCount(LinkTo$class, 1, @"ANY link.$prop < %@", $v1);
     %man %minmax RLMAssertCount(LinkTo$class, 1, @"ANY link.$prop <= %@", $v0);
 
-    [self createObjectWithValueIndex:1];
+    [self createObjectWithKey:@"1"];
 
     %man RLMAssertCount(LinkTo$class, 1, @"ANY link.$prop = %@", $v0);
     %man RLMAssertCount(LinkTo$class, 1, @"ANY link.$prop = %@", $v1);
