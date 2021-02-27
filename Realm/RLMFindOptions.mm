@@ -19,12 +19,9 @@
 #import "RLMFindOptions_Private.hpp"
 #import "RLMBSON_Private.hpp"
 
-@interface RLMFindOptions() {
+@implementation RLMFindOptions {
     realm::app::MongoCollection::FindOptions _options;
-};
-@end
-
-@implementation RLMFindOptions
+}
 
 - (instancetype)initWithLimit:(NSInteger)limit
                    projection:(id<RLMBSON> _Nullable)projection

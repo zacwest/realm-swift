@@ -39,7 +39,7 @@
     return self;
 }
 
-- (realm::app::MongoCollection::FindOneAndModifyOptions)_findOneAndModifyOptions {
+- (realm::app::MongoCollection::FindOneAndModifyOptions)_findOneAndModifyOptions RLM_OBJC_DIRECT {
     return _options;
 }
 

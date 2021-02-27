@@ -127,7 +127,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
 - (void)findWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
           options:(RLMFindOptions *)options
        completion:(RLMMongoFindBlock)completion {
-    self.collection.find(toBsonDocument(document), [options _findOptions],
+    self.collection.find(toBsonDocument(document), options._findOptions,
                          [completion](realm::util::Optional<realm::bson::BsonArray> documents,
                                       realm::util::Optional<realm::app::AppError> error) {
         if (error) {
@@ -145,7 +145,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
 - (void)findOneDocumentWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
                      options:(RLMFindOptions *)options
                   completion:(RLMMongoFindOneBlock)completion {
-    self.collection.find_one(toBsonDocument(document), [options _findOptions],
+    self.collection.find_one(toBsonDocument(document), options._findOptions,
                              [completion](realm::util::Optional<realm::bson::BsonDocument> document,
                                           realm::util::Optional<realm::app::AppError> error) {
         if (error) {
