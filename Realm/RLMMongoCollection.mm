@@ -124,17 +124,45 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
     return [self collection:self.name];
 }
 
+template<typename T>
+static std::function<void(realm::util::Optional<T>, realm::util::Optional<realm::app::AppError>)>
+wrapCompletion(void (^completion)(id, NSError *)) {
+    return ^(realm::util::Optional<T> documents,
+             realm::util::Optional<realm::app::AppError> error) {
+        if (error) {
+            return completion(nil, RLMAppErrorToNSError(*error));
+        }
+        completion(RLMConvertBsonToRLMBSON(*documents), nil);
+    };
+}
+
+static std::function<void(uint64_t, realm::util::Optional<realm::app::AppError>)>
+wrapCompletion(void (^completion)(NSInteger, NSError *)) {
+    return [=](uint64_t count, realm::util::Optional<realm::app::AppError> error) {
+        if (error) {
+            return completion(0, RLMAppErrorToNSError(*error));
+        }
+        completion(static_cast<NSInteger>(count), nil);
+    };
+}
+
+static std::function<void(realm::app::MongoCollection::UpdateResult, realm::util::Optional<realm::app::AppError>)>
+wrapCompletion(void (^completion)(id, NSError *)) {
+    return [completion](realm::app::MongoCollection::UpdateResult result,
+                        realm::util::Optional<realm::app::AppError> error) {
+        if (error) {
+            return completion(nil, RLMAppErrorToNSError(*error));
+        }
+        completion([[RLMUpdateResult alloc] initWithUpdateResult:result], nil);
+    };
+}
+
+
 - (void)findWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
           options:(RLMFindOptions *)options
        completion:(RLMMongoFindBlock)completion {
     self.collection.find(toBsonDocument(document), options._findOptions,
-                         [completion](realm::util::Optional<realm::bson::BsonArray> documents,
-                                      realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion((NSArray<NSDictionary<NSString *, id<RLMBSON>> *> *)RLMConvertBsonToRLMBSON(*documents), nil);
-    });
+                         wrapCompletion<realm::bson::BsonArray>(completion));
 }
 
 - (void)findWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
@@ -146,13 +174,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                      options:(RLMFindOptions *)options
                   completion:(RLMMongoFindOneBlock)completion {
     self.collection.find_one(toBsonDocument(document), options._findOptions,
-                             [completion](realm::util::Optional<realm::bson::BsonDocument> document,
-                                          realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion((NSDictionary<NSString *, id<RLMBSON>> *)RLMConvertBsonToRLMBSON(*document), nil);
-    });
+                             wrapCompletion<realm::bson::BsonDocument>(completion));
 }
 
 - (void)findOneDocumentWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
@@ -163,13 +185,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
 - (void)insertOneDocument:(NSDictionary<NSString *, id<RLMBSON>> *)document
                completion:(RLMMongoInsertBlock)completion {
     self.collection.insert_one(toBsonDocument(document),
-                               [completion](realm::util::Optional<realm::bson::Bson> objectId,
-                                            realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion(RLMConvertBsonToRLMBSON(*objectId), nil);
-    });
+                             wrapCompletion<realm::bson::Bson>(completion));
 }
 
 - (void)insertManyDocuments:(NSArray<NSDictionary<NSString *, id<RLMBSON>> *> *)documents
@@ -191,26 +207,14 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
 - (void)aggregateWithPipeline:(NSArray<NSDictionary<NSString *, id<RLMBSON>> *> *)pipeline
                    completion:(RLMMongoFindBlock)completion {
     self.collection.aggregate(toBsonArray(pipeline),
-                              [completion](realm::util::Optional<realm::bson::BsonArray> documents,
-                                           realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion((NSArray<id> *)RLMConvertBsonToRLMBSON(*documents), nil);
-    });
+                              wrapCompletion<realm::bson::BsonArray>(completion));
 }
 
 - (void)countWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
              limit:(NSInteger)limit
         completion:(RLMMongoCountBlock)completion {
     self.collection.count(toBsonDocument(document), limit,
-                          [completion](uint64_t count,
-                                       realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(0, RLMAppErrorToNSError(*error));
-        }
-        completion(static_cast<NSInteger>(count), nil);
-    });
+                          wrapCompletion(completion));
 }
 
 - (void)countWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
@@ -220,26 +224,12 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
 
 - (void)deleteOneDocumentWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
                     completion:(RLMMongoCountBlock)completion {
-    self.collection.delete_one(toBsonDocument(document),
-                               [completion](uint64_t count,
-                                            realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(0, RLMAppErrorToNSError(*error));
-        }
-        completion(static_cast<NSInteger>(count), nil);
-    });
+    self.collection.delete_one(toBsonDocument(document), wrapCompletion(completion));
 }
 
 - (void)deleteManyDocumentsWhere:(NSDictionary<NSString *, id<RLMBSON>> *)document
                       completion:(RLMMongoCountBlock)completion {
-    self.collection.delete_many(toBsonDocument(document),
-                                [completion](uint64_t count,
-                                             realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(0, RLMAppErrorToNSError(*error));
-        }
-        completion(static_cast<NSInteger>(count), nil);
-    });
+    self.collection.delete_many(toBsonDocument(document), wrapCompletion(completion));
 }
 
 - (void)updateOneDocumentWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
@@ -248,13 +238,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                     completion:(RLMMongoUpdateBlock)completion {
     self.collection.update_one(toBsonDocument(filterDocument), toBsonDocument(updateDocument),
                                upsert,
-                               [completion](realm::app::MongoCollection::UpdateResult result,
-                                            realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion([[RLMUpdateResult alloc] initWithUpdateResult:result], nil);
-    });
+                               wrapCompletion(completion));
 }
 
 - (void)updateOneDocumentWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
@@ -272,13 +256,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                       completion:(RLMMongoUpdateBlock)completion {
     self.collection.update_many(toBsonDocument(filterDocument), toBsonDocument(updateDocument),
                                 upsert,
-                                [completion](realm::app::MongoCollection::UpdateResult result,
-                                             realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-        completion([[RLMUpdateResult alloc] initWithUpdateResult:result], nil);
-    });
+                                wrapCompletion(completion));
 }
 
 - (void)updateManyDocumentsWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
@@ -296,14 +274,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                    completion:(RLMMongoFindOneBlock)completion {
     self.collection.find_one_and_update(toBsonDocument(filterDocument), toBsonDocument(updateDocument),
                                         [options _findOneAndModifyOptions],
-                                        [completion](realm::util::Optional<realm::bson::BsonDocument> document,
-                                                     realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-
-        return completion((NSDictionary *)RLMConvertBsonDocumentToRLMBSON(document), nil);
-    });
+                                        wrapCompletion<realm::bson::BsonDocument>(completion));
 }
 
 - (void)findOneAndUpdateWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
@@ -321,14 +292,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                     completion:(RLMMongoFindOneBlock)completion {
     self.collection.find_one_and_replace(toBsonDocument(filterDocument), toBsonDocument(replacementDocument),
                                          [options _findOneAndModifyOptions],
-                                         [completion](realm::util::Optional<realm::bson::BsonDocument> document,
-                                                      realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-
-        return completion((NSDictionary *)RLMConvertBsonDocumentToRLMBSON(document), nil);
-    });
+                                         wrapCompletion<realm::bson::BsonDocument>(completion));
 }
 
 - (void)findOneAndReplaceWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
@@ -345,14 +309,7 @@ static realm::bson::BsonArray toBsonArray(id<RLMBSON> bson) {
                    completion:(RLMMongoDeleteBlock)completion {
     self.collection.find_one_and_delete(toBsonDocument(filterDocument),
                                         [options _findOneAndModifyOptions],
-                                        [completion](realm::util::Optional<realm::bson::BsonDocument> document,
-                                                     realm::util::Optional<realm::app::AppError> error) {
-        if (error) {
-            return completion(nil, RLMAppErrorToNSError(*error));
-        }
-
-        return completion((NSDictionary *)RLMConvertBsonDocumentToRLMBSON(document), nil);
-    });
+                                        wrapCompletion<realm::bson::BsonDocument>(completion));
 }
 
 - (void)findOneAndDeleteWhere:(NSDictionary<NSString *, id<RLMBSON>> *)filterDocument
