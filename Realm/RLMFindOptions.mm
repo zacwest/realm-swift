@@ -17,10 +17,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #import "RLMFindOptions_Private.hpp"
+
 #import "RLMBSON_Private.hpp"
+#import "RLMIvarStorage.hpp"
 
 @implementation RLMFindOptions {
-    realm::app::MongoCollection::FindOptions _options;
+    RLMIvar<realm::app::MongoCollection::FindOptions> _options;
 }
 
 - (instancetype)initWithLimit:(NSInteger)limit
@@ -44,41 +46,41 @@
 }
 
 - (realm::app::MongoCollection::FindOptions)_findOptions {
-    return _options;
+    return *_options;
 }
 
 - (id<RLMBSON>)projection {
-    return RLMConvertBsonDocumentToRLMBSON(_options.projection_bson);
+    return RLMConvertBsonDocumentToRLMBSON(_options->projection_bson);
 }
 
 - (id<RLMBSON>)sort {
-    return RLMConvertBsonDocumentToRLMBSON(_options.sort_bson);
+    return RLMConvertBsonDocumentToRLMBSON(_options->sort_bson);
 }
 
 - (void)setProjection:(id<RLMBSON>)projection {
     if (projection) {
         auto bson = realm::bson::BsonDocument(RLMConvertRLMBSONToBson(projection));
-        _options.projection_bson = realm::util::Optional<realm::bson::BsonDocument>(bson);
+        _options->projection_bson = realm::util::Optional<realm::bson::BsonDocument>(bson);
     } else {
-        _options.projection_bson = realm::util::none;
+        _options->projection_bson = realm::util::none;
     }
 }
 
 - (void)setSort:(id<RLMBSON>)sort {
     if (sort) {
         auto bson = realm::bson::BsonDocument(RLMConvertRLMBSONToBson(sort));
-        _options.sort_bson = realm::util::Optional<realm::bson::BsonDocument>(bson);
+        _options->sort_bson = realm::util::Optional<realm::bson::BsonDocument>(bson);
     } else {
-        _options.sort_bson = realm::util::none;
+        _options->sort_bson = realm::util::none;
     }
 }
 
 - (NSInteger)limit {
-    return static_cast<NSInteger>(_options.limit.value_or(0));
+    return static_cast<NSInteger>(_options->limit.value_or(0));
 }
 
 - (void)setLimit:(NSInteger)limit {
-    _options.limit = realm::util::Optional<int64_t>(limit);
+    _options->limit = realm::util::Optional<int64_t>(limit);
 }
 
 @end

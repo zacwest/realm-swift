@@ -22,6 +22,7 @@
 #import "RLMBSON_Private.hpp"
 #import "RLMFindOneAndModifyOptions_Private.hpp"
 #import "RLMFindOptions_Private.hpp"
+#import "RLMIvarStorage.hpp"
 #import "RLMNetworkTransport_Private.hpp"
 #import "RLMUpdateResult_Private.hpp"
 #import "RLMUser_Private.hpp"
@@ -31,7 +32,7 @@
 #import <realm/object-store/sync/mongo_database.hpp>
 
 @implementation RLMChangeStream {
-    realm::app::WatchStream _watchStream;
+    RLMIvar<realm::app::WatchStream> _watchStream;
     id<RLMChangeEventDelegate> _subscriber;
     __weak NSURLSession *_session;
     _Nonnull dispatch_queue_t _queue;
@@ -67,19 +68,19 @@
 
 - (void)didReceiveEvent:(nonnull NSData *)event {
     std::string_view str = [[NSString alloc] initWithData:event encoding:NSUTF8StringEncoding].UTF8String;
-    if (!str.empty() && _watchStream.state() == realm::app::WatchStream::State::NEED_DATA) {
-        _watchStream.feed_buffer(str);
+    if (!str.empty() && _watchStream->state() == realm::app::WatchStream::State::NEED_DATA) {
+        _watchStream->feed_buffer(str);
     }
 
-    while (_watchStream.state() == realm::app::WatchStream::State::HAVE_EVENT) {
-        id<RLMBSON> event = RLMConvertBsonToRLMBSON(_watchStream.next_event());
+    while (_watchStream->state() == realm::app::WatchStream::State::HAVE_EVENT) {
+        id<RLMBSON> event = RLMConvertBsonToRLMBSON(_watchStream->next_event());
         dispatch_async(_queue, ^{
             [_subscriber changeStreamDidReceiveChangeEvent:event];
         });
     }
 
-    if (_watchStream.state() == realm::app::WatchStream::State::HAVE_ERROR) {
-        [self didReceiveError:RLMAppErrorToNSError(_watchStream.error())];
+    if (_watchStream->state() == realm::app::WatchStream::State::HAVE_ERROR) {
+        [self didReceiveError:RLMAppErrorToNSError(_watchStream->error())];
     }
 }
 
