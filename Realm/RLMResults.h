@@ -168,6 +168,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (RLMResults<RLMObjectType> *)objectsWithPredicate:(NSPredicate *)predicate;
 
+- (RLMResults<RLMObjectType> *)fullTextSearchWithPhrase:(NSString *)phrase;
+
+
 /**
  Returns a sorted `RLMResults` from an existing results collection.
 

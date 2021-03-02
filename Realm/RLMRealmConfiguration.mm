@@ -211,10 +211,10 @@ static bool isSync(realm::Realm::Config const& config) {
     }
     else if (isSync(_config)) {
         if (_customSchema) {
-            _config.schema_mode = realm::SchemaMode::AdditiveExplicit;
+            _config.schema_mode = realm::SchemaMode::Additive;
         }
         else {
-            _config.schema_mode = realm::SchemaMode::AdditiveDiscovered;
+            _config.schema_mode = realm::SchemaMode::Additive;
         }
     }
     else {

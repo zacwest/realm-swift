@@ -19,6 +19,12 @@
 import XCTest
 import RealmSwift
 
+class FullTextSearchTests: TestCase {
+    func testFullTextSearch() {
+        realmWithTestPath().objects(SwiftStringObject.self).filter(<#T##predicate: NSPredicate##NSPredicate#>)
+    }
+}
+
 class ListTests: TestCase {
     var str1: SwiftStringObject?
     var str2: SwiftStringObject?

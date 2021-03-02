@@ -108,21 +108,21 @@
     XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::Automatic);
 
     configuration.syncConfiguration = [RLMDummyUser() configurationWithPartitionValue:@"dummy"].syncConfiguration;
-    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::AdditiveDiscovered);
+    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::Additive);
     configuration.objectClasses = @[];
-    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::AdditiveExplicit);
+    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::Additive);
     configuration.readOnly = true;
     XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::ReadOnlyAlternative);
     configuration.objectClasses = nil;
     XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::ReadOnlyAlternative);
     configuration.readOnly = false;
-    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::AdditiveDiscovered);
+    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::Additive);
     configuration.readOnly = true;
     XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::ReadOnlyAlternative);
     configuration.objectClasses = @[];
     XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::ReadOnlyAlternative);
     configuration.readOnly = false;
-    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::AdditiveExplicit);
+    XCTAssertEqual(configuration.schemaMode, realm::SchemaMode::Additive);
 }
 
 #pragma mark - Default Configuration

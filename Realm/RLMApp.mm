@@ -65,12 +65,12 @@ namespace {
 
                 // Convert the RLMResponse to an app:Response and pass downstream to
                 // the object store
-                completion({
-                    .body = response.body.UTF8String,
-                    .headers = bridgingHeaders,
-                    .http_status_code = static_cast<int>(response.httpStatusCode),
-                    .custom_status_code = static_cast<int>(response.customStatusCode)
-                });
+//                completion({
+//                    .body = response.body.UTF8String,
+//                    .headers = bridgingHeaders,
+//                    .http_status_code = static_cast<int>(response.httpStatusCode),
+//                    .custom_status_code = static_cast<int>(response.customStatusCode)
+//                });
             }];
         }
 

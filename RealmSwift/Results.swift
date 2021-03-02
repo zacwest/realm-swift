@@ -197,6 +197,10 @@ extension Decimal128: AddableType {}
         return Results<Element>(rlmResults.objects(with: predicate))
     }
 
+    public func fullTextSearch(_ predicate: String) -> Results<Element> {
+        return Results<Element>(rlmResults.objects(with: predicate))
+    }
+
     // MARK: Sorting
 
     /**
