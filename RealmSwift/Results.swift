@@ -197,8 +197,9 @@ extension Decimal128: AddableType {}
         return Results<Element>(rlmResults.objects(with: predicate))
     }
 
-    public func fullTextSearch(_ predicate: String) -> Results<Element> {
-        return Results<Element>(rlmResults.objects(with: predicate))
+    public func fullTextSearch(_ phrase: String, key: KeyPath<Element, String>) -> Results<Element> {
+        let k = NSExpression(forKeyPath: key).keyPath
+        return Results<Element>(rlmResults.fullTextSearch(withPhrase: phrase, forKey: k))
     }
 
     // MARK: Sorting

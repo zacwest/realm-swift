@@ -21,7 +21,12 @@ import RealmSwift
 
 class FullTextSearchTests: TestCase {
     func testFullTextSearch() {
-        realmWithTestPath().objects(SwiftStringObject.self).filter(<#T##predicate: NSPredicate##NSPredicate#>)
+
+        let results = realmWithTestPath()
+            .objects(SwiftStringObject.self)
+            .fullTextSearch("hello", key: \.stringCol)
+
+        XCTAssertEqual(results.count, 0)
     }
 }
 

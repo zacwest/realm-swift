@@ -375,8 +375,10 @@ static inline void RLMResultsValidateInWriteTransaction(__unsafe_unretained RLMR
     });
 }
 
-- (RLMResults<RLMObjectType> *)fullTextSearchWithPhrase:(NSString *)phrase {
-    
+- (RLMResults *)fullTextSearchWithPhrase:(NSString *)phrase forKey:(NSString *)key {
+    auto colKey = _results.get_table()->get_column_key(StringData(key.UTF8String));
+    auto query = _results.get_query().fulltext(colKey, StringData("Hello"));
+    return [self subresultsWithResults:_results.filter(std::move(query))];
 }
 
 - (RLMResults *)sortedResultsUsingKeyPath:(NSString *)keyPath ascending:(BOOL)ascending {

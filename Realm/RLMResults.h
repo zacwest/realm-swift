@@ -168,7 +168,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (RLMResults<RLMObjectType> *)objectsWithPredicate:(NSPredicate *)predicate;
 
-- (RLMResults<RLMObjectType> *)fullTextSearchWithPhrase:(NSString *)phrase;
+- (RLMResults *)fullTextSearchWithPhrase:(NSString *)phrase forKey:(NSString *)key;
 
 
 /**
