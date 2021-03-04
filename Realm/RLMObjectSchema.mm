@@ -148,6 +148,21 @@ using namespace realm;
         }
     }
 
+    // TODO: reduce the need for itterating over the properties twice
+    if ([objectClass respondsToSelector:@selector(textSearchableProperties)]) {
+        for (NSString *propName in [objectClass textSearchableProperties]) {
+            for (RLMProperty *prop in schema.properties) {
+                if ([propName isEqualToString:prop.name]) {
+                    if (prop.type != RLMPropertyTypeString) {
+                        REALM_TERMINATE("Property must be of type String.");
+                    }
+                    prop.textSearchable = YES;
+                    break;
+                }
+            }
+        }
+    }
+
     if (NSString *primaryKey = [objectClass primaryKey]) {
         for (RLMProperty *prop in schema.properties) {
             if ([primaryKey isEqualToString:prop.name]) {
@@ -302,11 +317,13 @@ using namespace realm;
     for (RLMProperty *prop in _properties) {
         Property p = [prop objectStoreCopy:schema];
         p.is_primary = (prop == _primaryKeyProperty);
+        p.is_text_searchable = prop.textSearchable;
         objectSchema.persisted_properties.push_back(std::move(p));
     }
     for (RLMProperty *prop in _computedProperties) {
         objectSchema.computed_properties.push_back([prop objectStoreCopy:schema]);
     }
+
     return objectSchema;
 }
 
@@ -320,6 +337,7 @@ using namespace realm;
     for (const Property &prop : objectSchema.persisted_properties) {
         RLMProperty *property = [RLMProperty propertyForObjectStoreProperty:prop];
         property.isPrimary = (prop.name == objectSchema.primary_key);
+        property.textSearchable = prop.is_text_searchable;
         [properties addObject:property];
     }
     schema.properties = properties;

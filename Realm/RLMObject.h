@@ -396,6 +396,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (nullable NSString *)primaryKey;
 
++ (nullable NSArray<NSString *> *)textSearchableProperties;
+
 /**
  Override this method to specify the names of properties to ignore. These properties will not be managed by the Realm
  that manages the object.

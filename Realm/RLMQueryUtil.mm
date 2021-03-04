@@ -480,6 +480,7 @@ public:
     : m_query(query), m_group(group), m_schema(schema) { }
 
     void apply_predicate(NSPredicate *predicate, RLMObjectSchema *objectSchema);
+    void apply_full_text_search(NSString *phrase, NSString *keyPath, RLMObjectSchema *objectSchema);
 
 
     void apply_collection_operator_expression(RLMObjectSchema *desc, NSString *keyPath, id value, NSComparisonPredicate *pred);
@@ -1421,6 +1422,12 @@ void QueryBuilder::apply_function_expression(RLMObjectSchema *objectSchema, NSEx
                            collectionColumn.resolve<Link>(std::move(subquery)).count(), value);
 }
 
+void QueryBuilder::apply_full_text_search(NSString *phrase, NSString *keyPath, RLMObjectSchema *objectSchema)
+{
+    ColumnReference collectionColumn = column_reference_from_key_path(objectSchema, keyPath, false);
+    m_query.fulltext(collectionColumn.column(), phrase.UTF8String);
+}
+
 void QueryBuilder::apply_predicate(NSPredicate *predicate, RLMObjectSchema *objectSchema)
 {
     // Compound predicates.
@@ -1553,6 +1560,22 @@ realm::Query RLMPredicateToQuery(NSPredicate *predicate, RLMObjectSchema *object
 
     @autoreleasepool {
         QueryBuilder(query, group, schema).apply_predicate(predicate, objectSchema);
+    }
+
+    // Test the constructed query in core
+    std::string validateMessage = query.validate();
+    RLMPrecondition(validateMessage.empty(), @"Invalid query", @"%.*s",
+                    (int)validateMessage.size(), validateMessage.c_str());
+    return query;
+}
+
+realm::Query RLMFullTextSearchToQuery(NSString *phrase, RLMObjectSchema *objectSchema,
+                                      RLMSchema *schema, Group &group, NSString *colName)
+{
+    auto query = get_table(group, objectSchema).where();
+
+    @autoreleasepool {
+        QueryBuilder(query, group, schema).apply_full_text_search(phrase, colName, objectSchema);
     }
 
     // Test the constructed query in core

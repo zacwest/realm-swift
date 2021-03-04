@@ -195,6 +195,11 @@
     return nil;
 }
 
++ (nullable NSArray *)textSearchableProperties {
+    return nil;
+}
+
+
 + (NSArray *)ignoredProperties {
     return nil;
 }

@@ -20,6 +20,19 @@ import Foundation
 import RealmSwift
 import Realm
 
+class SwiftFullTextObject: Object {
+    @objc dynamic var stringCol = ""
+
+    override class func textSearchableProperties() -> [String] {
+        ["stringCol"]
+    }
+
+//    override class func indexedProperties() -> [String] {
+//        ["stringCol"]
+//    }
+}
+
+
 class SwiftStringObject: Object {
     @objc dynamic var stringCol = ""
 }

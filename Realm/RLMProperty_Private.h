@@ -82,6 +82,7 @@ static inline NSString *RLMTypeToString(RLMPropertyType type) {
 @property (nonatomic, readwrite) NSString *name;
 @property (nonatomic, readwrite, assign) RLMPropertyType type;
 @property (nonatomic, readwrite) BOOL indexed;
+@property (nonatomic, readwrite) BOOL textSearchable;
 @property (nonatomic, readwrite) BOOL optional;
 @property (nonatomic, readwrite) BOOL array;
 @property (nonatomic, copy, nullable) NSString *objectClassName;

@@ -132,6 +132,9 @@ extension EmbeddedObject: RealmCollectionValue {
      */
     @objc open class func ignoredProperties() -> [String] { return [] }
 
+    @objc open class func textSearchableProperties() -> [String] { return [] }
+
+
     // MARK: Key-Value Coding & Subscripting
 
     /// Returns or sets the value of the property with the given name.

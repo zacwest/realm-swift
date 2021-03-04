@@ -62,7 +62,8 @@ let package = Package(
             targets: ["Realm", "RealmSwift"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/realm/realm-core", .branch("je/as-full-text-search"))
+//        .package(url: "https://github.com/realm/realm-core", .branch("je/as-full-text-search"))
+        .package(path: "../realm-core")
     ],
     targets: [
       .target(

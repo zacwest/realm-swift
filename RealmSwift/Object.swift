@@ -147,6 +147,8 @@ extension Object: RealmCollectionValue {
      */
     @objc open class func primaryKey() -> String? { return nil }
 
+    @objc open class func textSearchableProperties() -> [String] { return [] }
+
     /**
      Override this method to specify the names of properties to ignore. These properties will not be managed by
      the Realm that manages the object.
