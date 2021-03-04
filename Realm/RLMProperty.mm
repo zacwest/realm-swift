@@ -302,6 +302,27 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
                             @"%@ can only contain instances of RLMObject subclasses. "
                             @"See https://realm.io/docs/objc/latest/#to-many for more information.", _name, collectionName, _objectClassName, collectionName, collectionName);
     }
+    else if (strncmp(code, setPrefix, setPrefixLen) == 0) {
+        _set = true;
+        if (auto type = typeFromProtocolString(code + setPrefixLen)) {
+            _type = *type;
+            return YES;
+        }
+
+        // get object class from type string - @"RLMSet<objectClassName>"
+        _objectClassName = [[NSString alloc] initWithBytes:code + setPrefixLen
+                                                    length:strlen(code + setPrefixLen) - 2 // drop trailing >"
+                                                  encoding:NSUTF8StringEncoding];
+
+        if ([RLMSchema classForString:_objectClassName]) {
+            _optional = false;
+            _type = RLMPropertyTypeObject;
+            return YES;
+        }
+        @throw RLMException(@"Property '%@' is of type 'RLMSet<%@>' which is not a supported RLMSet object type. "
+                            @"RLMSets can only contain instances of RLMObject subclasses. "
+                            @"See https://realm.io/docs/objc/latest/#to-many for more information.", _name, _objectClassName);
+    }
     else if (strncmp(code, numberPrefix, numberPrefixLen) == 0) {
         auto type = typeFromProtocolString(code + numberPrefixLen);
         if (type && (*type == RLMPropertyTypeInt || *type == RLMPropertyTypeFloat || *type == RLMPropertyTypeDouble || *type == RLMPropertyTypeBool)) {

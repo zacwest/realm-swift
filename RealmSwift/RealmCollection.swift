@@ -378,7 +378,11 @@ public protocol _RealmCollectionEnumerator {
 }
 
 /// :nodoc:
-public protocol RealmCollectionBase: RandomAccessCollection, LazyCollectionProtocol, CustomStringConvertible, ThreadConfined where Element: RealmCollectionValue { }
+public protocol RealmCollectionBase: RandomAccessCollection, LazyCollectionProtocol, CustomStringConvertible, ThreadConfined where Element: RealmCollectionValue {
+    // This typealias was needed with Swift 3.1. It no longer is, but remains
+    // just in case someone was depending on it
+    typealias ElementType = Element
+}
 
 /**
  A homogenous collection of `Object`s which can be retrieved, filtered, sorted, and operated upon.
