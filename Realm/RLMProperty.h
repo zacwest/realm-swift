@@ -76,6 +76,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) BOOL indexed;
 
+@property (nonatomic, readonly) BOOL fullTextSearchIndexed;
+
+
 /**
  For `RLMObject` and `RLMArray` properties, the name of the class of object stored in the property.
  */

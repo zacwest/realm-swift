@@ -695,6 +695,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                           objectClassName:nil
                                    linkOriginPropertyName:nil
                                                   indexed:NO
+                                    fullTextSearchIndexed:NO
                                                  optional:NO];
     RLMObjectSchema *objectSchema = [[RLMObjectSchema alloc] initWithClassName:@"DeletedClass" objectClass:RLMObject.class properties:@[prop]];
     [self createTestRealmWithSchema:@[objectSchema] block:^(RLMRealm *realm) {
@@ -774,7 +775,13 @@ RLM_ARRAY_TYPE(MigrationTestObject);
 - (void)testRemoveProperty {
     // create schema with an extra column
     RLMObjectSchema *objectSchema = [RLMObjectSchema schemaForObjectClass:MigrationTestObject.class];
-    RLMProperty *thirdProperty = [[RLMProperty alloc] initWithName:@"deletedCol" type:RLMPropertyTypeBool objectClassName:nil linkOriginPropertyName:nil indexed:NO optional:NO];
+    RLMProperty *thirdProperty = [[RLMProperty alloc] initWithName:@"deletedCol"
+                                                              type:RLMPropertyTypeBool
+                                                   objectClassName:nil
+                                            linkOriginPropertyName:nil
+                                                           indexed:NO
+                                             fullTextSearchIndexed:NO
+                                                          optional:NO];
     objectSchema.properties = [objectSchema.properties arrayByAddingObject:thirdProperty];
 
     // create realm with old schema and populate
@@ -804,7 +811,13 @@ RLM_ARRAY_TYPE(MigrationTestObject);
 - (void)testRemoveAndAddProperty {
     // create schema to migrate from with single string column
     RLMObjectSchema *objectSchema = [RLMObjectSchema schemaForObjectClass:MigrationTestObject.class];
-    RLMProperty *oldInt = [[RLMProperty alloc] initWithName:@"oldIntCol" type:RLMPropertyTypeInt objectClassName:nil linkOriginPropertyName:nil indexed:NO optional:NO];
+    RLMProperty *oldInt = [[RLMProperty alloc] initWithName:@"oldIntCol"
+                                                       type:RLMPropertyTypeInt
+                                            objectClassName:nil
+                                     linkOriginPropertyName:nil
+                                                    indexed:NO
+                                      fullTextSearchIndexed:NO
+                                                   optional:NO];
     objectSchema.properties = @[oldInt, objectSchema.properties[1]];
 
     // create realm with old schema and populate
@@ -1404,6 +1417,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1413,6 +1427,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1436,6 +1451,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMEmbeddedObject.class
@@ -1445,6 +1461,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1468,6 +1485,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMEmbeddedObject.class
@@ -1477,6 +1495,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1500,6 +1519,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1509,6 +1529,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1535,6 +1556,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMEmbeddedObject.class
@@ -1558,6 +1580,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1567,6 +1590,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1625,6 +1649,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1634,6 +1659,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1680,6 +1706,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1689,6 +1716,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class
@@ -1741,6 +1769,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                  objectClassName:nil
                                           linkOriginPropertyName:nil
                                                          indexed:NO
+                                           fullTextSearchIndexed:NO
                                                         optional:NO];
     RLMObjectSchema *childObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ChildClass"
                                                                   objectClass:RLMObject.class
@@ -1750,6 +1779,7 @@ RLM_ARRAY_TYPE(MigrationTestObject);
                                                    objectClassName:@"ChildClass"
                                             linkOriginPropertyName:nil
                                                            indexed:NO
+                                             fullTextSearchIndexed:NO
                                                           optional:YES];
     RLMObjectSchema *parentObjectSchema = [[RLMObjectSchema alloc] initWithClassName:@"ParentClass"
                                                                    objectClass:RLMObject.class

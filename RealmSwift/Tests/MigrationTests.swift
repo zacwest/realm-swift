@@ -144,7 +144,7 @@ class MigrationTests: TestCase {
 
     func testMigrationProperties() {
         let prop = RLMProperty(name: "stringCol", type: RLMPropertyType.int, objectClassName: nil,
-                               linkOriginPropertyName: nil, indexed: false, optional: false)
+                               linkOriginPropertyName: nil, indexed: false, fullTextSearchIndexed: false, optional: false)
         _ = autoreleasepool {
             realmWithSingleClassProperties(defaultRealmURL(), className: "SwiftStringObject", properties: [prop])
         }
@@ -581,7 +581,7 @@ class MigrationTests: TestCase {
     func testDeleteData() {
         autoreleasepool {
             let prop = RLMProperty(name: "id", type: .int, objectClassName: nil,
-                                   linkOriginPropertyName: nil, indexed: false, optional: false)
+                                   linkOriginPropertyName: nil, indexed: false, fullTextSearchIndexed: false, optional: false)
             let realm = realmWithSingleClassProperties(defaultRealmURL(),
                 className: "DeletedClass", properties: [prop])
             try! realm.transaction {
@@ -607,7 +607,7 @@ class MigrationTests: TestCase {
     func testRenameProperty() {
         autoreleasepool {
             let prop = RLMProperty(name: "before_stringCol", type: .string, objectClassName: nil,
-                linkOriginPropertyName: nil, indexed: false, optional: false)
+                                   linkOriginPropertyName: nil, indexed: false, fullTextSearchIndexed: false, optional: false)
             autoreleasepool {
                 let realm = realmWithSingleClassProperties(defaultRealmURL(), className: "SwiftStringObject",
                     properties: [prop])
@@ -772,7 +772,7 @@ class MigrationTests: TestCase {
 
     func testFailOnSchemaMismatch() {
         let prop = RLMProperty(name: "name", type: RLMPropertyType.string, objectClassName: nil,
-                               linkOriginPropertyName: nil, indexed: false, optional: false)
+                               linkOriginPropertyName: nil, indexed: false, fullTextSearchIndexed: false, optional: false)
         _ = autoreleasepool {
             realmWithSingleClassProperties(defaultRealmURL(), className: "SwiftEmployeeObject", properties: [prop])
         }
@@ -787,7 +787,7 @@ class MigrationTests: TestCase {
 
     func testDeleteRealmIfMigrationNeededWithSetCustomSchema() {
         let prop = RLMProperty(name: "name", type: RLMPropertyType.string, objectClassName: nil,
-                               linkOriginPropertyName: nil, indexed: false, optional: false)
+                               linkOriginPropertyName: nil, indexed: false, fullTextSearchIndexed: false, optional: false)
         _ = autoreleasepool {
             realmWithSingleClassProperties(defaultRealmURL(), className: "SwiftEmployeeObject", properties: [prop])
         }

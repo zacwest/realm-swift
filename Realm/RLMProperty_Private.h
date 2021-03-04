@@ -67,11 +67,13 @@ static inline NSString *RLMTypeToString(RLMPropertyType type) {
 
 - (instancetype)initWithName:(NSString *)name
                      indexed:(BOOL)indexed
+       fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
       linkPropertyDescriptor:(nullable RLMPropertyDescriptor *)linkPropertyDescriptor
                     property:(objc_property_t)property;
 
 - (instancetype)initSwiftPropertyWithName:(NSString *)name
                                   indexed:(BOOL)indexed
+                    fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
                    linkPropertyDescriptor:(nullable RLMPropertyDescriptor *)linkPropertyDescriptor
                                  property:(objc_property_t)property
                                  instance:(RLMObjectBase *)objectInstance;
@@ -127,6 +129,7 @@ static inline NSString *RLMTypeToString(RLMPropertyType type) {
              objectClassName:(nullable NSString *)objectClassName
       linkOriginPropertyName:(nullable NSString *)linkOriginPropertyName
                      indexed:(BOOL)indexed
+       fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
                     optional:(BOOL)optional;
 @end
 

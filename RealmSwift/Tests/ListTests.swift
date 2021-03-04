@@ -19,11 +19,23 @@
 import XCTest
 import RealmSwift
 
-class FullTextSearchTests: TestCase {
+class FullTextSearchTests: XCTestCase {
     func testFullTextSearch() {
 
-        let results = realmWithTestPath()
-            .objects(SwiftStringObject.self)
+        let config = Realm.Configuration(objectTypes: [SwiftFullTextObject.self])
+        print(config.fileURL)
+
+        let realm = try! Realm(configuration: config)
+
+        let o = SwiftFullTextObject()
+        o.stringCol = "hello this is a string"
+
+        try! realm.write {
+            realm.add(o)
+        }
+
+        let results = realm
+            .objects(SwiftFullTextObject.self)
             .fullTextSearch("hello", key: \.stringCol)
 
         XCTAssertEqual(results.count, 0)

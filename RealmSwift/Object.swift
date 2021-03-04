@@ -730,11 +730,15 @@ internal class ObjectUtil {
         let object = cls.init()
 
         var indexedProperties: Set<String>!
+        var textSearchableProperties: Set<String>!
+
         let columnNames = cls._realmColumnNames()
         if let realmObject = object as? Object {
             indexedProperties = Set(type(of: realmObject).indexedProperties())
+            textSearchableProperties = Set(type(of: realmObject).textSearchableProperties())
         } else {
             indexedProperties = Set()
+            textSearchableProperties = Set()
         }
 
         return getNonIgnoredMirrorChildren(for: object).compactMap { prop in
@@ -760,6 +764,7 @@ internal class ObjectUtil {
             let property = RLMProperty()
             property.name = label
             property.indexed = indexedProperties.contains(label)
+            property.textSearchable = textSearchableProperties.contains(label)
             property.columnName = columnNames?[label]
             valueType._rlmProperty(property)
             value._rlmProperty(property)

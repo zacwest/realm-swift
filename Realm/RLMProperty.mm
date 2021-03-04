@@ -90,6 +90,7 @@ static bool rawTypeShouldBeTreatedAsComputedProperty(NSString *rawType) {
                                  objectClassName:prop.object_type.length() ? @(prop.object_type.c_str()) : nil
                           linkOriginPropertyName:prop.link_origin_property_name.length() ? @(prop.link_origin_property_name.c_str()) : nil
                                          indexed:prop.is_indexed
+                           fullTextSearchIndexed:prop.is_text_searchable
                                         optional:is_nullable(prop.type)];
     if (is_array(prop.type)) {
         ret->_array = true;
@@ -106,6 +107,7 @@ static bool rawTypeShouldBeTreatedAsComputedProperty(NSString *rawType) {
              objectClassName:(NSString *)objectClassName
       linkOriginPropertyName:(NSString *)linkOriginPropertyName
                      indexed:(BOOL)indexed
+       fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
                     optional:(BOOL)optional {
     self = [super init];
     if (self) {
@@ -114,6 +116,7 @@ static bool rawTypeShouldBeTreatedAsComputedProperty(NSString *rawType) {
         _objectClassName = objectClassName;
         _linkOriginPropertyName = linkOriginPropertyName;
         _indexed = indexed;
+        _fullTextSearchIndexed = fullTextSearchIndexed;
         _optional = optional;
         [self updateAccessors];
     }
@@ -369,6 +372,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 
 - (instancetype)initSwiftPropertyWithName:(NSString *)name
                                   indexed:(BOOL)indexed
+                    fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
                    linkPropertyDescriptor:(RLMPropertyDescriptor *)linkPropertyDescriptor
                                  property:(objc_property_t)property
                                  instance:(RLMObject *)obj {
@@ -381,6 +385,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 
     _name = name;
     _indexed = indexed;
+    _fullTextSearchIndexed = fullTextSearchIndexed;
 
     if (linkPropertyDescriptor) {
         _objectClassName = [linkPropertyDescriptor.objectClass className];
@@ -492,6 +497,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 
 - (instancetype)initWithName:(NSString *)name
                      indexed:(BOOL)indexed
+       fullTextSearchIndexed:(BOOL)fullTextSearchIndexed
       linkPropertyDescriptor:(RLMPropertyDescriptor *)linkPropertyDescriptor
                     property:(objc_property_t)property
 {
@@ -502,6 +508,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 
     _name = name;
     _indexed = indexed;
+    _fullTextSearchIndexed = fullTextSearchIndexed;
 
     if (linkPropertyDescriptor) {
         _objectClassName = [linkPropertyDescriptor.objectClass className];
@@ -541,6 +548,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
     prop->_objectClassName = _objectClassName;
     prop->_array = _array;
     prop->_indexed = _indexed;
+    prop->_fullTextSearchIndexed = _fullTextSearchIndexed;
     prop->_getterName = _getterName;
     prop->_setterName = _setterName;
     prop->_getterSel = _getterSel;
@@ -569,6 +577,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
 - (BOOL)isEqualToProperty:(RLMProperty *)property {
     return _type == property->_type
         && _indexed == property->_indexed
+        && _fullTextSearchIndexed == property->_fullTextSearchIndexed
         && _isPrimary == property->_isPrimary
         && _optional == property->_optional
         && [_name isEqualToString:property->_name]
@@ -590,6 +599,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
              "\ttype = %@;\n"
              "%@"
              "\tindexed = %@;\n"
+             "\tindexed = %@;\n"
              "\tisPrimary = %@;\n"
              "\tarray = %@;\n"
              "\toptional = %@;\n"
@@ -597,6 +607,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
             self.name, RLMTypeToString(self.type),
             objectClassName,
             self.indexed ? @"YES" : @"NO",
+            self.fullTextSearchIndexed ? @"YES" : @"NO",
             self.isPrimary ? @"YES" : @"NO",
             self.array ? @"YES" : @"NO",
             self.optional ? @"YES" : @"NO"];
@@ -617,6 +628,7 @@ static realm::util::Optional<RLMPropertyType> typeFromProtocolString(const char 
         }
     }
     p.is_indexed = static_cast<bool>(_indexed);
+    p.is_text_searchable = static_cast<bool>(_fullTextSearchIndexed);
     p.type = static_cast<realm::PropertyType>(_type);
     if (_array) {
         p.type |= realm::PropertyType::Array;

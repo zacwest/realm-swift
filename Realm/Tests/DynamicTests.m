@@ -119,6 +119,7 @@
                                           objectClassName:nil
                                    linkOriginPropertyName:nil
                                                   indexed:NO
+                                    fullTextSearchIndexed:NO
                                                  optional:NO];
     RLMObjectSchema *objectSchema = [[RLMObjectSchema alloc] initWithClassName:@"TrulyDynamicObject"
                                                                    objectClass:RLMObject.class

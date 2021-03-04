@@ -211,6 +211,12 @@ using namespace realm;
     std::unique_ptr<objc_property_t[], decltype(&free)> props(class_copyPropertyList(objectClass, &count), &free);
     NSMutableArray<RLMProperty *> *propArray = [NSMutableArray arrayWithCapacity:count];
     NSSet *indexed = [[NSSet alloc] initWithArray:[objectClass indexedProperties]];
+
+    NSSet *fullTextIndexed = [NSSet set];
+    if ([objectClass respondsToSelector:@selector(textSearchableProperties)]) {
+        fullTextIndexed = [[NSSet alloc] initWithArray:[objectClass textSearchableProperties]];
+    }
+
     for (unsigned int i = 0; i < count; i++) {
         NSString *propertyName = @(property_getName(props[i]));
         if ([ignoredProperties containsObject:propertyName]) {
@@ -221,6 +227,7 @@ using namespace realm;
         if (isSwiftClass) {
             prop = [[RLMProperty alloc] initSwiftPropertyWithName:propertyName
                                                           indexed:[indexed containsObject:propertyName]
+                                            fullTextSearchIndexed:[fullTextIndexed containsObject:propertyName]
                                            linkPropertyDescriptor:linkingObjectsProperties[propertyName]
                                                          property:props[i]
                                                          instance:swiftObjectInstance];
@@ -228,6 +235,7 @@ using namespace realm;
         else {
             prop = [[RLMProperty alloc] initWithName:propertyName
                                              indexed:[indexed containsObject:propertyName]
+                               fullTextSearchIndexed:[fullTextIndexed containsObject:propertyName]
                               linkPropertyDescriptor:linkingObjectsProperties[propertyName]
                                             property:props[i]];
         }

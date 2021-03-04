@@ -183,6 +183,10 @@
     return @[];
 }
 
++ (NSArray *)textSearchableProperties {
+    return @[];
+}
+
 + (NSDictionary *)linkingObjectsProperties {
     return @{};
 }
@@ -194,11 +198,6 @@
 + (NSString *)primaryKey {
     return nil;
 }
-
-+ (nullable NSArray *)textSearchableProperties {
-    return nil;
-}
-
 
 + (NSArray *)ignoredProperties {
     return nil;
