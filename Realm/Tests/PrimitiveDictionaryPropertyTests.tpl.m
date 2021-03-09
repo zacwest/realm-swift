@@ -206,13 +206,6 @@ static double average(NSDictionary *dictionary) {
     %man RLMAssertThrowsWithReason([realm deleteObjects:$dictionary], @"Cannot delete objects from RLMManagedDictionary<RLMString, $type>: only RLMObjects can be deleted.");
 }
 
-- (void)testObjectAtIndex {
-    RLMAssertThrowsWithReason([unmanaged.intObj objectAtIndex:0],
-                              @"Index 0 is out of bounds (must be less than 0).");
-    unmanaged.intObj[@"testVal"] = @1;
-    XCTAssertEqualObjects([unmanaged.intObj objectAtIndex:0], @1);
-}
-
 /**
 - (void)testLastObject {
     XCTAssertNil($allDictionaries.lastObject);
@@ -233,7 +226,7 @@ static double average(NSDictionary *dictionary) {
     // Managed non-optional
     %man %r XCTAssertNil($dictionary[@"testVal"]);
     %man %r XCTAssertNoThrow($dictionary[@"testVal"] = $first);
-    %man %r XCTAssertEqual($dictionary[@"testVal"], $first);
+    %man %r XCTAssertEqualObjects($dictionary[@"testVal"], $first);
     %man %r RLMAssertThrowsWithReason($dictionary[@"testVal"] = NSNull.null, @"Invalid value '<null>' of type 'NSNull' for expected type '$type'.");
     %man %r XCTAssertNoThrow($dictionary[@"testVal"] = nil);
     %man %r XCTAssertNil($dictionary[@"testVal"]);
@@ -241,9 +234,9 @@ static double average(NSDictionary *dictionary) {
     // Managed optional
     %man %o XCTAssertNil($dictionary[@"testVal"]);
     %man %o XCTAssertNoThrow($dictionary[@"testVal"] = $first);
-    %man %o XCTAssertEqual($dictionary[@"testVal"], $first);
+    %man %o XCTAssertEqualObjects($dictionary[@"testVal"], $first);
     %man %o XCTAssertNoThrow($dictionary[@"testVal"] = NSNull.null);
-    %man %o XCTAssertEqual($dictionary[@"testVal"], NSNull.null);
+    %man %o XCTAssertEqualObjects($dictionary[@"testVal"], NSNull.null);
     %man %o XCTAssertNoThrow($dictionary[@"testVal"] = nil);
     %man %o XCTAssertNil($dictionary[@"testVal"]);
 
@@ -264,16 +257,10 @@ static double average(NSDictionary *dictionary) {
     %unman %o XCTAssertNoThrow($dictionary[@"testVal"] = nil);
     %unman %o XCTAssertNil($dictionary[@"testVal"]);
 
-    // Fail with nil key on unmanaged
-    %unman RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:nil], ^n @"Invalid nil key for dictionary expecting key of type 'string'.");
-    // Fail with nil key on managed
-    %man RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:nil], ^n @"Unsupported key type (null) in key array");
-    // c
+    // Fail with nil key
+    RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:nil], ^n @"Invalid nil key for dictionary expecting key of type 'string'.");
+    // Fail on set nil for non-optional
     %r RLMAssertThrowsWithReason([$dictionary setObject:NSNull.null forKey: @"testVal"], ^n @"Invalid value '<null>' of type 'NSNull' for expected type '$type'");
-    // d
-    %unman RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:(id)$first], ^n @"Invalid key '$cVal' of type '$cType' for expected type 'string'");
-    // e
-    %man RLMAssertThrowsWithReason([$dictionary setObject:$first forKey:(id)$first], ^n @"Invalid key '$cVal' of type '$cType' for expected type 'string'");
     // f
     RLMAssertThrowsWithReason([$dictionary setObject:$wrong forKey: @"wrongVal"], ^n @"Invalid value '$wdesc' of type '$wtype' for expected type '$type'");
     %r RLMAssertThrowsWithReason([$dictionary setObject:NSNull.null forKey: @"nullVal"], ^n @"Invalid value '<null>' of type 'NSNull' for expected type '$type'");
@@ -319,12 +306,13 @@ static double average(NSDictionary *dictionary) {
     %r XCTAssertEqual($dictionary.count, 2U);
     %o XCTAssertEqual($dictionary.count, 3U);
 
+    XCTAssertEqualObjects($dictionary[@"0"], $v0);
+
     [$allDictionaries removeObjectForKey:@"0"];
     %r XCTAssertEqual($dictionary.count, 1U);
     %o XCTAssertEqual($dictionary.count, 2U);
 
-    XCTAssertEqualObjects($dictionary[0], $v1);
-    %o XCTAssertEqualObjects($dictionary[1], NSNull.null);
+    XCTAssertNil($dictionary[@"0"]);
 }
 
 - (void)testRemoveObjects {
@@ -332,12 +320,13 @@ static double average(NSDictionary *dictionary) {
     %r XCTAssertEqual($dictionary.count, 2U);
     %o XCTAssertEqual($dictionary.count, 3U);
 
+    XCTAssertEqualObjects($dictionary[@"0"], $v0);
+
     [$allDictionaries removeObjectsForKeys:@[@"0"]];
     %r XCTAssertEqual($dictionary.count, 1U);
     %o XCTAssertEqual($dictionary.count, 2U);
 
-    XCTAssertEqualObjects($dictionary[0], $v1);
-    %o XCTAssertEqualObjects($dictionary[1], NSNull.null);
+    XCTAssertNil($dictionary[@"0"]);
 }
 
 - (void)testUpdateObjects {
@@ -353,19 +342,6 @@ static double average(NSDictionary *dictionary) {
 
     %r XCTAssertNotEqualObjects($dictionary[@"1"], $v1);
     %o XCTAssertNotEqualObjects($dictionary[@"2"], NSNull.null);
-}
-
-- (void)testIndexOfObject {
-    XCTAssertEqual(NSNotFound, [$dictionary indexOfObject:$v0]);
-
-    RLMAssertThrowsWithReason([$dictionary indexOfObject:$wrong], ^n @"Invalid value '$wdesc' of type '$wtype' for expected type '$type'");
-
-    %r RLMAssertThrowsWithReason([$dictionary indexOfObject:NSNull.null], ^n @"Invalid value '<null>' of type 'NSNull' for expected type '$type'");
-    %o XCTAssertEqual(NSNotFound, [$dictionary indexOfObject:NSNull.null]);
-
-    [self addObjects];
-
-    XCTAssertEqual(1U, [$dictionary indexOfObject:$v1]);
 }
 
 - (void)testIndexOfObjectSorted {
