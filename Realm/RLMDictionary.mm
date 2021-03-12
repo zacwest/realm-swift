@@ -208,16 +208,10 @@
 }
 
 - (void)setValue:(nullable id)value forKey:(nonnull NSString *)key {
-    if ([key isEqualToString:@"self"]) {
-        RLMDictionaryValidateMatchingObjectType(self, key, value);
-        _backingCollection[key] = value;
-    }
-    else if (_type == RLMPropertyTypeObject) {
+    RLMDictionaryValidateMatchingObjectType(self, key, value);
+    changeDictionary(self, ^{
         [_backingCollection setValue:value forKey:key];
-    }
-    else {
-        [self setValue:value forUndefinedKey:key];
-    }
+    });
 }
 
 - (RLMResults *)sortedResultsUsingDescriptors:(nonnull NSArray<RLMSortDescriptor *> *)properties {
@@ -395,7 +389,7 @@ void RLMDictionaryValidateMatchingObjectType(__unsafe_unretained RLMDictionary *
     if (!value) {
         return;
     }
-    if (dictionary->_type != RLMPropertyTypeObject) {
+    if ((dictionary->_type == RLMPropertyTypeAny) || (dictionary->_type != RLMPropertyTypeObject)) {
         if (!RLMValidateValue(value, dictionary->_type, dictionary->_optional, false, nil)) {
             @throw RLMException(@"Invalid value '%@' of type '%@' for expected type '%@%s'.",
                                 value, [value class], RLMTypeToString(dictionary->_type),

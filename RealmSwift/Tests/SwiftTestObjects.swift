@@ -204,6 +204,7 @@ class SwiftMapObject: Object {
     let decimal = Map<String, Decimal128>()
     let objectId = Map<String, ObjectId>()
     let uuid = Map<String, UUID>()
+    let any = Map<String, AnyRealmValue>()
 
     let intOpt = Map<String, Int?>()
     let int8Opt = Map<String, Int8?>()

@@ -236,6 +236,16 @@ class AnyRealmValueTests: TestCase {
         XCTAssertEqual(o.anyValue.value.objectValue(SwiftStringObject.self)!.stringCol, "bye!")
     }
 
+    func testList() {
+        let o = AnyRealmTypeObject()
+        o.anyList.append(.init(.string("Hello")))
+
+        XCTAssertEqual(o.anyList[0].value.stringValue, "Hello")
+        o.anyList[0].value = .string("Bye")
+        XCTAssertEqual(o.anyList[0].value.stringValue, "Bye")
+
+    }
+
     func testAssortment() {
         // The purpose of this test is to reuse a mixed container
         // and ensure no issues exist in doing that.
@@ -455,6 +465,8 @@ class AnyRealmValueListTests<O: ObjectFactory, V: ValueFactory>: PrimitiveListTe
 
     func testFirst() {
         array.append(objectsIn: values)
+        print(array.first!.value)
+        print(values.first!.value)
         assertEqual(array.first!.value, values.first!.value)
         array.removeAll()
         XCTAssertNil(array.first)

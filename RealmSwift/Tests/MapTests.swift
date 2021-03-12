@@ -34,12 +34,18 @@ class MapTests: TestCase {
 
     func testPrimitive() {
         let obj = SwiftMapObject()
-        let valueInTest = 5
-        obj.int[String(valueInTest)] = valueInTest
-        XCTAssertEqual(obj.int.first!, 5)
-        XCTAssertEqual(obj.int.last!, 5)
-        XCTAssertEqual(obj.int[0], 5)
-        XCTAssertEqual(obj.int["5"], 5)
+//        let valueInTest = 5
+//        obj.int[String(valueInTest)] = valueInTest
+//        XCTAssertEqual(obj.int.first!, 5)
+//        XCTAssertEqual(obj.int.last!, 5)
+//        XCTAssertEqual(obj.int[0], 5)
+//        XCTAssertEqual(obj.int["5"], 5)
+
+        obj.any["key"] = .init(.string("Hello"))
+        XCTAssertEqual(obj.any["key"]?.value.stringValue, "Hello")
+
+        obj.any["key"]?.value = .string("Boo!")
+        XCTAssertEqual(obj.any["key"]?.value.stringValue, "Boo!")
         
 //        obj.int.app
 //        obj.int.append(objectsIn: [6, 7, 8] as [Int])
