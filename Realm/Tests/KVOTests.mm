@@ -52,6 +52,9 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property NSDate              *dateCol;
 @property RLMObjectId         *objectIdCol;
 @property RLMDecimal128       *decimal128Col;
+@property NSUUID              *uuidCol;
+@property id<RLMValue>         anyCol;
+
 @property KVOObject           *objectCol;
 
 @property RLMArray<RLMBool>       *boolArray;
@@ -63,6 +66,8 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property RLMArray<RLMDate>       *dateArray;
 @property RLMArray<RLMObjectId>   *objectIdArray;
 @property RLMArray<RLMDecimal128> *decimal128Array;
+@property RLMArray<RLMUUID>       *uuidArray;
+@property RLMArray<RLMValue>      *anyArray;
 @property RLMArray<KVOObject>     *objectArray;
 
 @property RLMSet<RLMBool>       *boolSet;
@@ -74,6 +79,8 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property RLMSet<RLMDate>       *dateSet;
 @property RLMSet<RLMObjectId>   *objectIdSet;
 @property RLMSet<RLMDecimal128> *decimal128Set;
+@property RLMSet<RLMUUID>       *uuidSet;
+@property RLMSet<RLMValue>      *anySet;
 @property RLMSet<KVOObject>     *objectSet;
 
 @property RLMDictionary<RLMString, RLMBool>       *boolDictionary;
@@ -141,6 +148,8 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property PlainKVOObject *objectCol;
 @property RLMObjectId    *objectIdCol;
 @property RLMDecimal128  *decimal128Col;
+@property NSUUID         *uuidCol;
+@property id<RLMValue>    anyCol;
 
 @property NSMutableArray *boolArray;
 @property NSMutableArray *intArray;
@@ -152,6 +161,8 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property NSMutableArray *objectArray;
 @property NSMutableArray *objectIdArray;
 @property NSMutableArray *decimal128Array;
+@property NSMutableArray *uuidArray;
+@property NSMutableArray *anyArray;
 
 @property NSMutableSet *boolSet;
 @property NSMutableSet *intSet;
@@ -163,6 +174,8 @@ RLM_COLLECTION_TYPE(KVOLinkObject1)
 @property NSMutableSet *objectSet;
 @property NSMutableSet *objectIdSet;
 @property NSMutableSet *decimal128Set;
+@property NSMutableSet *uuidSet;
+@property NSMutableSet *anySet;
 
 @property NSNumber<RLMInt> *optIntCol;
 @property NSNumber<RLMFloat> *optFloatCol;
@@ -773,6 +786,23 @@ public:
     }
 
     {
+        KVORecorder r(self, obj, @"uuidCol");
+        NSUUID *uuid = [NSUUID UUID];
+        obj.uuidCol = uuid;
+        AssertChanged(r, NSNull.null, uuid);
+        obj.uuidCol = nil;
+        AssertChanged(r, uuid, NSNull.null);
+    }
+
+    {
+        KVORecorder r(self, obj, @"anyCol");
+        obj.anyCol = @"abc";
+        AssertChanged(r, NSNull.null, @"abc");
+        obj.anyCol = nil;
+        AssertChanged(r, @"abc", NSNull.null);
+    }
+
+    {
         KVORecorder r(self, obj, @"intArray");
         obj.intArray = obj.intArray;
         r.refresh();
@@ -843,6 +873,20 @@ public:
     }
 
     {
+        KVORecorder r(self, obj, @"uuidArray");
+        obj.uuidArray = obj.uuidArray;
+        r.refresh();
+        r.pop_front(); // asserts that there's something to pop
+    }
+
+    {
+        KVORecorder r(self, obj, @"anyArray");
+        obj.anyArray = obj.anyArray;
+        r.refresh();
+        r.pop_front(); // asserts that there's something to pop
+    }
+
+    {
         KVORecorder r(self, obj, @"intSet");
         obj.intSet = obj.intSet;
         r.refresh();
@@ -908,6 +952,20 @@ public:
     {
         KVORecorder r(self, obj, @"objectSet");
         obj.objectSet = obj.objectSet;
+        r.refresh();
+        r.pop_front(); // asserts that there's something to pop
+    }
+
+    {
+        KVORecorder r(self, obj, @"uuidSet");
+        obj.uuidSet = obj.uuidSet;
+        r.refresh();
+        r.pop_front(); // asserts that there's something to pop
+    }
+
+    {
+        KVORecorder r(self, obj, @"anySet");
+        obj.anySet = obj.anySet;
         r.refresh();
         r.pop_front(); // asserts that there's something to pop
     }
@@ -1043,6 +1101,15 @@ public:
     }
 
     {
+        KVORecorder r(self, obj, @"uuidCol");
+        NSUUID *uuid = [NSUUID UUID];
+        [obj setValue:uuid forKey:@"uuidCol"];
+        AssertChanged(r, NSNull.null, uuid);
+        [obj setValue:nil forKey:@"uuidCol"];
+        AssertChanged(r, uuid, NSNull.null);
+    }
+
+    {
         KVORecorder r(self, obj, @"objectArray");
         [obj setValue:obj.objectArray forKey:@"objectArray"];
         r.refresh();
@@ -1162,6 +1229,23 @@ public:
         AssertChanged(r, NSNull.null, [self observableForObject:obj]);
         obj[@"objectCol"] = nil;
         AssertChanged(r, [self observableForObject:obj], NSNull.null);
+    }
+
+    {
+        KVORecorder r(self, obj, @"uuidCol");
+        NSUUID *uuid = [NSUUID UUID];
+        obj[@"uuidCol"] = uuid;
+        AssertChanged(r, NSNull.null, uuid);
+        obj[@"uuidCol"] = nil;
+        AssertChanged(r, uuid, NSNull.null);
+    }
+
+    {
+        KVORecorder r(self, obj, @"anyCol");
+        obj[@"anyCol"] = @"abc";
+        AssertChanged(r, NSNull.null, @"abc");
+        obj[@"anyCol"] = nil;
+        AssertChanged(r, @"abc", NSNull.null);
     }
 
     {
@@ -1444,13 +1528,13 @@ public:
 }
 
 // RLMArray doesn't support @count at all
-//- (void)testObserveArrayCount {
-//    KVOObject *obj = [self createObject];
-//    KVORecorder r(self, obj, @"objectArray.@count");
-//    id mutator = [obj mutableArrayValueForKey:@"objectArray"];
-//    [mutator addObject:obj];
-//    AssertChanged(r, @0, @1);
-//}
+- (void)testObserveArrayCount {
+    KVOObject *obj = [self createObject];
+    KVORecorder r(self, obj, @"objectArray.@count");
+    id mutator = [obj mutableArrayValueForKey:@"objectArray"];
+    [mutator addObject:obj];
+    AssertChanged(r, @0, @1);
+}
 @end
 
 // Run tests on an unmanaged RLMObject instance

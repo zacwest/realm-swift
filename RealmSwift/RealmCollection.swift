@@ -181,6 +181,7 @@ private func arrayType<T>(_ type: T.Type) -> RLMArray<AnyObject> {
     case is Decimal128.Type: return RLMArray(objectType: .decimal128, optional: true)
     case is ObjectId.Type:   return RLMArray(objectType: .objectId, optional: true)
     case is UUID.Type:       return RLMArray(objectType: .UUID, optional: true)
+    case is AnyRealmValue.Type: return RLMArray(objectType: .any, optional: true)
     default: fatalError("Unsupported type for List: \(type)?")
     }
 }
@@ -198,6 +199,7 @@ private func setType<T>(_ type: T.Type) -> RLMSet<AnyObject> {
     case is Decimal128.Type: return RLMSet(objectType: .decimal128, optional: true)
     case is ObjectId.Type:   return RLMSet(objectType: .objectId, optional: true)
     case is UUID.Type:       return RLMSet(objectType: .UUID, optional: true)
+    case is AnyRealmValue.Type: return RLMSet(objectType: .any, optional: false)
     default: fatalError("Unsupported type for MutableSet: \(type)?")
     }
 }
@@ -368,6 +370,22 @@ extension UUID: RealmCollectionValue {
     /// :nodoc:
     public static func _rlmDictionary() -> RLMDictionary<AnyObject, AnyObject> {
         return RLMDictionary(objectType: .UUID, optional: false)
+    }
+}
+extension AnyRealmValue: RealmCollectionValue {
+    /// :nodoc:
+    public static func _rlmArray() -> RLMArray<AnyObject> {
+        return RLMArray(objectType: .any, optional: false)
+    }
+    /// :nodoc:
+    public static func _rlmSet() -> RLMSet<AnyObject> {
+        return RLMSet(objectType: .any, optional: false)
+    }
+    /// :nodoc:
+    public static func _nilValue() -> AnyRealmValue {
+        let v = AnyRealmValue()
+        v.value = .none
+        return v
     }
 }
 

@@ -184,6 +184,17 @@ extension Decimal128: CustomObjectiveCBridgeable {
         return self
     }
 }
+extension AnyRealmValue: CustomObjectiveCBridgeable {
+    static func bridging(objCValue: Any) -> AnyRealmValue {
+        if let any = objCValue as? RLMValue {
+            return AnyRealmValue(value: any)
+        }
+        return objCValue as! AnyRealmValue
+    }
+    var objCValue: Any {
+        return ObjectiveCSupport.convert(value: self.value) ?? NSNull()
+    }
+}
 
 // MARK: AssistedObjectiveCBridgeable
 

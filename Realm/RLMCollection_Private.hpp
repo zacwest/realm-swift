@@ -95,3 +95,18 @@ template<typename Collection, typename ObjcCollection>
 id RLMManagedCollectionFromCollection(RLMClassInfo* info, realm::Obj&& obj, RLMProperty *prop);
 template<typename Fn>
 void RLMGetCollectionType(RLMProperty *prop, Fn&& func);
+
+static bool canAggregate(RLMPropertyType type, bool allowDate) {
+    switch (type) {
+        case RLMPropertyTypeInt:
+        case RLMPropertyTypeFloat:
+        case RLMPropertyTypeDouble:
+        case RLMPropertyTypeDecimal128:
+        case RLMPropertyTypeAny:
+            return true;
+        case RLMPropertyTypeDate:
+            return allowDate;
+        default:
+            return false;
+    }
+}

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 2016 Realm Inc.
+// Copyright 2021 Realm Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#import <Realm/RLMProperty_Private.h>
+#import <Foundation/Foundation.h>
 
-#import <realm/object-store/property.hpp>
+NS_ASSUME_NONNULL_BEGIN
 
-@class RLMSchema;
+@class RLMObjectBase, RLMProperty;
+@protocol RLMValue;
 
-@interface RLMProperty ()
+@interface RLMValueBase : NSObject
 
-+ (instancetype)propertyForObjectStoreProperty:(const realm::Property&)property;
+@property (nonatomic, nullable) id<RLMValue> rlmValue;
 
-- (realm::Property)objectStoreCopy:(RLMSchema *)schema;
+- (void)attachWithParent:(RLMObjectBase *)parent
+                property:(RLMProperty *)property;
 
 @end
 
-static inline bool isNullable(const realm::PropertyType& t) {
-    return t != realm::PropertyType::Mixed && is_nullable(t);
-}
+NS_ASSUME_NONNULL_END

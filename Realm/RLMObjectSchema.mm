@@ -240,6 +240,9 @@ using namespace realm;
             @throw RLMException(@"The `%@.%@` property must be marked as being optional.",
                                 [objectClass className], property.name);
         }
+        if (property.type == RLMPropertyTypeAny) {
+            property.optional = NO;
+        }
     }
 
     return propArray;

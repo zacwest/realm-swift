@@ -33,6 +33,7 @@
 #import "RLMSwiftCollectionBase.h"
 #import "RLMUtil.hpp"
 #import "RLMUUID_Private.hpp"
+#import "RLMValueBase.h"
 
 #import <realm/object-store/results.hpp>
 #import <realm/object-store/property.hpp>
@@ -81,7 +82,10 @@ template<>
 bool is_null(realm::Decimal128 const& v) {
     return v.is_null();
 }
-
+template<>
+bool is_null(realm::Mixed const& v) {
+    return v.is_null();
+}
 template<>
 bool is_null(realm::UUID const&) {
     return false;
@@ -287,6 +291,18 @@ void setValue(__unsafe_unretained RLMObjectBase *const obj, ColKey key,
     }
 }
 
+void setValue(__unsafe_unretained RLMObjectBase *const obj, ColKey key,
+              __unsafe_unretained id<RLMValue> const value) {
+    RLMTranslateError([&] {
+        if (value) {
+            obj->_row.set(key, RLMObjcToMixed(value, obj->_realm, realm::CreatePolicy::SetLink));
+        }
+        else {
+            setNull(obj->_row, key);
+        }
+    });
+}
+
 RLMLinkingObjects *getLinkingObjects(__unsafe_unretained RLMObjectBase *const obj,
                                      __unsafe_unretained RLMProperty *const property) {
     RLMVerifyAttached(obj);
@@ -379,7 +395,7 @@ id managedGetter(RLMProperty *prop, const char *type) {
         case RLMPropertyTypeObjectId:
             return makeWrapperGetter<realm::ObjectId>(index, prop.optional);
         case RLMPropertyTypeAny:
-            @throw RLMException(@"Cannot create accessor class for schema with Mixed properties");
+            return makeBoxedGetter<realm::Mixed>(index);
         case RLMPropertyTypeLinkingObjects:
             return ^(__unsafe_unretained RLMObjectBase *const obj) {
                 return getLinkingObjects(obj, prop);
@@ -440,7 +456,7 @@ id managedSetter(RLMProperty *prop, const char *type) {
         case RLMPropertyTypeString:         return makeSetter<NSString *>(prop);
         case RLMPropertyTypeDate:           return makeSetter<NSDate *>(prop);
         case RLMPropertyTypeData:           return makeSetter<NSData *>(prop);
-        case RLMPropertyTypeAny:            return nil;
+        case RLMPropertyTypeAny:            return makeSetter<id<RLMValue>>(prop);
         case RLMPropertyTypeLinkingObjects: return nil;
         case RLMPropertyTypeObject:         return makeSetter<RLMObjectBase *>(prop);
         case RLMPropertyTypeObjectId:       return makeSetter<RLMObjectId *>(prop);
@@ -762,7 +778,9 @@ id RLMAccessorContext::propertyValue(__unsafe_unretained id const obj, size_t pr
         if (prop.collection) {
             return static_cast<RLMSwiftCollectionBase *>(object_getIvar(obj, prop.swiftIvar))._rlmCollection;
         }
-        else { // optional
+        else if (prop.type == RLMPropertyTypeAny) { // mixed
+            value = static_cast<RLMValueBase *>(object_getIvar(obj, prop.swiftIvar)).rlmValue;
+        } else { // optional
             value = RLMGetOptional(static_cast<RLMOptionalBase *>(object_getIvar(obj, prop.swiftIvar)));
         }
     }
@@ -868,8 +886,8 @@ realm::UUID RLMAccessorContext::unbox(id v, CreatePolicy, ObjKey) {
     return RLMObjcToUUID(v);
 }
 template<>
-realm::Mixed RLMAccessorContext::unbox(id, CreatePolicy, ObjKey) {
-    REALM_UNREACHABLE();
+realm::Mixed RLMAccessorContext::unbox(id v, CreatePolicy p, ObjKey) {
+    return RLMObjcToMixed(v, _realm, p);
 }
 
 template<typename Fn>
@@ -991,6 +1009,7 @@ RLMAccessorContext::createObject(id value, realm::CreatePolicy policy,
         object_setClass(objBase, _info.rlmObjectSchema.accessorClass);
         RLMInitializeSwiftAccessorGenerics(objBase);
     }
+
     return {*outObj, false};
 }
 

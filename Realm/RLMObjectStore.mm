@@ -33,6 +33,7 @@
 #import "RLMSwiftCollectionBase.h"
 #import "RLMSwiftSupport.h"
 #import "RLMUtil.hpp"
+#import "RLMValueBase.h"
 
 #import <realm/object-store/object_store.hpp>
 #import <realm/object-store/results.hpp>
@@ -74,7 +75,7 @@ static inline void RLMVerifyRealmRead(__unsafe_unretained RLMRealm *const realm)
     }
 }
 
-static inline void RLMVerifyInWriteTransaction(__unsafe_unretained RLMRealm *const realm) {
+inline void RLMVerifyInWriteTransaction(__unsafe_unretained RLMRealm *const realm) {
     RLMVerifyRealmRead(realm);
     // if realm is not writable throw
     if (!realm.inWriteTransaction) {
@@ -114,7 +115,7 @@ void RLMInitializeSwiftAccessorGenerics(__unsafe_unretained RLMObjectBase *const
             id managedCollection = [[cls alloc] initWithParent:object property:prop];
             [ivar set_rlmCollection:managedCollection];
         }
-        else {
+        else if (prop.optional) {
             id ivar = object_getIvar(object, prop.swiftIvar);
             RLMInitializeManagedOptional(ivar, object, prop);
         }
@@ -171,6 +172,14 @@ RLMObjectBase *RLMCreateObjectInRealmWithValue(RLMRealm *realm, NSString *classN
         return value;
     }
     object->_row = std::move(obj);
+    RLMInitializeSwiftAccessorGenerics(object);
+    return object;
+}
+
+RLMObjectBase *RLMObjectFromObjLink(RLMRealm *realm, realm::ObjLink&& objLink) {
+    auto& info = realm->_info[objLink.get_table_key()];
+    RLMObjectBase *object = RLMCreateManagedAccessor(info.rlmObjectSchema.accessorClass, &info);
+    object->_row = realm.group.get_object(objLink);
     RLMInitializeSwiftAccessorGenerics(object);
     return object;
 }

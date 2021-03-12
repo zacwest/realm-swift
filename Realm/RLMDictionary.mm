@@ -380,20 +380,6 @@ static void validateDictionaryBounds(__unsafe_unretained RLMDictionary *const di
     }
 }
 
-static bool canAggregate(RLMPropertyType type, bool allowDate) {
-    switch (type) {
-        case RLMPropertyTypeInt:
-        case RLMPropertyTypeFloat:
-        case RLMPropertyTypeDouble:
-        case RLMPropertyTypeDecimal128:
-            return true;
-        case RLMPropertyTypeDate:
-            return allowDate;
-        default:
-            return false;
-    }
-}
-
 void RLMDictionaryValidateMatchingObjectType(__unsafe_unretained RLMDictionary *const dictionary,
                                              __unsafe_unretained id const key,
                                              __unsafe_unretained id const value) {

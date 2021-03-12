@@ -26,6 +26,7 @@
 #import "RLMRealm_Private.hpp"
 #import "RLMSet_Private.hpp"
 #import "RLMSwiftCollectionBase.h"
+#import "RLMValueBase.h"
 
 #import <realm/group.hpp>
 
@@ -199,6 +200,8 @@ void RLMObservationInfo::recordObserver(realm::Obj& objectRow, RLMClassInfo *obj
     else if (auto swiftIvar = prop.swiftIvar) {
         if (auto optional = RLMDynamicCast<RLMOptionalBase>(object_getIvar(object, swiftIvar))) {
             RLMInitializeUnmanagedOptional(optional, object, prop);
+        } else if (auto value = RLMDynamicCast<RLMValueBase>(object_getIvar(object, swiftIvar))) {
+            [value attachWithParent:object property:prop];
         }
     }
 }
@@ -537,8 +540,8 @@ void RLMWillChange(std::vector<realm::BindingContext::ObserverState> const& obse
         NSMutableIndexSet *indexes = [NSMutableIndexSet new];
         for (auto const& o : observed) {
             forEach(o, [&](realm::ColKey colKey, auto const& change, RLMObservationInfo *info) {
-                    info->willChange(info->columnName(colKey),
-                                     convert(change.kind), convert(change.indices, indexes));
+                info->willChange(info->columnName(colKey),
+                                 convert(change.kind), convert(change.indices, indexes));
             });
         }
     }
@@ -554,7 +557,7 @@ void RLMDidChange(std::vector<realm::BindingContext::ObserverState> const& obser
         NSMutableIndexSet *indexes = [NSMutableIndexSet new];
         for (auto const& o : reverse(observed)) {
             forEach(o, [&](realm::ColKey col, auto const& change, RLMObservationInfo *info) {
-                    info->didChange(info->columnName(col), convert(change.kind), convert(change.indices, indexes));
+                info->didChange(info->columnName(col), convert(change.kind), convert(change.indices, indexes));
             });
         }
     }
