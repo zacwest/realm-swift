@@ -53,6 +53,36 @@
     }
 }
 
+-(void)testPopulateEmptyRLMValueDictionary {
+    RLMRealm *realm = [self realmWithTestPath];
+
+    [realm beginWriteTransaction];
+    DictionaryPropertyObject *dict = [DictionaryPropertyObject createInRealm:realm withValue:@[@{}, @{}]];
+    XCTAssertNotNil(dict.stringDictionary, @"Should be able to get an empty dictionary");
+    XCTAssertEqual(dict.stringDictionary.count, 0U, @"Should start with no dictionary elements");
+
+    StringObject *obj = [[StringObject alloc] init];
+    obj.stringCol = @"a";
+
+    dict.anyDictionary[@"one"] = @"Hey";
+    dict.anyDictionary[@"two"] = [StringObject createInRealm:realm withValue:@[@"b"]];
+    dict.anyDictionary[@"three"] = @123;
+
+    [realm commitWriteTransaction];
+
+    for (id<RLMValue> element in dict.anyDictionary) {
+        NSLog(@"%@", element);
+    }
+
+    XCTAssertEqual(dict.anyDictionary.count, 3U, @"Should have three elements in the dictionary");
+    XCTAssertEqualObjects(dict.anyDictionary[@"one"], @"Hey", @"First element should have property value 'Hey'");
+    XCTAssertEqualObjects([dict.anyDictionary[@"two"] stringCol], @"b", @"Second element should have property value 'b'");
+    XCTAssertEqualObjects(dict.anyDictionary[@"three"], @123, @"Third element should have property value '123'");
+
+    RLMDictionary *dictionaryProp = dict.anyDictionary;
+    RLMAssertThrowsWithReasonMatching([dictionaryProp setObject:obj forKey:@"four"], @"write transaction");
+}
+
 -(void)testModifyDetatchedDictionary {
     RLMRealm *realm = [self realmWithTestPath];
 

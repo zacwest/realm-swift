@@ -127,7 +127,7 @@ void RLMCollectionValidateMatchingObjectType(__unsafe_unretained RLMDictionary *
         @throw RLMException(@"Invalid nil value for collection of '%@'.",
                             collection.objectClassName ?: RLMTypeToString(collection.keyType));
     }
-    if (((RLMDictionary *)collection).keyType != RLMPropertyTypeObject) {
+    if (((RLMDictionary *)collection).type != RLMPropertyTypeObject) {
         if (!RLMValidateValue(value, collection.type, collection.optional, false, nil)) {
             @throw RLMException(@"Invalid value '%@' of type '%@' for expected type '%@%s'.",
                                 value, [value class], RLMTypeToString(collection.type),

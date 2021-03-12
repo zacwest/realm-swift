@@ -136,7 +136,7 @@ RLM_COLLECTION_TYPE(EmbeddedIntObject)
 @interface MixedObject: RLMObject
 @property id<RLMValue> anyCol;
 @property RLMArray<RLMValue> *anyArray;
-
+@property RLMDictionary<RLMString, RLMValue> *anyDictionary;
 @end
 
 #pragma mark AllTypesObject
@@ -510,6 +510,7 @@ RLM_COLLECTION_TYPE(CircleObject);
 @property RLM_GENERIC_DICTIONARY(RLMString, StringObject) *stringDictionary;
 @property RLM_GENERIC_DICTIONARY(RLMString, IntObject) *intDictionary;
 @property RLM_GENERIC_DICTIONARY(RLMString, RLMString) *primitiveStringDictionary;
+@property RLM_GENERIC_DICTIONARY(RLMString, RLMValue) *anyDictionary;
 
 @end
 
