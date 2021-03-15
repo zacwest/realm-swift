@@ -1877,7 +1877,7 @@
     RLMAssertThrowsWithReason([realm setAutorefresh:YES],
                               @"Auto-refresh cannot be enabled for frozen Realms.");
     RLMAssertThrowsWithReason([realm beginWriteTransaction],
-                              @"Can't perform transactions on a frozen Realm");
+                              @"Can't perform write transactions on a frozen Realm.");
     RLMAssertThrowsWithReason([realm addNotificationBlock:^(RLMNotification, RLMRealm *) { }],
                               @"Frozen Realms do not change and do not have change notifications.");
     RLMAssertThrowsWithReason(([[IntObject allObjectsInRealm:realm]

@@ -131,7 +131,7 @@ NSString *RLMRealmPathForFile(NSString *fileName) {
 }
 
 - (NSURL *)fileURL {
-    if (_config.in_memory) {
+    if (_config.is_in_memory) {
         return nil;
     }
     return [NSURL fileURLWithPath:@(_config.path.c_str())];
@@ -144,11 +144,11 @@ NSString *RLMRealmPathForFile(NSString *fileName) {
     }
 
     RLMNSStringToStdString(_config.path, path);
-    _config.in_memory = false;
+    _config.is_in_memory = false;
 }
 
 - (NSString *)inMemoryIdentifier {
-    if (!_config.in_memory) {
+    if (!_config.is_in_memory) {
         return nil;
     }
     return [@(_config.path.c_str()) lastPathComponent];
@@ -161,7 +161,7 @@ NSString *RLMRealmPathForFile(NSString *fileName) {
     _config.sync_config = nullptr;
 
     RLMNSStringToStdString(_config.path, [NSTemporaryDirectory() stringByAppendingPathComponent:inMemoryIdentifier]);
-    _config.in_memory = true;
+    _config.is_in_memory = true;
 }
 
 - (NSData *)encryptionKey {
@@ -190,7 +190,7 @@ NSString *RLMRealmPathForFile(NSString *fileName) {
 }
 
 - (BOOL)readOnly {
-    return _config.immutable() || _config.read_only_alternative();
+    return _config.is_immutable() || _config.is_read_only_alternative();
 }
 
 static bool isSync(realm::Realm::Config const& config) {
@@ -319,7 +319,7 @@ static bool isSync(realm::Realm::Config const& config) {
 
 - (void)setShouldCompactOnLaunch:(RLMShouldCompactOnLaunchBlock)shouldCompactOnLaunch {
     if (shouldCompactOnLaunch) {
-        if (_config.immutable()) {
+        if (_config.is_immutable()) {
             @throw RLMException(@"Cannot set `shouldCompactOnLaunch` when `readOnly` is set.");
         }
         _config.should_compact_on_launch_function = [=](size_t totalBytes, size_t usedBytes) {

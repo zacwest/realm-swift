@@ -48,7 +48,7 @@
     }
 
     NSAssert(user.identifier, @"Cannot call this method on a user that doesn't have an identifier.");
-    self.config.in_memory = false;
+    self.config.is_in_memory = false;
     self.config.sync_config = std::make_shared<realm::SyncConfig>([syncConfiguration rawConfiguration]);
 
     if (syncConfiguration.customFileURL) {

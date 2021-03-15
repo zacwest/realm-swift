@@ -136,8 +136,8 @@ void RLMThrowResultsError(NSString *aggregateMethod) {
 }
 
 static inline void RLMResultsValidateInWriteTransaction(__unsafe_unretained RLMResults *const ar) {
-    ar->_realm->_realm->verify_thread();
-    ar->_realm->_realm->verify_in_write();
+    ar->_realm->_realm->verify_is_on_thread();
+    ar->_realm->_realm->verify_is_in_write_transaction();
 }
 
 - (BOOL)isInvalidated {

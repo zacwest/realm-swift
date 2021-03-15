@@ -1400,7 +1400,7 @@ static IntObject *managedObject() {
     IntObject *frozen = obj.freeze;
 
     RLMRealm *realm = frozen.realm;
-    RLMAssertThrowsWithReason([realm beginWriteTransaction], @"Can't perform transactions on a frozen Realm");
+    RLMAssertThrowsWithReason([realm beginWriteTransaction], @"Can't perform write transactions on a frozen Realm.");
     XCTAssertThrows(frozen.intCol = 1);
 }
 

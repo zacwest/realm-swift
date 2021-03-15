@@ -527,7 +527,7 @@ class RealmCollectionTypeTests: TestCase {
         XCTAssertTrue(frozen.isFrozen)
 
         let frozenRealm = frozen.realm!
-        assertThrows(try! frozenRealm.write {}, reason: "Can't perform transactions on a frozen Realm")
+        assertThrows(try! frozenRealm.write {}, reason: "Can't perform write transactions on a frozen Realm.")
 
         let live = frozen.thaw()
         XCTAssertFalse(live!.isFrozen)

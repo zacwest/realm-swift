@@ -165,7 +165,7 @@ NSData *RLMRealmValidatedEncryptionKey(NSData *key) {
 
 - (void)verifyThread {
     try {
-        _realm->verify_thread();
+        _realm->verify_is_on_thread();
     }
     catch (std::exception const& e) {
         @throw RLMException(e);
@@ -173,11 +173,11 @@ NSData *RLMRealmValidatedEncryptionKey(NSData *key) {
 }
 
 - (BOOL)inWriteTransaction {
-    return _realm->is_in_transaction();
+    return _realm->is_in_write_transaction();
 }
 
 - (realm::Group &)group {
-    return _realm->read_group();
+    return _realm->get_group();
 }
 
 - (BOOL)autorefresh {
@@ -392,11 +392,11 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
         if (cache || dynamic) {
             if (RLMRealm *realm = RLMGetThreadLocalCachedRealmForPath(config.path, cacheKey)) {
                 auto const& old_config = realm->_realm->config();
-                if (old_config.immutable() != config.immutable()
-                    || old_config.read_only_alternative() != config.read_only_alternative()) {
+                if (old_config.is_immutable() != config.is_immutable()
+                    || old_config.is_read_only_alternative() != config.is_read_only_alternative()) {
                     @throw RLMException(@"Realm at path '%s' already opened with different read permissions", config.path.c_str());
                 }
-                if (old_config.in_memory != config.in_memory) {
+                if (old_config.is_in_memory != config.is_in_memory) {
                     @throw RLMException(@"Realm at path '%s' already opened with different inMemory settings", config.path.c_str());
                 }
                 if (realm->_dynamic != dynamic) {
@@ -498,7 +498,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
         RLMRealmCreateAccessors(realm.schema);
 
         if (!readOnly) {
-            REALM_ASSERT(!realm->_realm->is_in_read_transaction());
+            REALM_ASSERT(!realm->_realm->is_in_any_transaction());
 
             if (s_set_skip_backup_attribute) {
                 RLMAddSkipBackupAttributeToItemAtPath(config.path + ".management");
@@ -528,7 +528,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 
 - (void)verifyNotificationsAreSupported:(bool)isCollection {
     [self verifyThread];
-    if (_realm->config().immutable()) {
+    if (_realm->config().is_immutable()) {
         @throw RLMException(@"Read-only Realms do not change and do not have change notifications.");
     }
     if (_realm->is_frozen()) {
@@ -537,7 +537,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
     if (!_realm->can_deliver_notifications()) {
         @throw RLMException(@"Can only add notification blocks from within runloops.");
     }
-    if (isCollection && _realm->is_in_transaction()) {
+    if (isCollection && _realm->is_in_write_transaction()) {
         @throw RLMException(@"Cannot register notification blocks from within write transactions.");
     }
 }
@@ -548,7 +548,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
     }
     [self verifyNotificationsAreSupported:false];
 
-    _realm->read_group();
+    _realm->get_group();
 
     if (!_notificationHandlers) {
         _notificationHandlers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
@@ -562,7 +562,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 }
 
 - (void)sendNotifications:(RLMNotification)notification {
-    NSAssert(!_realm->config().immutable(), @"Read-only realms do not have notifications");
+    NSAssert(!_realm->config().is_immutable(), @"Read-only realms do not have notifications");
     if (_sendingNotifications) {
         return;
     }
@@ -605,7 +605,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 
 - (BOOL)beginWriteTransactionWithError:(NSError **)error {
     try {
-        _realm->begin_transaction();
+        _realm->begin_write_transaction();
         return YES;
     }
     catch (...) {
@@ -655,7 +655,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 - (BOOL)transactionWithoutNotifying:(NSArray<RLMNotificationToken *> *)tokens block:(__attribute__((noescape)) void(^)(void))block error:(NSError **)error {
     [self beginWriteTransactionWithError:error];
     block();
-    if (_realm->is_in_transaction()) {
+    if (_realm->is_in_write_transaction()) {
         return [self commitWriteTransactionWithoutNotifying:tokens error:error];
     }
     return YES;
@@ -671,7 +671,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 }
 
 - (void)invalidate {
-    if (_realm->is_in_transaction()) {
+    if (_realm->is_in_write_transaction()) {
         NSLog(@"WARNING: An RLMRealm instance was invalidated during a write "
               "transaction and all pending changes have been rolled back.");
     }
@@ -726,7 +726,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
     // up cached state and send invalidated notifications when that happens, so
     // explicitly end it first unless we're in a write transaction (in which
     // case compact() will throw an exception)
-    if (!_realm->is_in_transaction()) {
+    if (!_realm->is_in_write_transaction()) {
         [self invalidate];
     }
 
@@ -740,7 +740,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
 
 - (void)dealloc {
     if (_realm) {
-        if (_realm->is_in_transaction()) {
+        if (_realm->is_in_write_transaction()) {
             [self cancelWriteTransaction];
             NSLog(@"WARNING: An RLMRealm instance was deallocated during a write transaction and all "
                   "pending changes have been rolled back. Make sure to retain a reference to the "
@@ -964,7 +964,7 @@ REALM_NOINLINE static void translateSharedGroupOpenException(NSError **error) {
         RLMRealm *realm = [[RLMRealm alloc] initPrivate];
         realm->_realm = _realm->freeze();
         realm->_realm->set_schema_subset(_realm->schema());
-        realm->_realm->read_group();
+        realm->_realm->get_group();
         realm->_dynamic = _dynamic;
         realm->_schema = _schema;
         realm->_info = RLMSchemaInfo(realm);

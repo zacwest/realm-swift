@@ -1041,7 +1041,7 @@ class ObjectTests: TestCase {
 
         let frozenObj = obj.freeze()
         XCTAssertTrue(frozenObj.isFrozen)
-        assertThrows(try! frozenObj.realm!.write {}, reason: "Can't perform transactions on a frozen Realm")
+        assertThrows(try! frozenObj.realm!.write {}, reason: "Can't perform write transactions on a frozen Realm.")
 
         let liveObj = frozenObj.thaw()!
         XCTAssertFalse(liveObj.isFrozen)
