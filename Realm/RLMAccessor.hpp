@@ -64,7 +64,7 @@ struct RLMStatelessAccessorContext {
     id box(realm::util::Optional<realm::UUID> v) { return v ? box(*v) : NSNull.null; }
 
     template<typename T>
-    T unbox(id v);
+    static T unbox(id v);
 
     template<typename Func>
     void enumerate_collection(__unsafe_unretained const id v, Func&& func) {
