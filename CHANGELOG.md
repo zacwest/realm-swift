@@ -57,6 +57,9 @@ x.y.z Release notes (yyyy-MM-dd)
   dictionary but did not actually delete the objects in the dictionary (since v10.8.0).
 * AnyRealmValue enum values are now supported in more places when creating
   objects.
+* Declaring a property as `RealmProperty<AnyRealmValue?>` will now report an
+  error during schema discovery rather than doing broken things when the
+  property is used.
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
