@@ -1085,7 +1085,7 @@ RLMAccessorContext::createObject(id value, realm::CreatePolicy policy,
         }
 
         object_setClass(objBase, _info.rlmObjectSchema.accessorClass);
-        RLMInitializeSwiftAccessorGenerics(objBase);
+        RLMInitializeSwiftAccessor(objBase, true);
     }
 
     return {*outObj, false};
@@ -1147,8 +1147,13 @@ bool RLMStatelessAccessorContext::is_same_dictionary(realm::object_store::Dictio
                                                      __unsafe_unretained id const v) const noexcept {
     return [v respondsToSelector:@selector(isBackedByDictionary:)] && [v isBackedByDictionary:dict];
 }
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation RLMManagedPropertyAccessor
+// Most types don't need to distinguish between promote and init so provide a default
++ (void)promote:(RLMProperty *)property on:(RLMObjectBase *)parent {
+    [self initialize:property on:parent];
+}
 @end
 #pragma clang diagnostic pop
