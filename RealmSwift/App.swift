@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 import Foundation
+import Combine
 import Realm
 import Realm.Private
 
@@ -155,9 +156,6 @@ extension App {
         self.__setASAuthorizationControllerDelegateFor(controller)
     }
 }
-
-#if canImport(Combine)
-import Combine
 
 /// :nodoc:
 @available(OSX 10.15, watchOS 6.0, iOS 13.0, iOSApplicationExtension 13.0, OSXApplicationExtension 10.15, tvOS 13.0, macCatalyst 13.0, macCatalystApplicationExtension 13.0, *)
@@ -476,7 +474,6 @@ public extension PushClient {
         }
     }
 }
-#endif // canImport(Combine)
 
 public extension APIKeyAuth {
     /**

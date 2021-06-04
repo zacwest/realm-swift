@@ -16,7 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#if canImport(SwiftUI) && canImport(Combine) && swift(>=5.3.1) && (REALM_HAVE_COMBINE || !SWIFT_PACKAGE)
 import XCTest
 import RealmSwift
 import SwiftUI
@@ -237,4 +236,3 @@ class SwiftUITests: TestCase {
         XCTAssertEqual(binding.wrappedValue, "baz")
     }
 }
-#endif

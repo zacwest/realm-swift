@@ -18,7 +18,6 @@
 
 import Foundation
 
-#if canImport(SwiftUI) && canImport(Combine) && swift(>=5.3.1) && (REALM_HAVE_COMBINE || !SWIFT_PACKAGE)
 import SwiftUI
 import Combine
 import Realm
@@ -576,10 +575,3 @@ extension SwiftUIKVO {
         }
     }
 }
-#else
-internal final class SwiftUIKVO {
-    static func removeObservers(object: NSObject) {
-        // noop
-    }
-}
-#endif

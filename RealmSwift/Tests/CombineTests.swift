@@ -16,7 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#if canImport(Combine)
 import XCTest
 import Combine
 import RealmSwift
@@ -1290,5 +1289,3 @@ class AnyRealmCollectionPublisherTests: TestCase {
         return CombineCollectionPublisherTests<AnyRealmCollection<SwiftIntObject>>.testSuite("AnyRealmCollection")
     }
 }
-
-#endif // canImport(Combine)

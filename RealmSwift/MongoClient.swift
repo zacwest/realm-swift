@@ -16,6 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+import Combine
 import Foundation
 import Realm
 import Realm.Private
@@ -729,9 +730,6 @@ private class ChangeEventDelegateProxy: RLMChangeEventDelegate {
     }
 }
 
-#if canImport(Combine)
-import Combine
-
 @available(OSX 10.15, watchOS 6.0, iOS 13.0, iOSApplicationExtension 13.0, OSXApplicationExtension 10.15, tvOS 13.0, *)
 extension Publishers {
     class WatchSubscription<S: Subscriber>: ChangeEventDelegate, Subscription where S.Input == AnyBSON, S.Failure == Error {
@@ -1087,5 +1085,3 @@ public extension MongoCollection {
         return Future { self.findOneAndDelete(filter: filter, $0) }
     }
 }
-
-#endif // canImport(Combine)

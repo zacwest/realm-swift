@@ -16,6 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+import Combine
 import Realm
 import Realm.Private
 
@@ -248,10 +249,6 @@ public typealias Provider = RLMIdentityProvider
     }
 }
 
-#if canImport(Combine)
-import Combine
-#endif
-
 /// Structure providing an interface to call a MongoDB Realm function with the provided name and arguments.
 ///
 ///     user.functions.sum([1, 2, 3, 4, 5]) { sum, error in
@@ -311,7 +308,6 @@ import Combine
         }
     }
 
-    #if canImport(Combine)
     /// The implementation of @dynamicMemberLookup that allows for dynamic remote function calls.
     @available(OSX 10.15, watchOS 6.0, iOS 13.0, iOSApplicationExtension 13.0, OSXApplicationExtension 10.15, tvOS 13.0, macCatalyst 13.0, macCatalystApplicationExtension 13.0, *)
     public subscript(dynamicMember string: String) -> ([AnyBSON]) -> Future<AnyBSON, Error> {
@@ -319,7 +315,6 @@ import Combine
             return Future<AnyBSON, Error> { self[dynamicMember: string](arguments, $0) }
         }
     }
-    #endif
 }
 
 public extension User {
@@ -583,7 +578,6 @@ extension Realm {
     }
 }
 
-#if canImport(Combine)
 @available(OSX 10.15, watchOS 6.0, iOS 13.0, iOSApplicationExtension 13.0, OSXApplicationExtension 10.15, tvOS 13.0, macCatalyst 13.0, macCatalystApplicationExtension 13.0, *)
 public extension User {
     /// Refresh a user's custom data. This will, in effect, refresh the user's auth session.
@@ -695,7 +689,6 @@ extension User: ObservableObject {
         return UserPublisher(self)
     }
 }
-#endif
 
 public extension User {
     /// Refresh a user's custom data. This will, in effect, refresh the user's auth session.
