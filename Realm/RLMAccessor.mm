@@ -20,6 +20,7 @@
 
 #import "RLMArray_Private.hpp"
 #import "RLMDictionary_Private.hpp"
+#import "RLMObjectBase_Private.h"
 #import "RLMObjectId_Private.hpp"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMObjectStore.h"
@@ -94,20 +95,69 @@ bool isNull(realm::UUID const&) {
 template<typename T>
 T get(__unsafe_unretained RLMObjectBase *const obj, NSUInteger index) {
     RLMVerifyAttached(obj);
-    return obj->_row.get<T>(getProperty(obj, index).column_key);
+    auto& prop = getProperty(obj, index);
+    if (obj.tracingModeEnabled) {
+        if (obj.tracingKeyPaths == nil) {
+            obj.tracingKeyPaths = [NSMutableArray arrayWithObject:@(prop.name.c_str())];
+        } else {
+            [((NSMutableArray *)obj.tracingKeyPaths) addObject:@(prop.name.c_str())];
+        }
+    }
+    return obj->_row.get<T>(prop.column_key);
 }
 
 template<typename T>
 id getBoxed(__unsafe_unretained RLMObjectBase *const obj, NSUInteger index) {
-    RLMVerifyAttached(obj);
-    auto& prop = getProperty(obj, index);
-    RLMAccessorContext ctx(obj, &prop);
-    auto value = obj->_row.get<T>(prop.column_key);
-    return isNull(value) ? nil : ctx.box(std::move(value));
+    if (obj.tracingModeEnabled) {
+        RLMVerifyAttached(obj);
+        auto& prop = getProperty(obj, index);
+        RLMAccessorContext ctx(obj, &prop);
+        auto value = obj->_row.get<T>(prop.column_key);
+        if (obj.tracingKeyPaths == nil) {
+            obj.tracingKeyPaths = [NSMutableArray arrayWithObject:@(prop.name.c_str())];
+        } else {
+            [((NSMutableArray *)obj.tracingKeyPaths) addObject:@(prop.name.c_str())];
+        }
+        if (isNull(value) && (prop.type & realm::PropertyType::Object) == realm::PropertyType::Object) {
+            Class nestedClass = [RLMSchema classForString:@(prop.object_type.c_str())];
+            RLMObjectBase *nestedObject = [[nestedClass alloc] init];
+            nestedObject.tracingKeyPaths = obj.tracingKeyPaths;
+            RLMObjectSchema *schema = [[obj->_realm schema] schemaForClassName:@(prop.object_type.c_str())];
+            if (schema.isEmbedded) {
+                [obj setValue:nestedObject forKey:@(prop.name.c_str())];
+            } else {
+                [obj->_realm addObject:(id)nestedObject];
+            }
+            RLMInitializeSwiftAccessor(nestedObject, false);
+            [nestedObject enableTracingMode];
+            return nestedObject;
+        } else if ((prop.type & realm::PropertyType::Object) == realm::PropertyType::Object) {
+            RLMObjectBase *nestedObject = ctx.box(std::move(value));
+            [nestedObject enableTracingMode];
+            nestedObject.tracingKeyPaths = obj.tracingKeyPaths;
+            return nestedObject;
+        } else {
+            return isNull(value) ? nil : ctx.box(std::move(value));
+        }
+    } else {
+        RLMVerifyAttached(obj);
+        auto& prop = getProperty(obj, index);
+        RLMAccessorContext ctx(obj, &prop);
+        auto value = obj->_row.get<T>(prop.column_key);
+        return isNull(value) ? nil : ctx.box(std::move(value));
+    }
 }
 
 template<typename T>
 T getOptional(__unsafe_unretained RLMObjectBase *const obj, uint16_t key, bool *gotValue) {
+    if (obj.tracingModeEnabled) {
+        auto& prop = getProperty(obj, key);
+        if (obj.tracingKeyPaths == nil) {
+            obj.tracingKeyPaths = [NSMutableArray arrayWithObject:@(prop.name.c_str())];
+        } else {
+            [((NSMutableArray *)obj.tracingKeyPaths) addObject:@(prop.name.c_str())];
+        }
+    }
     auto ret = get<realm::util::Optional<T>>(obj, key);
     if (ret) {
         *gotValue = true;
@@ -201,6 +251,13 @@ id RLMCollectionClassForProperty(RLMProperty *prop, bool isManaged) {
 id<RLMCollection> getCollection(__unsafe_unretained RLMObjectBase *const obj, NSUInteger propIndex) {
     RLMVerifyAttached(obj);
     auto prop = obj->_info->rlmObjectSchema.properties[propIndex];
+    if (obj.tracingModeEnabled) {
+        if (obj.tracingKeyPaths == nil) {
+            obj.tracingKeyPaths = [NSMutableArray arrayWithObject:prop.name];
+        } else {
+            [(NSMutableArray *)obj.tracingKeyPaths addObject:prop.name];
+        }
+    }
     Class cls = RLMCollectionClassForProperty(prop, true);
     return [[cls alloc] initWithParent:obj property:prop];
 }

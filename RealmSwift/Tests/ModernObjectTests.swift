@@ -38,6 +38,18 @@ class ModernObjectTests: TestCase {
     // init() Tests are in ObjectCreationTests.swift
     // init(value:) tests are in ObjectCreationTests.swift
 
+    func testKeyPathStrings() {
+        let object = ModernAllTypesObject()
+        let realm = realmWithTestPath()
+        realm.beginWrite()
+        realm.add(object)
+        object.enableTracingMode()
+        _ = object[keyPath: \.embeddedObj?.value]
+        print(object.tracingKeyPaths)
+        realm.cancelWrite()
+        XCTAssertEqual("embeddedObj.value", object.tracingKeyPaths.joined(separator: "."))
+    }
+
     func testObjectSchema() {
         let object = ModernAllTypesObject()
         let schema = object.objectSchema

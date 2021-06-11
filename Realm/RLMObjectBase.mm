@@ -84,6 +84,10 @@ static bool maybeInitObjectSchemaForUnmanaged(RLMObjectBase *obj) {
     return self;
 }
 
+- (void)enableTracingMode {
+    self.tracingModeEnabled = YES;
+}
+
 - (void)dealloc {
     // This can't be a unique_ptr because associated objects are removed
     // *after* c++ members are destroyed and dealloc is called, and we need it

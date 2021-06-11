@@ -157,7 +157,11 @@ public struct Persisted<Value: _Persistable> {
                 storage = .managedCached(value: v, key: key)
             }
             return v
-        case let .managedCached(value, _):
+        case let .managedCached(value, key):
+            if object.tracingModeEnabled {
+                let name = RLMObjectBaseObjectSchema(object)!.properties[Int(key)].name
+                object.tracingKeyPaths.append(name)
+            }
             return value
         }
     }

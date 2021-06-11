@@ -44,6 +44,7 @@ class ModernAllTypesObject: Object {
     @Persisted var uuidCol: UUID
     @Persisted var intEnumCol: ModernIntEnum
     @Persisted var stringEnumCol: ModernStringEnum
+    @Persisted var embeddedObj: ModernEmbeddedTreeObject1?
 
     @Persisted var optIntCol: Int?
     @Persisted var optInt8Col: Int8?

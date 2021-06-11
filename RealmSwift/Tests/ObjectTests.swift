@@ -64,6 +64,19 @@ class ObjectTests: TestCase {
         }
     }
 
+    func testKeyPathStrings() {
+        let object = SwiftObject()
+        let realm = realmWithTestPath()
+        realm.beginWrite()
+        realm.add(object)
+        object.enableTracingMode()
+        _ = object[keyPath: \.objectCol?.intEnumCol]
+        print(object.tracingKeyPaths)
+        realm.cancelWrite()
+        XCTAssertEqual("objectCol.intEnumCol", object.tracingKeyPaths.joined(separator: "."))
+        
+    }
+
     func testObjectSchema() {
         let object = SwiftObject()
         let schema = object.objectSchema
