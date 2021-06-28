@@ -601,6 +601,9 @@ void addMethod(Class cls, __unsafe_unretained RLMProperty *const prop,
                id (*getter)(RLMProperty *, const char *),
                id (*setter)(RLMProperty *, const char *)) {
     SEL sel = prop.getterSel;
+    if (!sel) {
+        return;
+    }
     auto getterMethod = class_getInstanceMethod(cls, sel);
     if (!getterMethod) {
         return;
@@ -650,6 +653,20 @@ Class createAccessorClass(Class objectClass,
 
     return accClass;
 }
+
+bool requiresUnmanagedAccessor(RLMObjectSchema *schema) {
+    for (RLMProperty *prop in schema.properties) {
+        if (prop.collection && !prop.swiftIvar) {
+            return true;
+        }
+    }
+    for (RLMProperty *prop in schema.computedProperties) {
+        if (prop.collection && !prop.swiftIvar) {
+            return true;
+        }
+    }
+    return false;
+}
 } // anonymous namespace
 
 #pragma mark - Public Interface
@@ -659,6 +676,9 @@ Class RLMManagedAccessorClassForObjectClass(Class objectClass, RLMObjectSchema *
 }
 
 Class RLMUnmanagedAccessorClassForObjectClass(Class objectClass, RLMObjectSchema *schema) {
+    if (!requiresUnmanagedAccessor(schema)) {
+        return objectClass;
+    }
     return createAccessorClass(objectClass, schema,
                                [@"RLM:Unmanaged " stringByAppendingString:schema.className].UTF8String,
                                unmanagedGetter, unmanagedSetter);
@@ -668,19 +688,20 @@ Class RLMUnmanagedAccessorClassForObjectClass(Class objectClass, RLMObjectSchema
 // base object
 void RLMReplaceClassNameMethod(Class accessorClass, NSString *className) {
     Class metaClass = object_getClass(accessorClass);
-    IMP imp = imp_implementationWithBlock(^(Class){ return className; });
+    IMP imp = imp_implementationWithBlock(^(Class) { return className; });
     class_addMethod(metaClass, @selector(className), imp, "@@:");
 }
 
 // implement the shared schema method
 void RLMReplaceSharedSchemaMethod(Class accessorClass, RLMObjectSchema *schema) {
+    REALM_ASSERT(accessorClass != [RealmSwiftObject class]);
     Class metaClass = object_getClass(accessorClass);
     IMP imp = imp_implementationWithBlock(^(Class cls) {
         if (cls == accessorClass) {
             return schema;
         }
 
-        // If we aren't being called directly on the class this was overriden
+        // If we aren't being called directly on the class this was overridden
         // for, the class is either a subclass which we haven't initialized yet,
         // or it's a runtime-generated class which should use the parent's
         // schema. We check for the latter by checking if the immediate
@@ -1191,17 +1212,17 @@ RLMOptionalId RLMAccessorContext::default_value_for_property(realm::ObjectSchema
 }
 
 bool RLMStatelessAccessorContext::is_same_list(realm::List const& list,
-                                               __unsafe_unretained id const v) const noexcept {
+                                               __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedByList:)] && [v isBackedByList:list];
 }
 
 bool RLMStatelessAccessorContext::is_same_set(realm::object_store::Set const& set,
-                                              __unsafe_unretained id const v) const noexcept {
+                                              __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedBySet:)] && [v isBackedBySet:set];
 }
 
 bool RLMStatelessAccessorContext::is_same_dictionary(realm::object_store::Dictionary const& dict,
-                                                     __unsafe_unretained id const v) const noexcept {
+                                                     __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedByDictionary:)] && [v isBackedByDictionary:dict];
 }
 

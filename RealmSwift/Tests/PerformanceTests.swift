@@ -39,7 +39,7 @@ private let isRunningOnDevice = TARGET_IPHONE_SIMULATOR == 0
 @available(*, deprecated) // Silence deprecation warnings for RealmOptional
 class SwiftPerformanceTests: TestCase {
     override class var defaultTestSuite: XCTestSuite {
-        #if !DEBUG && os(iOS)
+        #if !DEBUG && os(iOS) && !targetEnvironment(macCatalyst)
             if isRunningOnDevice {
                 return super.defaultTestSuite
             }
@@ -504,11 +504,7 @@ class SwiftPerformanceTests: TestCase {
             self.startMeasuring()
             try! realm.write { object.intCol += 1 }
             while object.intCol < stopValue {
-                #if swift(>=4.2)
-                    RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
-                #else
-                    RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date.distantFuture)
-                #endif
+                RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
             }
             queue.sync {}
             self.stopMeasuring()

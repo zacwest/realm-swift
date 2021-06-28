@@ -219,6 +219,10 @@ extension Persisted: Encodable where Value: Encodable {
         case .unmanagedNoDefault:
             try Value._rlmDefaultValue().encode(to: encoder)
         default:
+            // We need a reference to the parent object to be able to read from
+            // a managed property. There's probably a way to do this with some
+            // sort of custom adapter that keeps track of the current parent
+            // at each level of recursion, but it's not trivial.
             throw EncodingError.invalidValue(self, .init(codingPath: encoder.codingPath, debugDescription: "Only unmanaged Realm objects can be encoded using automatic Codable synthesis. You must explicitly define encode(to:) on your model class to support managed Realm objects."))
         }
     }
