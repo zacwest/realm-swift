@@ -100,6 +100,8 @@ public struct Persisted<Value: _Persistable> {
     /// :nodoc:
     @available(*, unavailable, message: "@Persisted can only be used as a property on a Realm object")
     public var wrappedValue: Value {
+        // The static subscript below is called instead of this when the property
+        // wrapper is used on an ObjectBase subclass, which is the only thing we support.
         get { fatalError("called wrappedValue getter") }
         // swiftlint:disable:next unused_setter_value
         set { fatalError("called wrappedValue setter") }
@@ -128,12 +130,23 @@ public struct Persisted<Value: _Persistable> {
         }
     }
 
+    // Called via RLMInitializeSwiftAccessor() to initialize the wrapper on a
+    // newly created managed accessor object.
     internal mutating func initialize(_ object: ObjectBase, key: PropertyKey) {
         storage = .managed(key: key)
     }
 
+    // Collection types use this instead of the above because when promoting a
+    // unmanaged object to a managed object we want to reuse the existing collection
+    // object if it exists. Currently it always will exist because we read the
+    // value of the property first, but there's a potential optimization to
+    // skip initializing it on that read.
     internal mutating func initializeCollection(_ object: ObjectBase, key: PropertyKey) -> Value? {
         if case let .unmanaged(value, _, _) = storage {
+            storage = .managedCached(value: value, key: key)
+            return value
+        }
+        if case let .unmanagedObserved(value, _) = storage {
             storage = .managedCached(value: value, key: key)
             return value
         }
@@ -154,6 +167,10 @@ public struct Persisted<Value: _Persistable> {
         case let .managed(key):
             let v = Value._rlmGetProperty(object, key)
             if Value._rlmRequiresCaching {
+                // Collection types are initialized once and stored on the
+                // object rather than on every access. Non-collection types
+                // cannot be cached without some mechanism for knowing when to
+                // reread them which we don't currently have.
                 storage = .managedCached(value: v, key: key)
             }
             return v
@@ -164,7 +181,7 @@ public struct Persisted<Value: _Persistable> {
 
     internal mutating func set(_ object: ObjectBase, value: Value) {
         if value is MutableRealmCollection {
-            assign(value: value, to: get(object) as! MutableRealmCollection)
+            (get(object) as! MutableRealmCollection).assign(value)
             return
         }
         switch storage {
@@ -191,6 +208,8 @@ public struct Persisted<Value: _Persistable> {
         case .unmanagedObserved, .managed, .managedCached:
             return
         }
+        // Mutating a collection triggers a KVO notification on the parent, so
+        // we need to ensure that the collection has a pointer to its parent.
         if let value = value as? MutableRealmCollection {
             value.setParent(object, property)
         }

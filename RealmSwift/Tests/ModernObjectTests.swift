@@ -191,6 +191,69 @@ class ModernObjectTests: TestCase {
         obj.didSetCallback = nil
     }
 
+    func testAddingObjectReusesExistingCollectionObjects() {
+        let obj = ModernAllTypesObject()
+        let list = obj.arrayCol
+        let set = obj.setCol
+        let dictionary = obj.mapAny
+
+        XCTAssertNil(list.realm)
+        XCTAssertNil(set.realm)
+        XCTAssertNil(dictionary.realm)
+        XCTAssertTrue(list === obj.arrayCol)
+        XCTAssertTrue(set === obj.setCol)
+        XCTAssertTrue(dictionary === obj.mapAny)
+
+        let realm = try! Realm()
+        try! realm.write {
+            realm.add(obj)
+        }
+
+        XCTAssertNotNil(list.realm)
+        XCTAssertNotNil(set.realm)
+        XCTAssertNotNil(dictionary.realm)
+        XCTAssertTrue(list === obj.arrayCol)
+        XCTAssertTrue(set === obj.setCol)
+        XCTAssertTrue(dictionary === obj.mapAny)
+    }
+
+    func testAddingPreviouslyObservedObjectReusesExistingCollectionObjects() {
+        let obj = ModernAllTypesObject()
+        let list = obj.arrayCol
+        let set = obj.setCol
+        let dictionary = obj.mapAny
+
+        // We don't allow adding an object with active observers to the Realm
+        // (it causes problems with the subclass KVO creates at runtime), but
+        // once a property has been observed it stays in the observed state forever.
+        obj.addObserver(self, forKeyPath: "arrayCol", context: nil)
+        obj.addObserver(self, forKeyPath: "setCol", context: nil)
+        obj.addObserver(self, forKeyPath: "mapAny", context: nil)
+        obj.removeObserver(self, forKeyPath: "arrayCol", context: nil)
+        obj.removeObserver(self, forKeyPath: "setCol", context: nil)
+        obj.removeObserver(self, forKeyPath: "mapAny", context: nil)
+
+
+        XCTAssertNil(list.realm)
+        XCTAssertNil(set.realm)
+        XCTAssertNil(dictionary.realm)
+        XCTAssertTrue(list === obj.arrayCol)
+        XCTAssertTrue(set === obj.setCol)
+        XCTAssertTrue(dictionary === obj.mapAny)
+
+        let realm = try! Realm()
+        try! realm.write {
+            realm.add(obj)
+        }
+
+        XCTAssertNotNil(list.realm)
+        XCTAssertNotNil(set.realm)
+        XCTAssertNotNil(dictionary.realm)
+        XCTAssertTrue(list === obj.arrayCol)
+        XCTAssertTrue(set === obj.setCol)
+        XCTAssertTrue(dictionary === obj.mapAny)
+    }
+
     #if false
     func testValueForKeyLinkingObjects() {
         let test: (ModernDogObject) -> Void = { object in
