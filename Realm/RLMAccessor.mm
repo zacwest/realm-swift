@@ -546,6 +546,9 @@ void addMethod(Class cls, __unsafe_unretained RLMProperty *const prop,
                id (*getter)(RLMProperty *, const char *),
                id (*setter)(RLMProperty *, const char *)) {
     SEL sel = prop.getterSel;
+    if (!sel) {
+        return;
+    }
     auto getterMethod = class_getInstanceMethod(cls, sel);
     if (!getterMethod) {
         return;
@@ -595,6 +598,20 @@ Class createAccessorClass(Class objectClass,
 
     return accClass;
 }
+
+bool requiresUnmanagedAccessor(RLMObjectSchema *schema) {
+    for (RLMProperty *prop in schema.properties) {
+        if (prop.collection && !prop.swiftIvar) {
+            return true;
+        }
+    }
+    for (RLMProperty *prop in schema.computedProperties) {
+        if (prop.collection && !prop.swiftIvar) {
+            return true;
+        }
+    }
+    return false;
+}
 } // anonymous namespace
 
 #pragma mark - Public Interface
@@ -604,6 +621,9 @@ Class RLMManagedAccessorClassForObjectClass(Class objectClass, RLMObjectSchema *
 }
 
 Class RLMUnmanagedAccessorClassForObjectClass(Class objectClass, RLMObjectSchema *schema) {
+    if (!requiresUnmanagedAccessor(schema)) {
+        return objectClass;
+    }
     return createAccessorClass(objectClass, schema,
                                [@"RLM:Unmanaged " stringByAppendingString:schema.className].UTF8String,
                                unmanagedGetter, unmanagedSetter);
@@ -1038,17 +1058,17 @@ RLMOptionalId RLMAccessorContext::default_value_for_property(realm::ObjectSchema
 }
 
 bool RLMStatelessAccessorContext::is_same_list(realm::List const& list,
-                                               __unsafe_unretained id const v) const noexcept {
+                                               __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedByList:)] && [v isBackedByList:list];
 }
 
 bool RLMStatelessAccessorContext::is_same_set(realm::object_store::Set const& set,
-                                              __unsafe_unretained id const v) const noexcept {
+                                              __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedBySet:)] && [v isBackedBySet:set];
 }
 
 bool RLMStatelessAccessorContext::is_same_dictionary(realm::object_store::Dictionary const& dict,
-                                                     __unsafe_unretained id const v) const noexcept {
+                                                     __unsafe_unretained id const v) noexcept {
     return [v respondsToSelector:@selector(isBackedByDictionary:)] && [v isBackedByDictionary:dict];
 }
 #pragma clang diagnostic push

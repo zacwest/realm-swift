@@ -1,22 +1,53 @@
 x.y.z Release notes (yyyy-MM-dd)
 =============================================================
 ### Enhancements
-* None.
+* Add `App.emailPasswordAuth.retryCustomConfirmation(email:completion:)` and `[App.emailPasswordAuth retryCustomConfirmation:completion:]`. 
+  These functions support retrying a [custom confirmation](https://docs.mongodb.com/realm/authentication/email-password/#run-a-confirmation-function) function.
+* Improve performance of many Dictionary operations, especially when KVO is being used.
 
 ### Fixed
 * Copy EmbeddedObject for embedded object property on initializing unmanaged object ([#6921](https://github.com/realm/realm-cocoa/issues/6921)
+* <How to hit and notice issue? what was the impact?> ([#????](https://github.com/realm/realm-cocoa/issues/????), since v?.?.?)
+* Calling `-[RLMRealm deleteObjects:]` on a `RLMDictionary` cleared the
+  dictionary but did not actually delete the objects in the dictionary (since v10.8.0).
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
 ### Compatibility
 * Realm Studio: 10.0.0 or later.
 * APIs are backwards compatible with all previous releases in the 10.x.y series.
-* Carthage release for Swift is built with Xcode 12.5.
+* Carthage release for Swift is built with Xcode 12.5.1.
 * CocoaPods: 1.10 or later.
 * Xcode: 12.2-13.0 beta 1.
 
 ### Internal
 * Upgraded realm-core from ? to ?
+
+10.8.1 Release notes (2021-06-22)
+=============================================================
+
+### Enhancements
+
+* Update Xcode 12.5 to Xcode 12.5.1.
+* Create fewer dynamic classes at runtime, improving memory usage and startup time slightly.
+
+### Fixed
+
+* Importing the Realm swift package produced several warnings about excluded
+  files not existing. Note that one warning will still remain after this change.
+  ([#7295](https://github.com/realm/realm-cocoa/issues/7295), since v10.8.0).
+* Update the root URL for the API docs so that the links go to the place where
+  new versions of the docs are being published.
+  ([#7299](https://github.com/realm/realm-cocoa/issues/7299), since v10.6.0).
+
+### Compatibility
+
+* Realm Studio: 11.0.0 or later. Note that this version of Realm Studio has not
+  yet been released at the time of this release.
+* APIs are backwards compatible with all previous releases in the 10.x.y series.
+* Carthage release for Swift is built with Xcode 12.5.1.
+* CocoaPods: 1.10 or later.
+* Xcode: 12.2-13.0 beta 1.
 
 10.8.0 Release notes (2021-06-14)
 =============================================================

@@ -242,6 +242,16 @@ static NSString *randomEmail() {
     [self waitForExpectationsWithTimeout:60.0 handler:nil];
 }
 
+- (void)testRetryCustomConfirmation {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"should try retry confirmation email and fail"];
+
+    [self.app.emailPasswordAuth retryCustomConfirmation:@"some-email@email.com" completion:^(NSError *error) {
+        XCTAssertTrue([error.userInfo[@"NSLocalizedDescription"] isEqualToString:@"cannot run confirmation for some-email@email.com: automatic confirmation is enabled"]);
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:60.0 handler:nil];
+}
+
 - (void)testResendConfirmationEmail {
     XCTestExpectation *expectation = [self expectationWithDescription:@"should try resend confirmation email and fail"];
 
@@ -538,7 +548,10 @@ static NSString *randomEmail() {
     [self manuallySetAccessTokenForUser:user value:[self badAccessToken]];
     [self manuallySetRefreshTokenForUser:user value:[self badAccessToken]];
 
-    [self openRealmForPartitionValue:NSStringFromSelector(_cmd) user:user];
+    [self immediatelyOpenRealmForPartitionValue:NSStringFromSelector(_cmd)
+                                           user:user
+                                  encryptionKey:nil
+                                     stopPolicy:RLMSyncStopPolicyAfterChangesUploaded];
 
     [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
@@ -1748,10 +1761,7 @@ static const NSInteger NUMBER_OF_BIG_OBJECTS = 2;
     // Create a large object and then delete it in the next transaction so that
     // the file is bloated
     @autoreleasepool {
-        RLMRealm *realm = [self immediatelyOpenRealmForPartitionValue:partitionValue
-                                                                 user:user
-                                                        encryptionKey:nil
-                                                           stopPolicy:RLMSyncStopPolicyImmediately];
+        RLMRealm *realm = [self openRealmForPartitionValue:partitionValue user:user];
         [realm beginWriteTransaction];
         [realm addObject:[HugeSyncObject hugeSyncObject]];
         [realm commitWriteTransaction];
@@ -1760,12 +1770,11 @@ static const NSInteger NUMBER_OF_BIG_OBJECTS = 2;
         [realm beginWriteTransaction];
         [realm deleteAllObjects];
         [realm commitWriteTransaction];
-        [self waitForUploadsForRealm:realm];
-        [self waitForDownloadsForRealm:realm];
-        [realm.syncSession suspend];
 
         path = realm.configuration.pathOnDisk;
     }
+
+    RLMWaitForRealmToClose(path);
 
     auto fileManager = NSFileManager.defaultManager;
     auto initialSize = [[fileManager attributesOfItemAtPath:path error:nil][NSFileSize] unsignedLongLongValue];
