@@ -26,8 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// :nodoc:
 @interface RLMObjectBase : NSObject
-@property (nonatomic) BOOL tracingModeEnabled;
-@property (nonatomic, strong) NSArray<NSString *> *tracingKeyPaths;
 
 @property (nonatomic, readonly, getter = isInvalidated) BOOL invalidated;
 

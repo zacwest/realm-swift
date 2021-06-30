@@ -85,3 +85,9 @@ public protocol RealmPropertyType {}
 
 extension AnyRealmValue: RealmPropertyType {}
 extension Optional: RealmPropertyType where Wrapped: RealmOptionalType {}
+
+extension RealmProperty: KeyPathPropertyName {
+    func keyPathPropertyName() -> String {
+        self.propertyName()
+    }
+}

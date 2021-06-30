@@ -672,3 +672,9 @@ extension List: AssistedObjectiveCBridgeable {
         return (objectiveCValue: _rlmCollection, metadata: nil)
     }
 }
+
+extension List: KeyPathPropertyName {
+    func keyPathPropertyName() -> String {
+        self.propertyName()
+    }
+}

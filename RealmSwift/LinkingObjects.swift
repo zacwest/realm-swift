@@ -405,3 +405,12 @@ extension LinkingObjects: AssistedObjectiveCBridgeable {
         return (objectiveCValue: handle!.results, metadata: nil)
     }
 }
+
+extension LinkingObjects: KeyPathPropertyName {
+    func keyPathPropertyName() -> String {
+        guard let name = handle?.keyPathPropertyName else {
+            throwRealmException("Key path strings are only supported on managed properties.")
+        }
+        return name
+    }
+}

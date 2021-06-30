@@ -74,16 +74,15 @@ static void maybeInitObjectSchemaForUnmanaged(RLMObjectBase *obj) {
 @interface RLMObjectBase () <RLMThreadConfined, RLMThreadConfined_Private>
 @end
 
-@implementation RLMObjectBase
+@implementation RLMObjectBase {
+    NSMutableArray<NSString *> *_keyPathStrings;
+}
+
 - (instancetype)init {
     if ((self = [super init])) {
         maybeInitObjectSchemaForUnmanaged(self);
     }
     return self;
-}
-
-- (void)enableTracingMode {
-    self.tracingModeEnabled = YES;
 }
 
 - (void)dealloc {
@@ -423,6 +422,45 @@ id RLMCreateManagedAccessor(Class cls, RLMClassInfo *info) {
     }
     NSString *objectClassName = @(object.get_object_schema().name.c_str());
     return RLMCreateObjectAccessor(realm->_info[objectClassName], object.obj());
+}
+
+#pragma mark - KeyPath Strings
+
+- (void)enableTracingMode {
+    _keyPathStrings = [NSMutableArray new];
+}
+
+- (void)enableTracingModeWithKeyPathStrings:(NSMutableArray<NSString *> *)keyPaths {
+    // Keep reference from parent.
+    _keyPathStrings = keyPaths;
+}
+
+- (BOOL)isTracingModeEnabled {
+    return _keyPathStrings != nil;
+}
+
+- (void)appendKeyPathString:(NSString *)keyPathString {
+    if (!_keyPathStrings) {
+        @throw RLMException(@"Key path string tracing mode is not enabled.");
+    }
+    if ([keyPathString isEqualToString:@""]) {
+        @throw RLMException(@"Attemping to insert an empty key path string.");
+    }
+    [_keyPathStrings addObject:keyPathString];
+}
+
+- (NSString *)keyPathString {
+    if (!_keyPathStrings) {
+        @throw RLMException(@"Key path string tracing mode is not enabled.");
+    }
+    return [_keyPathStrings componentsJoinedByString:@"."];
+}
+
+- (NSArray<NSString *> *)keyPathStrings {
+    if (!_keyPathStrings) {
+        @throw RLMException(@"Key path string tracing mode is not enabled.");
+    }
+    return _keyPathStrings;
 }
 
 @end

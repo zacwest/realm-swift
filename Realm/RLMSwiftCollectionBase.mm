@@ -99,6 +99,10 @@
     return aProtocol == @protocol(NSFastEnumeration) || [self._rlmCollection conformsToProtocol:aProtocol];
 }
 
+- (NSString *)propertyName {
+    return [((id)self._rlmCollection) propertyName];
+}
+
 @end
 
 #pragma clang diagnostic pop
@@ -168,6 +172,10 @@
     _results = [RLMLinkingObjects resultsWithObjectInfo:objectInfo results:std::move(results)];
     _realm = nil;
     return _results;
+}
+
+- (NSString *)keyPathPropertyName {
+    return _property.name;
 }
 
 @end

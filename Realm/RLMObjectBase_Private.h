@@ -24,9 +24,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 // RLMObjectBase private
 @interface RLMObjectBase ()
+
 + (void)initializeLinkedObjectSchemas;
 + (bool)isEmbedded;
+
+// Key Path Strings
 - (void)enableTracingMode;
+- (void)enableTracingModeWithKeyPathStrings:(NSMutableArray<NSString *> *)keyPaths;
+- (BOOL)isTracingModeEnabled;
+- (void)appendKeyPathString:(NSString *)keyPathString;
+- (NSString *)keyPathString;
+- (NSArray<NSString *> *)keyPathStrings;
 @end
 
 NS_ASSUME_NONNULL_END

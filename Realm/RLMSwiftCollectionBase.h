@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id)valueForKey:(NSString *)key;
 - (nullable id)valueForKeyPath:(NSString *)keyPath;
 - (BOOL)isEqual:(nullable id)object;
+
+- (NSString *)propertyName;
 @end
 
 @interface RLMLinkingObjectsHandle : NSObject
@@ -41,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)thaw;
 
 @property (nonatomic, readonly) RLMLinkingObjects *results;
+@property (nonatomic, readonly) NSString *keyPathPropertyName;
 @end
 
 NS_ASSUME_NONNULL_END

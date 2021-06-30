@@ -621,3 +621,9 @@ extension Optional: OptionalObject where Wrapped: ObjectBase {
         Wrapped.className()
     }
 }
+
+extension Map: KeyPathPropertyName {
+    func keyPathPropertyName() -> String {
+        self.propertyName()
+    }
+}

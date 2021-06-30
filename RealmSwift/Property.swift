@@ -75,3 +75,9 @@ extension Property: Equatable {
         return lhs.rlmProperty.isEqual(to: rhs.rlmProperty)
     }
 }
+
+/// A tag protocol that makes a Realm property type produce the name that it is defined as in its Realm Object class.
+internal protocol KeyPathPropertyName {
+    /// The name of this property in its enclosing class.
+    func keyPathPropertyName() -> String
+}

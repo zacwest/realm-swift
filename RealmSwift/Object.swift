@@ -524,6 +524,60 @@ internal func dynamicSet(object: ObjectBase, key: String, value: Any?) {
     }
 }
 
+// MARK: KeyPath Strings
+
+public protocol _KeyPathString {
+    associatedtype Root
+    /// Get the strings for each component in a given KeyPath.
+    ///
+    /// - Warning: This should not mix properties with the old `@objc dynamic` syntax and the
+    /// `@Persisted` property declaration syntax.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The KeyPath you want as a string.
+    static func _keyPathString(for keyPath: PartialKeyPath<Root>) -> String
+}
+
+
+extension Object: _KeyPathString { }
+extension _KeyPathString where Self: Object {
+    public static func _keyPathString(for keyPath: PartialKeyPath<Self>) -> String {
+        autoreleasepool {
+            do {
+                if let kvcStr = keyPath._kvcKeyPathString {
+                    return kvcStr
+                }
+                let config = Realm.Configuration(inMemoryIdentifier: "realm._keyPathString")
+                let tempRealm = try Realm(configuration: config)
+                // Create a temporary object so that we do not create any unwanted values on the
+                // current object.
+                let tempObj = Self.init()
+                tempRealm.beginWrite()
+                tempRealm.add(tempObj)
+                tempObj.enableTracingMode()
+
+                let value = tempObj[keyPath: keyPath]
+                if let value = value as? KeyPathPropertyName {
+                    let propName = value.keyPathPropertyName()
+                    tempRealm.cancelWrite()
+                    var result = tempObj.keyPathString()
+                    if result == "" {
+                        result.append("\(propName)")
+                    } else {
+                        result.append(".\(propName)")
+                    }
+                    return result
+                }
+
+                tempRealm.cancelWrite()
+                return tempObj.keyPathString()
+            } catch {
+                throwRealmException(error.localizedDescription)
+            }
+        }
+    }
+}
+
 // MARK: AssistedObjectiveCBridgeable
 
 // FIXME: Remove when `as! Self` can be written

@@ -667,4 +667,10 @@ static RLMNotificationToken *RLMAddNotificationBlock(RLMManagedDictionary *colle
     return token;
 }
 
+#pragma mark - Key Path String
+
+- (NSString *)propertyName {
+    return _key;
+}
+
 @end

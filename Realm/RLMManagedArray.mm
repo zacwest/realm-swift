@@ -573,4 +573,10 @@ realm::List& RLMGetBackingCollection(RLMManagedArray *self) {
                                                      property:parentInfo->rlmObjectSchema[metadata.key]];
 }
 
+#pragma mark - Key Path String
+
+- (NSString *)propertyName {
+    return _key;
+}
+
 @end

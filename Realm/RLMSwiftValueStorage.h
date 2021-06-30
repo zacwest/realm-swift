@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// This class should not be subclassed or used directly.
 @interface RLMSwiftValueStorage : NSProxy
 - (instancetype)init;
+- (NSString *)propertyName;
 @end
 /// Retrieves the value that is stored, or nil if it is empty.
 FOUNDATION_EXTERN id _Nullable RLMGetSwiftValueStorage(RLMSwiftValueStorage *);
