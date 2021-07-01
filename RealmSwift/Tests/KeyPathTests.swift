@@ -26,10 +26,6 @@ class KeyPathTests: TestCase {
         Root._keyPathString(for: keyPath)
     }
 
-    private func produceString<Root: Object>(keyPaths: [PartialKeyPath<Root>]) -> [String] {
-        keyPaths.map { Root._keyPathString(for: $0) }
-    }
-
     private func produceEmbeddedString(keyPath: PartialKeyPath<SwiftOldSyntaxAllTypesEmbeddedObject>) -> String {
         let realm = realmWithTestPath()
         let obj = SwiftOldSyntaxAllTypesObject()
@@ -39,6 +35,8 @@ class KeyPathTests: TestCase {
         }
         let string = (obj.embeddedCol?._keyPathString(for: keyPath))!
         XCTAssertNil(obj.embeddedCol?.embeddedCol) // Ensure objects are transient.
+        XCTAssertFalse(obj.embeddedCol!.isTracingModeEnabled())
+        XCTAssertFalse(obj.isTracingModeEnabled())
         return string
     }
 
@@ -51,6 +49,8 @@ class KeyPathTests: TestCase {
         }
         let string = (obj.embeddedCol?._keyPathString(for: keyPath))!
         XCTAssertNil(obj.embeddedCol?.embeddedCol) // Ensure objects are transient.
+        XCTAssertFalse(obj.embeddedCol!.isTracingModeEnabled())
+        XCTAssertFalse(obj.isTracingModeEnabled())
         return string
     }
 

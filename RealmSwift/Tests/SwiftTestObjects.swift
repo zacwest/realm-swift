@@ -26,7 +26,6 @@ class SwiftStringObject: Object {
 
 class SwiftBoolObject: Object {
     @objc dynamic var boolCol = false
-    @objc dynamic var intEnumCol = IntEnum.value1
 }
 
 class SwiftIntObject: Object {

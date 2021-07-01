@@ -533,6 +533,6 @@ extension MutableSet: AssistedObjectiveCBridgeable {
 
 extension MutableSet: KeyPathPropertyName {
     func keyPathPropertyName() -> String {
-        self.propertyName()
+        propertyName()
     }
 }

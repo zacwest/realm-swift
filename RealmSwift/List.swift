@@ -674,7 +674,7 @@ extension List: AssistedObjectiveCBridgeable {
 }
 
 extension List: KeyPathPropertyName {
-    func keyPathPropertyName() -> String {
-        self.propertyName()
+    internal func keyPathPropertyName() -> String {
+        propertyName()
     }
 }

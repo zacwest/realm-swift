@@ -699,6 +699,6 @@ extension Optional: OptionalObject where Wrapped: ObjectBase {
 
 extension Map: KeyPathPropertyName {
     func keyPathPropertyName() -> String {
-        self.propertyName()
+        propertyName()
     }
 }
