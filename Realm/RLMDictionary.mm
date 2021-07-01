@@ -187,7 +187,10 @@ static void changeDictionary(__unsafe_unretained RLMDictionary *const dictionary
 }
 
 - (void)setDictionary:(id)dictionary {
-    if (dictionary && ![dictionary respondsToSelector:@selector(enumerateKeysAndObjectsUsingBlock:)]) {
+    if (!dictionary || dictionary == NSNull.null) {
+        return [self removeAllObjects];
+    }
+    if (![dictionary respondsToSelector:@selector(enumerateKeysAndObjectsUsingBlock:)]) {
         @throw RLMException(@"Cannot set dictionary to object of class '%@'", [dictionary className]);
     }
 
@@ -239,8 +242,7 @@ static void changeDictionary(__unsafe_unretained RLMDictionary *const dictionary
 }
 
 - (nullable id)valueForKey:(nonnull NSString *)key {
-    // `invalidated` should be accessed with a `@` prefix when using RLMDictionary.
-    if ([key isEqualToString:@"@invalidated"]) {
+    if ([key isEqualToString:RLMInvalidatedKey]) {
         return @NO; // Unmanaged dictionaries are never invalidated
     }
     if (!_backingCollection) {

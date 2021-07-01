@@ -50,6 +50,10 @@ x.y.z Release notes (yyyy-MM-dd)
   does not change what data is stored in the Realm file and so does not require
   a migration (as long as you don't also change the schema in the process, of
   course).
+* Add `Map.merge()`, which adds the key-value pairs from another Map or
+  Dictionary to the map.
+* Add `Map.asKeyValueSequence()` which returns an adaptor that can be used with
+  generic functions that operate on Dictionary-styled sequences.
 
 ### Fixed
 * <How to hit and notice issue? what was the impact?> ([#????](https://github.com/realm/realm-cocoa/issues/????), since v?.?.?)
@@ -60,6 +64,8 @@ x.y.z Release notes (yyyy-MM-dd)
 * Declaring a property as `RealmProperty<AnyRealmValue?>` will now report an
   error during schema discovery rather than doing broken things when the
   property is used.
+* Observing the `invalidated` property of `RLMDictionary`/`Map` via KVO did not
+  set old/new values correctly in the notification (since 10.8.0).
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
