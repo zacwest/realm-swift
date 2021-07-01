@@ -526,9 +526,10 @@ internal func dynamicSet(object: ObjectBase, key: String, value: Any?) {
 
 // MARK: KeyPath Strings
 
+/// Allows an Object to produce a string for a given KeyPath.
 public protocol _KeyPathString {
     associatedtype Root
-    /// Get the strings for each component in a given KeyPath.
+    /// Get a joined string for each component in a given KeyPath.
     ///
     /// - Warning: This should not mix properties with the old `@objc dynamic` syntax and the
     /// `@Persisted` property declaration syntax.
@@ -538,9 +539,9 @@ public protocol _KeyPathString {
     static func _keyPathString(for keyPath: PartialKeyPath<Root>) -> String
 }
 
-
 extension Object: _KeyPathString { }
 extension _KeyPathString where Self: Object {
+    /// :nodoc:
     public static func _keyPathString(for keyPath: PartialKeyPath<Self>) -> String {
         autoreleasepool {
             do {

@@ -76,7 +76,6 @@ class SwiftObject: Object {
     @objc dynamic var objectCol: SwiftBoolObject? = SwiftBoolObject()
     @objc dynamic var uuidCol: UUID = UUID(uuidString: "137decc8-b300-4954-a233-f89909f4fd89")!
     let anyCol = RealmProperty<AnyRealmValue>()
-    @objc dynamic var embeddedCol: EmbeddedTreeObject1? = EmbeddedTreeObject1()
 
     let arrayCol = List<SwiftBoolObject>()
     let setCol = MutableSet<SwiftBoolObject>()

@@ -280,3 +280,51 @@ extension EmbeddedObject: AssistedObjectiveCBridgeable {
         return (objectiveCValue: unsafeBitCast(self, to: RLMObject.self), metadata: nil)
     }
 }
+
+/// Allows an EmbeddedObject to produce a string for a given KeyPath.
+public protocol _EmbeddedKeyPathString {
+    associatedtype Root
+    /// Get a joined string for each component in a given KeyPath.
+    ///
+    /// - Warning: This should not mix properties with the old `@objc dynamic` syntax and the
+    /// `@Persisted` property declaration syntax.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The KeyPath you want as a string.
+    func _keyPathString(for keyPath: PartialKeyPath<Root>) -> String
+}
+
+extension EmbeddedObject: _EmbeddedKeyPathString { }
+extension _EmbeddedKeyPathString where Self: EmbeddedObject {
+    /// :nodoc:
+    public func _keyPathString(for keyPath: PartialKeyPath<Self>) -> String {
+        autoreleasepool {
+            if let kvcStr = keyPath._kvcKeyPathString {
+                return kvcStr
+            }
+
+            guard let realm = realm else {
+                throwRealmException("Key path strings is only supported on managed embedded objects.")
+            }
+
+            realm.beginWrite()
+            enableTracingMode()
+
+            let value = self[keyPath: keyPath]
+            if let value = value as? KeyPathPropertyName {
+                let propName = value.keyPathPropertyName()
+                realm.cancelWrite()
+                var result = keyPathString()
+                if result == "" {
+                    result.append("\(propName)")
+                } else {
+                    result.append(".\(propName)")
+                }
+                return result
+            }
+
+            realm.cancelWrite()
+            return keyPathString()
+        }
+    }
+}

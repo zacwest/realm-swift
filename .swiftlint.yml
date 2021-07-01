@@ -13,6 +13,7 @@ identifier_name:
     error: 0
   excluded:
     - _id
+    - _keyPathString(for:)
     - _nilValue()
     - _nsError
     - _nsErrorDomain

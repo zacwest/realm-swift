@@ -30,6 +30,30 @@ class KeyPathTests: TestCase {
         keyPaths.map { Root._keyPathString(for: $0) }
     }
 
+    private func produceEmbeddedString(keyPath: PartialKeyPath<SwiftOldSyntaxAllTypesEmbeddedObject>) -> String {
+        let realm = realmWithTestPath()
+        let obj = SwiftOldSyntaxAllTypesObject()
+        try! realm.write {
+            obj.embeddedCol = SwiftOldSyntaxAllTypesEmbeddedObject()
+            realm.add(obj)
+        }
+        let string = (obj.embeddedCol?._keyPathString(for: keyPath))!
+        XCTAssertNil(obj.embeddedCol?.embeddedCol) // Ensure objects are transient.
+        return string
+    }
+
+    private func produceEmbeddedModernString(keyPath: PartialKeyPath<ModernAllTypesEmbeddedObject>) -> String {
+        let realm = realmWithTestPath()
+        let obj = ModernKeyPathStringParentObject()
+        try! realm.write {
+            obj.embeddedCol = ModernAllTypesEmbeddedObject()
+            realm.add(obj)
+        }
+        let string = (obj.embeddedCol?._keyPathString(for: keyPath))!
+        XCTAssertNil(obj.embeddedCol?.embeddedCol) // Ensure objects are transient.
+        return string
+    }
+
     func testModernObjectTopLevel() {
         XCTAssertEqual(produceString(keyPath: \ModernAllTypesObject.pk), "pk")
 
@@ -302,33 +326,194 @@ class KeyPathTests: TestCase {
     }
 
     func testOldObjectSyntax() {
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.boolCol), "boolCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.intCol), "intCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.int8Col), "int8Col")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.int16Col), "int16Col")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.int32Col), "int32Col")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.int64Col), "int64Col")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.intEnumCol), "intEnumCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.floatCol), "floatCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.doubleCol), "doubleCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.stringCol), "stringCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.binaryCol), "binaryCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.dateCol), "dateCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.decimalCol), "decimalCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.objectIdCol), "objectIdCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.objectCol), "objectCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.objectCol?.boolCol), "objectCol.boolCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.uuidCol), "uuidCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.anyCol), "anyCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.boolCol), "boolCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.intCol), "intCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.int8Col), "int8Col")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.int16Col), "int16Col")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.int32Col), "int32Col")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.int64Col), "int64Col")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.intEnumCol), "intEnumCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.floatCol), "floatCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.doubleCol), "doubleCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.stringCol), "stringCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.binaryCol), "binaryCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.dateCol), "dateCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.decimalCol), "decimalCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.objectIdCol), "objectIdCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.objectCol), "objectCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.objectCol?.boolCol), "objectCol.boolCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.uuidCol), "uuidCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.anyCol), "anyCol")
 
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.embeddedCol), "embeddedCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.embeddedCol?.value), "embeddedCol.value")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.arrayCol), "arrayCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.setCol), "setCol")
-        XCTAssertEqual(produceString(keyPath: \SwiftObject.mapCol), "mapCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.arrayCol), "arrayCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.setCol), "setCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.mapCol), "mapCol")
 
-        print(produceString(keyPaths: [\SwiftDogObject.owners, \SwiftDogObject.dogName]))
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.arrayObjCol), "arrayObjCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.setObjCol), "setObjCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.mapObjCol), "mapObjCol")
+
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.arrayEmbeddedCol), "arrayEmbeddedCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.mapEmbeddedCol), "mapEmbeddedCol")
+
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.embeddedCol), "embeddedCol")
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.embeddedCol?.boolCol), "embeddedCol.boolCol")
+
+        XCTAssertEqual(produceString(keyPath: \SwiftOldSyntaxAllTypesObject.embeddedCol?.embeddedCol?.child), "embeddedCol.embeddedCol.child")
     }
 
-    // test nested embedded object
+    func testOldSyntaxEmbeddedObject() {
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.boolCol), "boolCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.intCol), "intCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.int8Col), "int8Col")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.int16Col), "int16Col")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.int32Col), "int32Col")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.int64Col), "int64Col")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.intEnumCol), "intEnumCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.floatCol), "floatCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.doubleCol), "doubleCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.stringCol), "stringCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.binaryCol), "binaryCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.dateCol), "dateCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.decimalCol), "decimalCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.objectIdCol), "objectIdCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.uuidCol), "uuidCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.anyCol), "anyCol")
+
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.arrayCol), "arrayCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.setCol), "setCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.mapCol), "mapCol")
+
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.arrayEmbeddedCol), "arrayEmbeddedCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.mapEmbeddedCol), "mapEmbeddedCol")
+
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.embeddedCol), "embeddedCol")
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.embeddedCol?.child), "embeddedCol.child")
+
+        XCTAssertEqual(produceEmbeddedString(keyPath: \SwiftOldSyntaxAllTypesEmbeddedObject.embeddedCol?.child?.children), "embeddedCol.child.children")
+    }
+
+    func testEmbeddedObject() {
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.boolCol), "boolCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.intCol), "intCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.int8Col), "int8Col")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.int16Col), "int16Col")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.int32Col), "int32Col")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.int64Col), "int64Col")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.intEnumCol), "intEnumCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.floatCol), "floatCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.doubleCol), "doubleCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.stringCol), "stringCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.binaryCol), "binaryCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.dateCol), "dateCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.decimalCol), "decimalCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.objectIdCol), "objectIdCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.uuidCol), "uuidCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.anyCol), "anyCol")
+
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.arrayCol), "arrayCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.setCol), "setCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.mapCol), "mapCol")
+
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.arrayEmbeddedCol), "arrayEmbeddedCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.mapEmbeddedCol), "mapEmbeddedCol")
+
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.embeddedCol), "embeddedCol")
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.embeddedCol?.child), "embeddedCol.child")
+
+        XCTAssertEqual(produceEmbeddedModernString(keyPath: \ModernAllTypesEmbeddedObject.embeddedCol?.child?.children), "embeddedCol.child.children")
+    }
+}
+
+class SwiftOldSyntaxAllTypesObject: Object {
+    @objc dynamic var boolCol = false
+    @objc dynamic var intCol = 123
+    @objc dynamic var int8Col: Int8 = 123
+    @objc dynamic var int16Col: Int16 = 123
+    @objc dynamic var int32Col: Int32 = 123
+    @objc dynamic var int64Col: Int64 = 123
+    @objc dynamic var intEnumCol = IntEnum.value1
+    @objc dynamic var floatCol = 1.23 as Float
+    @objc dynamic var doubleCol = 12.3
+    @objc dynamic var stringCol = "a"
+    @objc dynamic var binaryCol = "a".data(using: String.Encoding.utf8)!
+    @objc dynamic var dateCol = Date(timeIntervalSince1970: 1)
+    @objc dynamic var decimalCol = Decimal128("123e4")
+    @objc dynamic var objectIdCol = ObjectId("1234567890ab1234567890ab")
+    @objc dynamic var objectCol: SwiftBoolObject? = SwiftBoolObject()
+    @objc dynamic var uuidCol: UUID = UUID(uuidString: "137decc8-b300-4954-a233-f89909f4fd89")!
+    @objc dynamic var embeddedCol: SwiftOldSyntaxAllTypesEmbeddedObject? = SwiftOldSyntaxAllTypesEmbeddedObject()
+
+    let anyCol = RealmProperty<AnyRealmValue>()
+
+    let arrayCol = List<Int>()
+    let setCol = MutableSet<Int>()
+    let mapCol = Map<String, Int>()
+
+    let arrayObjCol = List<SwiftObject>()
+    let setObjCol = MutableSet<SwiftObject>()
+    let mapObjCol = Map<String, SwiftObject?>()
+
+    let arrayEmbeddedCol = List<EmbeddedTreeObject1>()
+    let mapEmbeddedCol = Map<String, EmbeddedTreeObject1?>()
+}
+
+class SwiftOldSyntaxAllTypesEmbeddedObject: EmbeddedObject {
+    @objc dynamic var boolCol = false
+    @objc dynamic var intCol = 123
+    @objc dynamic var int8Col: Int8 = 123
+    @objc dynamic var int16Col: Int16 = 123
+    @objc dynamic var int32Col: Int32 = 123
+    @objc dynamic var int64Col: Int64 = 123
+    @objc dynamic var intEnumCol = IntEnum.value1
+    @objc dynamic var floatCol = 1.23 as Float
+    @objc dynamic var doubleCol = 12.3
+    @objc dynamic var stringCol = "a"
+    @objc dynamic var binaryCol = "a".data(using: String.Encoding.utf8)!
+    @objc dynamic var dateCol = Date(timeIntervalSince1970: 1)
+    @objc dynamic var decimalCol = Decimal128("123e4")
+    @objc dynamic var objectIdCol = ObjectId("1234567890ab1234567890ab")
+    @objc dynamic var uuidCol: UUID = UUID(uuidString: "137decc8-b300-4954-a233-f89909f4fd89")!
+
+    let anyCol = RealmProperty<AnyRealmValue>()
+    @objc dynamic var embeddedCol: EmbeddedTreeObject1?
+
+    let arrayCol = List<Int>()
+    let setCol = MutableSet<Int>()
+    let mapCol = Map<String, Int>()
+
+    let arrayEmbeddedCol = List<EmbeddedTreeObject3>()
+    let mapEmbeddedCol = Map<String, EmbeddedTreeObject1?>()
+}
+
+class ModernKeyPathStringParentObject: Object {
+    @Persisted var embeddedCol: ModernAllTypesEmbeddedObject?
+}
+
+class ModernAllTypesEmbeddedObject: EmbeddedObject {
+    @Persisted var boolCol = false
+    @Persisted var intCol = 123
+    @Persisted var int8Col: Int8 = 123
+    @Persisted var int16Col: Int16 = 123
+    @Persisted var int32Col: Int32 = 123
+    @Persisted var int64Col: Int64 = 123
+    @Persisted var intEnumCol: ModernIntEnum
+    @Persisted var floatCol = 1.23 as Float
+    @Persisted var doubleCol = 12.3
+    @Persisted var stringCol = "a"
+    @Persisted var binaryCol = "a".data(using: String.Encoding.utf8)!
+    @Persisted var dateCol = Date(timeIntervalSince1970: 1)
+    @Persisted var decimalCol = Decimal128("123e4")
+    @Persisted var objectIdCol = ObjectId("1234567890ab1234567890ab")
+    @Persisted var uuidCol: UUID = UUID(uuidString: "137decc8-b300-4954-a233-f89909f4fd89")!
+
+    @Persisted var anyCol: AnyRealmValue
+    @Persisted var embeddedCol: EmbeddedTreeObject1?
+
+    @Persisted var arrayCol: List<Int>
+    @Persisted var setCol: MutableSet<Int>
+    @Persisted var mapCol: Map<String, Int>
+
+    @Persisted var arrayEmbeddedCol: List<EmbeddedTreeObject3>
+    @Persisted var mapEmbeddedCol: Map<String, EmbeddedTreeObject1?>
 }
