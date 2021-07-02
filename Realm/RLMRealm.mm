@@ -147,11 +147,41 @@ NSData *RLMRealmValidatedEncryptionKey(NSData *key) {
     return key;
 }
 
+@interface RLMRealm () <RLMThreadConfined_Private>
+@end
+
 @implementation RLMRealm {
     std::mutex _collectionEnumeratorMutex;
     NSHashTable<RLMFastEnumerator *> *_collectionEnumerators;
     bool _sendingNotifications;
 }
+
+- (RLMRealm *)realm {
+    return self;
+}
+
+- (BOOL)isInvalidated {
+    // if not unmanaged and our accessor has been detached, we have been deleted
+    return _realm->is_closed();
+}
+
+
+#pragma mark - Thread Confined Protocol Conformance
+
+- (realm::ThreadSafeReference)makeThreadSafeReference {
+    return _realm;
+}
+
+- (id)objectiveCMetadata {
+    return nil;
+}
+
++ (instancetype)objectWithThreadSafeReference:(realm::ThreadSafeReference)reference
+                                     metadata:(__unused id)metadata
+                                        realm:(RLMRealm *)realm {
+    return realm;
+}
+
 
 + (void)initialize {
     static bool initialized;

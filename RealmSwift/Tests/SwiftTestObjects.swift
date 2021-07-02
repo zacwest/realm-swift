@@ -341,6 +341,13 @@ class SwiftEmployeeObject: Object {
     @objc dynamic var name = ""
     @objc dynamic var age = 0
     @objc dynamic var hired = false
+
+    convenience init(name: String, age: Int, hired: Bool) {
+        self.init()
+        self.name = name
+        self.age = age
+        self.hired = hired
+    }
 }
 
 class SwiftCompanyObject: Object {

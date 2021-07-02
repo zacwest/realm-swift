@@ -92,7 +92,7 @@ public protocol ThreadConfined {
  - see: `Realm.resolve(_:)`
  */
 @frozen public struct ThreadSafeReference<Confined: ThreadConfined> {
-    private let swiftMetadata: Any?
+    fileprivate let swiftMetadata: Any?
 
     /**
      Indicates if the reference can no longer be resolved because an attempt to resolve it has
@@ -100,7 +100,7 @@ public protocol ThreadConfined {
      */
     public var isInvalidated: Bool { return objectiveCReference.isInvalidated }
 
-    private let objectiveCReference: RLMThreadSafeReference<RLMThreadConfined>
+    fileprivate let objectiveCReference: RLMThreadSafeReference<RLMThreadConfined>
 
     /**
      Create a thread-safe reference to the thread-confined object.
@@ -146,5 +146,271 @@ extension Realm {
      */
     public func resolve<Confined>(_ reference: ThreadSafeReference<Confined>) -> Confined? {
         return reference.resolve(in: self)
+    }
+}
+
+@available(iOSApplicationExtension 15.0, *)
+@available(macOSApplicationExtension 12.0, *)
+public class RealmTaskLocalBase {
+    fileprivate class Context {
+        private let configuration: Realm.Configuration
+        private let threadSafeReference: AnyThreadSafeReference
+        lazy var resolved = threadSafeReference.resolve(in: try! Realm(configuration: configuration))
+        deinit {
+            print("deinit")
+        }
+        init(configuration: Realm.Configuration, threadSafeReference: AnyThreadSafeReference) {
+            self.configuration = configuration
+            self.threadSafeReference = threadSafeReference
+        }
+    }
+
+    fileprivate let defaultValue: ThreadConfined?
+    fileprivate let taskLocal: TaskLocal<Context?>
+
+    init(defaultValue: ThreadConfined?) {
+        self.defaultValue = defaultValue
+        if let defaultValue = defaultValue {
+            self.taskLocal = TaskLocal(wrappedValue: Context(configuration: defaultValue.realm!.configuration,
+                                                             threadSafeReference: AnyThreadSafeReference(to: defaultValue)))
+        } else {
+            self.taskLocal = TaskLocal(wrappedValue: nil)
+        }
+    }
+
+    @discardableResult
+    func withValue<R>(_ valueDuringOperation: ThreadConfined, operation: @escaping () async throws -> R) async throws -> R {
+        guard let configuration = valueDuringOperation.realm?.configuration else {
+            throwRealmException("Cannot use unmanaged objects as TaskLocal values")
+        }
+
+        let ctx = Context(configuration: configuration,
+                          threadSafeReference: AnyThreadSafeReference(to: valueDuringOperation))
+        return try await taskLocal.withValue(ctx,
+                                             operation: operation)
+    }
+}
+
+extension Realm {
+    func resolve(_ reference: AnyThreadSafeReference) -> ThreadConfined? {
+        return reference.resolve(in: self)
+    }
+}
+
+final class AnyThreadSafeReference {
+    private var _isInvalidated: () -> Bool
+    public var isInvalidated: Bool { return _isInvalidated() }
+    private let objectiveCReference: RLMThreadSafeReference<RLMThreadConfined>
+    private let swiftMetadata: Any?
+    private let assistedType: AssistedObjectiveCBridgeable.Type
+
+    init<Confined: ThreadConfined>(_ threadSafeReference: ThreadSafeReference<Confined>) {
+        self.objectiveCReference = threadSafeReference.objectiveCReference
+        swiftMetadata = threadSafeReference.swiftMetadata
+        self._isInvalidated = { threadSafeReference.isInvalidated }
+        self.assistedType = Confined.self as! AssistedObjectiveCBridgeable.Type
+    }
+    init(to threadConfined: ThreadConfined) {
+        let bridged = (threadConfined as! AssistedObjectiveCBridgeable).bridged
+        assistedType = type(of: (threadConfined as! AssistedObjectiveCBridgeable))
+        swiftMetadata = bridged.metadata
+        objectiveCReference = RLMThreadSafeReference(threadConfined: bridged.objectiveCValue as! RLMThreadConfined)
+        self._isInvalidated = { RLMThreadSafeReference(threadConfined: bridged.objectiveCValue as! RLMThreadConfined).isInvalidated }
+//        self.assistedType =
+    }
+
+    internal func resolve(in realm: Realm) -> ThreadConfined? {
+        guard let objectiveCValue = realm.rlmRealm.__resolve(objectiveCReference) else { return nil }
+        return (assistedType.bridging(from: objectiveCValue, with: swiftMetadata) as! ThreadConfined)
+    }
+}
+
+@available(iOSApplicationExtension 15.0, *)
+@available(macOSApplicationExtension 12.0, *)
+@dynamicCallable
+@propertyWrapper public final class RealmTaskLocal<Value: ThreadConfined>: RealmTaskLocalBase, UnsafeSendable {
+    private class Context {
+        private let configuration: Realm.Configuration
+        private let threadSafeReference: ThreadSafeReference<Value>
+        lazy var resolved = threadSafeReference.resolve(in: try! Realm(configuration: configuration))
+
+        deinit {
+            print("deinit")
+        }
+        init(configuration: Realm.Configuration, threadSafeReference: ThreadSafeReference<Value>) {
+            self.configuration = configuration
+            self.threadSafeReference = threadSafeReference
+        }
+    }
+    public init(wrappedValue defaultValue: Value?) where Value == Realm {
+        super.init(defaultValue: defaultValue)
+    }
+    public init(wrappedValue defaultValue: Value?) where Value: Object {
+        super.init(defaultValue: defaultValue)
+    }
+    public init<T: RealmSwiftObject>(wrappedValue defaultValue: Value?) where Value == Results<T> {
+        super.init(defaultValue: try! Realm().objects(T.self))
+    }
+    public func dynamicallyCall(withArguments arguments: [ThreadConfined]) -> (RealmTaskLocalBase, ThreadConfined) {
+        return (self, arguments.first!)
+    }
+//    public init<T: Object>(_ type: T.Type) where Value == Results<T> {
+//        self.defaultValue = Results(RLMResults.emptyDetached())
+//        self.taskLocal = TaskLocal(wrappedValue: nil)
+//    }
+
+    fileprivate var isInWriteTransaction = TaskLocal<Bool>(wrappedValue: false)
+
+    /// Gets the value currently bound to this task-local from the current task.
+    ///
+    /// If no current task is available in the context where this call is made,
+    /// or if the task-local has no value bound, this will return the `defaultValue`
+    /// of the task local.
+    public func get() -> Value? {
+        let resolved = taskLocal.wrappedValue?.resolved
+        if let resolved = resolved, let realm = resolved.realm, isInWriteTransaction.wrappedValue && !realm.isInWriteTransaction {
+            realm.beginWrite()
+        }
+        return taskLocal.wrappedValue?.resolved as? Value
+    }
+
+    @discardableResult
+    public func withResults<R, T: Object>(operation: @escaping () async throws -> R) async throws -> R where Value == Results<T> {
+        return try await taskLocal.withValue(RealmTaskLocalBase.Context(configuration: Realm.Configuration.defaultConfiguration,
+                                                     threadSafeReference: AnyThreadSafeReference(to: try Realm().objects(T.self))),
+                                             operation: operation)
+    }
+
+    /// Binds the task-local to the specific value for the duration of the asynchronous operation.
+    ///
+    /// The value is available throughout the execution of the operation closure,
+    /// including any `get` operations performed by child-tasks created during the
+    /// execution of the operation closure.
+    ///
+    /// If the same task-local is bound multiple times, be it in the same task, or
+    /// in specific child tasks, the more specific (i.e. "deeper") binding is
+    /// returned when the value is read.
+    ///
+    /// If the value is a reference type, it will be retained for the duration of
+    /// the operation closure.
+    @discardableResult
+    public func withValue<R>(_ valueDuringOperation: Value, operation: @escaping () async throws -> R) async throws -> R {
+//        guard let configuration = valueDuringOperation.realm?.configuration else {
+//            throwRealmException("Cannot use unmanaged objects as TaskLocal values")
+//        }
+
+        return try await super.withValue(valueDuringOperation, operation: operation)
+
+//        return try await taskLocal.withValue(Context(configuration: configuration,
+//                                                     threadSafeReference: ThreadSafeReference(to: valueDuringOperation)),
+//                                             operation: operation)
+    }
+
+//    public func withValue<R>(_ valueDuringOperation: Value, operation: @escaping () throws -> R) rethrows -> R {
+//        guard let configuration = valueDuringOperation.realm?.configuration else {
+//            throwRealmException("Cannot use unmanaged objects as TaskLocal values")
+//        }
+//
+//        self.taskLocal.withValue(Context(configuration: configuration,
+//                                                   threadSafeReference: ThreadSafeReference(to: valueDuringOperation)),
+//                                           operation: operation)
+//    }
+
+    public var projectedValue: RealmTaskLocal<Value> {
+      get {
+        self
+      }
+
+      @available(*, unavailable, message: "use '$myTaskLocal.withValue(_:do:)' instead")
+      set {
+        fatalError("Illegal attempt to set a \(Self.self) value, use `withValue(...) { ... }` instead.")
+      }
+    }
+
+    // This subscript is used to enforce that the property wrapper may only be used
+    // on static (or rather, "without enclosing instance") properties.
+    // This is done by marking the `_enclosingInstance` as `Never` which informs
+    // the type-checker that this property-wrapper never wants to have an enclosing
+    // instance (it is impossible to declare a property wrapper inside the `Never`
+    // type).
+    public static subscript(
+      _enclosingInstance object: Never,
+      wrapped wrappedKeyPath: ReferenceWritableKeyPath<Never, Value>,
+      storage storageKeyPath: ReferenceWritableKeyPath<Never, TaskLocal<Value>>
+    ) -> Value {
+      get {
+        fatalError()
+      }
+    }
+
+    public var wrappedValue: Value? {
+      self.get()
+    }
+}
+
+@available(macOSApplicationExtension 12.0, *)
+@available(iOSApplicationExtension 15.0, *)
+extension RealmTaskLocal where Value == Realm {
+    @discardableResult
+    public func write<Result>(_ taskLocals: (RealmTaskLocalBase, ThreadConfined)...,
+                              withoutNotifying tokens: [NotificationToken] = [],
+                              _ block: (@escaping @Sendable () async throws -> Result)) async throws -> Result {
+//        beginWrite()
+        var ret: Result!
+        do {
+            try await self.isInWriteTransaction.withValue(true) {
+                var i = 0
+                let curriedOperations = taskLocals.reduce(into: [() async throws -> ()]()) { partialResult, taskLocalPair in
+                    partialResult.append({ [i, partialResult] in
+                        if i != 0 {
+                            try await taskLocalPair.0.withValue(taskLocalPair.1, operation: {
+//                                guard let realm = taskLocalPair.0.taskLocal.get()?.resolved?.realm else {
+//                                    fatalError()
+//                                }
+//                                if !realm.isInWriteTransaction {
+//                                    realm.beginWrite()
+//                                }
+                                try await partialResult[i - 1]()
+//                                if realm.isInWriteTransaction {
+//                                    try realm.commitWrite()
+//                                }
+                            })
+                        }
+                        if i == 0 {
+                            try await taskLocalPair.0.withValue(taskLocalPair.1, operation: {
+                                guard let realm = taskLocalPair.0.taskLocal.get()?.resolved?.realm else {
+                                    fatalError()
+                                }
+                                if !realm.isInWriteTransaction {
+                                    realm.beginWrite()
+                                }
+                                ret = try await block()
+                                try realm.commitWrite()
+                            })
+                        }
+                    })
+                    i += 1
+                }
+                if curriedOperations.count > 0 {
+                    try await curriedOperations.last!()
+                } else {
+                    try await self.withValue(try Realm()) {
+                        guard let realm = self.get() else {
+                            fatalError()
+                        }
+                        if !realm.isInWriteTransaction {
+                            realm.beginWrite()
+                        }
+                        ret = try await block()
+                        try realm.commitWrite()
+                    }
+                }
+            }
+        } catch let error {
+//            if isInWriteTransaction { cancelWrite() }
+            throw error
+        }
+//        if isInWriteTransaction { try commitWrite(withoutNotifying: tokens) }
+        return ret
     }
 }

@@ -969,7 +969,7 @@ class RealmTests: TestCase {
         XCTAssert(frozenRealm.isFrozen)
 
         dispatchSyncNewThread {
-            let thawedRealm = frozenRealm.thaw()
+            let thawedRealm: Realm = frozenRealm.thaw()
             XCTAssertFalse(thawedRealm.isFrozen)
             try! thawedRealm.write {
                 try! Realm().create(SwiftBoolObject.self, value: ["boolCol": true])

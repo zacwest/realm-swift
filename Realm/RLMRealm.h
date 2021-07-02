@@ -18,6 +18,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Realm/RLMConstants.h>
+#import <Realm/RLMThreadSafeReference.h>
 
 @class RLMRealmConfiguration, RLMRealm, RLMObject, RLMSchema, RLMMigration, RLMNotificationToken, RLMThreadSafeReference, RLMAsyncOpenTask;
 
@@ -56,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
  of its blocks on the same thread.
  */
 
-@interface RLMRealm : NSObject
+@interface RLMRealm : NSObject <RLMThreadConfined>
 
 #pragma mark - Creating & Initializing a Realm
 

@@ -330,3 +330,90 @@ class ThreadSafeReferenceTests: TestCase {
         }
     }
 }
+
+// Return IP address of WiFi interface (en0) as a String, or `nil`
+func getWiFiAddress() -> String? {
+    var address : String?
+
+    // Get list of all interfaces on the local machine:
+    var ifaddr : UnsafeMutablePointer<ifaddrs>?
+    guard getifaddrs(&ifaddr) == 0 else { return nil }
+    guard let firstAddr = ifaddr else { return nil }
+
+    // For each interface ...
+    for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+        let interface = ifptr.pointee
+
+        // Check for IPv4 or IPv6 interface:
+        let addrFamily = interface.ifa_addr.pointee.sa_family
+        if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+
+            // Check interface name:
+            let name = String(cString: interface.ifa_name)
+            if  name == "en0" {
+
+                // Convert interface address to a human readable string:
+                var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len),
+                            &hostname, socklen_t(hostname.count),
+                            nil, socklen_t(0), NI_NUMERICHOST)
+                address = String(cString: hostname)
+            }
+        }
+    }
+    freeifaddrs(ifaddr)
+
+    return address
+}
+@available(iOS 15.0, *)
+@available(macOS 12.0, *)
+class RealmTaskLocalTests: TestCase {
+    @RealmTaskLocal static var realm: Realm?
+    @RealmTaskLocal static var object: SwiftEmployeeObject?
+    @RealmTaskLocal static var object2: SwiftEmployeeObject?
+    @RealmTaskLocal static var object3: SwiftEmployeeObject?
+    @RealmTaskLocal static var object4: SwiftEmployeeObject?
+
+    class func testAllWritesCommit() async throws {
+        let (data, error) = try await URLSession.shared.data(from: URL(string: "https://weatherstack.com/ws_api.php?ip=\(getWiFiAddress()!)")!)
+        let localObject = SwiftEmployeeObject(name: "Leonardo", age: 20, hired: true)
+        let localObject2 = SwiftEmployeeObject(name: "Donatello", age: 25, hired: false)
+        let localObject3 = SwiftEmployeeObject(name: "Raphael", age: 30, hired: true)
+        let localObject4 = SwiftEmployeeObject(name: "Michaelangelo", age: 35, hired: false)
+        let realm = try Realm()
+        try realm.write {
+            realm.add(localObject)
+            realm.add(localObject2)
+            realm.add(localObject3)
+            realm.add(localObject4)
+        }
+        try await $realm.write($object(localObject),
+                               $object2(localObject2),
+                               $object3(localObject3),
+                               $object4(localObject4)) {
+            await withThrowingTaskGroup(of: Void.self) { group in
+                group.async {
+                    object!.age += 5
+                }
+                group.async {
+                    object2!.age += 5
+                }
+                group.async {
+                    object3!.age += 5
+                }
+                group.async {
+                    object4!.age += 5
+                }
+            }
+        }
+
+        XCTAssertEqual(localObject.age, 25)
+        XCTAssertEqual(localObject2.age, 30)
+        XCTAssertEqual(localObject3.age, 35)
+        XCTAssertEqual(localObject4.age, 40)
+    }
+
+    func testAsync() async throws {
+        try await Self.testAllWritesCommit()
+    }
+}

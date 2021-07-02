@@ -260,7 +260,22 @@ import Realm.Private
         if isInWriteTransaction { try commitWrite(withoutNotifying: tokens) }
         return ret
     }
-
+//    @available(iOSApplicationExtension 15.0, *)
+//    @discardableResult
+//    public func write<Result>(_ taskLocals: RealmTaskLocalBase...,
+//                              withoutNotifying tokens: [NotificationToken] = [],
+//                              _ block: (@escaping @Sendable () async throws -> Result)) async throws -> Result {
+//        beginWrite()
+//        var ret: Result!
+//        do {
+//            ret = try await block()
+//        } catch let error {
+//            if isInWriteTransaction { cancelWrite() }
+//            throw error
+//        }
+//        if isInWriteTransaction { try commitWrite(withoutNotifying: tokens) }
+//        return ret
+//    }
     /**
      Begins a write transaction on the Realm.
 
@@ -1005,3 +1020,27 @@ extension Realm {
 
 /// The type of a block to run for notification purposes when the data in a Realm is modified.
 public typealias NotificationBlock = (_ notification: Realm.Notification, _ realm: Realm) -> Void
+
+extension Realm: ThreadConfined {
+    public var realm: Realm? {
+        return self
+    }
+
+    public var isInvalidated: Bool {
+        return false
+    }
+
+    public func thaw() -> Realm? {
+        return Realm(rlmRealm.thaw())
+    }
+}
+
+extension Realm: AssistedObjectiveCBridgeable {
+    static func bridging(from objectiveCValue: Any, with metadata: Any?) -> Realm {
+        Realm(objectiveCValue as! RLMRealm)
+    }
+
+    var bridged: (objectiveCValue: Any, metadata: Any?) {
+        return (objectiveCValue: unsafeBitCast(self, to: RLMRealm.self), metadata: nil)
+    }
+}

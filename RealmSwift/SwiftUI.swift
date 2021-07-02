@@ -152,6 +152,49 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
         }
     }
 }
+public enum RealmCollectionChangeFilter {
+    case insert, update, delete
+}
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+private final class ObservableStorageCollectionPublisher<ObjectType>: Publisher where ObjectType: ThreadConfined & RealmSubscribable & RealmCollection {
+    public typealias Output = Void
+    public typealias Failure = Never
+
+    private var subscribers = [AnySubscriber<Void, Never>]()
+    private let value: ObjectType
+
+    init(_ value: ObjectType, changeFilter: [RealmCollectionChangeFilter]) {
+        self.value = value
+    }
+
+    func send() {
+        subscribers.forEach {
+            _ = $0.receive()
+        }
+    }
+
+    public func receive<S>(subscriber: S) where S: Subscriber, Failure == S.Failure, Output == S.Input {
+        subscribers.append(AnySubscriber(subscriber))
+        if value.realm != nil && !value.isInvalidated, let value = value.thaw() {
+            // if the value is managed
+            let token =  value._observe(subscriber)
+            subscriber.receive(subscription: ObservationSubscription(token: token))
+        } else if let value = value as? ObjectBase, !value.isInvalidated {
+            // else if the value is unmanaged
+            let schema = ObjectSchema(RLMObjectBaseObjectSchema(value)!)
+            let kvo = SwiftUIKVO(subscriber: subscriber)
+
+            var keyPaths = [String]()
+            for property in schema.properties {
+                keyPaths.append(property.name)
+                value.addObserver(kvo, forKeyPath: property.name, options: .initial, context: nil)
+            }
+            let subscription = SwiftUIKVO.Subscription(observer: kvo, value: value, keyPaths: keyPaths)
+            subscriber.receive(subscription: subscription)
+            SwiftUIKVO.observedObjects[value] = subscription
+        }
+    }
+}
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 private class ObservableStorage<ObservedType>: ObservableObject where ObservedType: RealmSubscribable & ThreadConfined & Equatable {
     @Published var value: ObservedType {
@@ -628,19 +671,19 @@ extension EnvironmentValues {
     /// The current `Realm.Configuration` that the view should use.
     public var realmConfiguration: Realm.Configuration {
         get {
-            return self[RealmEnvironmentKey]
+            return self[RealmEnvironmentKey.self]
         }
         set {
-            self[RealmEnvironmentKey] = newValue
+            self[RealmEnvironmentKey.self] = newValue
         }
     }
     /// The current `Realm` that the view should use.
     public var realm: Realm {
         get {
-            return try! Realm(configuration: self[RealmEnvironmentKey])
+            return try! Realm(configuration: self[RealmEnvironmentKey.self])
         }
         set {
-            self[RealmEnvironmentKey] = newValue.configuration
+            self[RealmEnvironmentKey.self] = newValue.configuration
         }
     }
 }
