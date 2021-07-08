@@ -1,3 +1,26 @@
+x.y.z Release notes (yyyy-MM-dd)
+=============================================================
+### Enhancements
+* None.
+
+### Fixed
+* `RealmProperty<T?>` would crash when decoding a `null` json value.
+  ([Cocoa #7323](https://github.com/realm/realm-cocoa/issues/7323), since v10.8.0)
+* `@Persisted<T?>` would crash when decoding a `null` value.
+  ([#7332](https://github.com/realm/realm-cocoa/issues/7332), since v10.10.0).
+
+<!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
+
+### Compatibility
+* Realm Studio: 11.0.0 or later.
+* APIs are backwards compatible with all previous releases in the 10.x.y series.
+* Carthage release for Swift is built with Xcode 12.5.1.
+* CocoaPods: 1.10 or later.
+* Xcode: 12.2-13.0 beta 2.
+
+### Internal
+* Upgraded realm-core from ? to ?
+
 10.10.0 Release notes (2021-07-07)
 =============================================================
 
