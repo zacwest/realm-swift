@@ -65,6 +65,11 @@ import Realm
         self.propertyName = propertyName
     }
 
+    public init(fromType: Element.Type, keyPath: PartialKeyPath<Element>) {
+//    public init<R>(fromType: R.Type, keyPath: KeyPath<R, ElementType?>) where R : ObjectBase {
+        self._propertyKeyPath = keyPath
+    }
+    
     /// A human-readable description of the objects represented by the linking objects.
     public var description: String {
         if realm == nil {
@@ -328,7 +333,8 @@ import Realm
      `Realm.Configuration.maximumNumberOfActiveVersions` for more information.
      */
     public func freeze() -> LinkingObjects {
-        return LinkingObjects(propertyName: propertyName, handle: handle?.freeze())
+        return LinkingObjects(propertyKeyPath: _propertyKeyPath!, handle: handle?.freeze())
+//        return LinkingObjects(propertyName: propertyName, handle: handle?.freeze())
     }
 
     /**
@@ -338,13 +344,18 @@ import Realm
      If called on a live collection, will return itself.
     */
     public func thaw() -> LinkingObjects<Element>? {
-        return LinkingObjects(propertyName: propertyName, handle: handle?.thaw())
+        return LinkingObjects(propertyKeyPath: _propertyKeyPath!, handle: handle?.thaw())
+//        return LinkingObjects(propertyName: propertyName, handle: handle?.thaw())
     }
 
     // MARK: Implementation
 
     internal init(propertyName: String, handle: RLMLinkingObjectsHandle?) {
         self.propertyName = propertyName
+        self.handle = handle
+    }
+    internal init(propertyKeyPath: PartialKeyPath<ElementType>, handle: RLMLinkingObjectsHandle?) {
+        self._propertyKeyPath = propertyKeyPath
         self.handle = handle
     }
     internal init(objc: RLMResults<AnyObject>) {
@@ -356,7 +367,22 @@ import Realm
         return handle?.results ?? RLMResults<AnyObject>.emptyDetached()
     }
 
-    internal var propertyName: String
+    private var _propertyKeyPath: PartialKeyPath<ElementType>?
+    private var _propertyName: String?
+    
+    internal var propertyName: String {
+        get {
+            let obj = Element.Type()
+            if _propertyName == nil && _propertyKeyPath != nil && RLMObjectBaseObjectSchema(obj) != nil {
+                
+                return _name(for: _propertyKeyPath!)
+            }
+            return _propertyName ?? ""
+        }
+        set {
+            _propertyName = newValue
+        }
+    }
     internal var handle: RLMLinkingObjectsHandle?
     internal var lastAccessedNames: NSMutableArray?
 }

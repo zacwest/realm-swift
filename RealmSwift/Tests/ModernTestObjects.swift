@@ -155,7 +155,8 @@ class ModernAllTypesObject: Object {
     @Persisted var mapOptObjectId: Map<String, ObjectId?>
     @Persisted var mapOptUuid: Map<String, UUID?>
 
-    @Persisted(originProperty: "objectCol")
+//    @Persisted(originProperty: "objectCol23")
+    @Persisted(originPropertyKeyPath: \ModernAllTypesObject.objectCol)
     var linkingObjects: LinkingObjects<ModernAllTypesObject>
 }
 
@@ -335,9 +336,11 @@ class ModernEmbeddedTreeObject1: EmbeddedObject, ModernEmbeddedTreeObject {
     @Persisted var child: ModernEmbeddedTreeObject2?
     @Persisted var children: List<ModernEmbeddedTreeObject2>
 
-    @Persisted(originProperty: "object")
+//    @Persisted(originProperty: "object")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedParentObject.object)
     var parent1: LinkingObjects<ModernEmbeddedParentObject>
-    @Persisted(originProperty: "array")
+//    @Persisted(originProperty: "array")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedParentObject.array)
     var parent2: LinkingObjects<ModernEmbeddedParentObject>
 }
 
@@ -346,18 +349,22 @@ class ModernEmbeddedTreeObject2: EmbeddedObject, ModernEmbeddedTreeObject {
     @Persisted var child: ModernEmbeddedTreeObject3?
     @Persisted var children: List<ModernEmbeddedTreeObject3>
 
-    @Persisted(originProperty: "child")
+//    @Persisted(originProperty: "child")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedTreeObject1.child)
     var parent3: LinkingObjects<ModernEmbeddedTreeObject1>
-    @Persisted(originProperty: "children")
+//    @Persisted(originProperty: "children")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedTreeObject1.children)
     var parent4: LinkingObjects<ModernEmbeddedTreeObject1>
 }
 
 class ModernEmbeddedTreeObject3: EmbeddedObject, ModernEmbeddedTreeObject {
     @Persisted var value = 0
 
-    @Persisted(originProperty: "child")
+//    @Persisted(originProperty: "child")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedTreeObject2.child)
     var parent3: LinkingObjects<ModernEmbeddedTreeObject2>
-    @Persisted(originProperty: "children")
+//    @Persisted(originProperty: "children")
+    @Persisted(originPropertyKeyPath: \ModernEmbeddedTreeObject2.children)
     var parent4: LinkingObjects<ModernEmbeddedTreeObject2>
 }
 

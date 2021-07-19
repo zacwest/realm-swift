@@ -24,7 +24,7 @@ class KeyPathTests: TestCase {
 
     func testModernObjectTopLevel() {
         XCTAssertEqual(_name(for: \ModernAllTypesObject.pk), "pk")
-
+ 
         XCTAssertEqual(_name(for: \ModernAllTypesObject.boolCol), "boolCol")
         XCTAssertEqual(_name(for: \ModernAllTypesObject.intCol), "intCol")
         XCTAssertEqual(_name(for: \ModernAllTypesObject.int8Col), "int8Col")

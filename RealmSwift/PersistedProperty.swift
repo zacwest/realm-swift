@@ -319,6 +319,9 @@ extension Persisted where Value: _PrimaryKey {
 // doing so via a protocol which only that type conforms to.
 public protocol LinkingObjectsProtocol {
     init(fromType: Element.Type, property: String)
+//    init<R, V>(fromType: Element.Type, keyPath: KeyPath<R, V?>) where R : ObjectBase, V : ObjectBase
+    init(fromType: Element.Type, keyPath: PartialKeyPath<Element>)
+//    init<R : ObjectBase>(fromType: R.Type, keyPath: KeyPath<R, LinkingObjects<Element>.ElementType?>)
     associatedtype Element
 }
 extension Persisted where Value: LinkingObjectsProtocol {
@@ -328,8 +331,20 @@ extension Persisted where Value: LinkingObjectsProtocol {
     public init(originProperty: String) {
         self.init(wrappedValue: Value(fromType: Value.Element.self, property: originProperty))
     }
+    
+    /// Declares a LinkingObjects property with the given origin property keyPath.
+    ///
+    /// - param originProperty: The keyPath of the property on the linking object type which links to this object.
+    public init(originPropertyKeyPath: PartialKeyPath<Value.Element>) {
+//    public init<R: ObjectBase>(originPropertyKeyPath: KeyPath<R, Value.Element.Type?>) {
+//        let originPropertyString: String = _name(for: originPropertyKeyPath)
+//        self.init(wrappedValue: Value(fromType: Value.Element.self, property: originPropertyString))
+        self.init(wrappedValue: Value(fromType: Value.Element.self, keyPath: originPropertyKeyPath))
+    }
 }
-extension LinkingObjects: LinkingObjectsProtocol {}
+
+extension LinkingObjects: LinkingObjectsProtocol {
+}
 
 // MARK: - Implementation
 
