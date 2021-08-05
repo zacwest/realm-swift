@@ -2115,6 +2115,16 @@ static const NSInteger NUMBER_OF_BIG_OBJECTS = 2;
         [findOneExpectation2 fulfill];
     }];
     [self waitForExpectationsWithTimeout:60.0 handler:nil];
+
+    XCTestExpectation *findOneExpectation3 = [self expectationWithDescription:@"should return null"];
+    [collection findOneDocumentWhere:@{@"name": @"notInCollection", @"breed": @"notInCollection"}
+                             options:options
+                          completion:^(NSDictionary *document, NSError *error) {
+        XCTAssertNil(document);
+        XCTAssertNil(error);
+        [findOneExpectation3 fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:60.0 handler:nil];
 }
 
 // FIXME: Re-enable once we understand why the server is not setup correctly
