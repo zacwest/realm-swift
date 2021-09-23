@@ -829,162 +829,167 @@ class MigrationTests: TestCase {
         migrateAndTestDefaultRealm { migration, _ in
             var enumerated = false
             migration.enumerateObjects(ofType: "SwiftObject", { oldObj, newObj in
-                XCTAssertEqual((oldObj!["boolCol"] as! Bool), true)
-                XCTAssertEqual((newObj!["boolCol"] as! Bool), true)
-                XCTAssertEqual((oldObj!["intCol"] as! Int), 123)
-                XCTAssertEqual((newObj!["intCol"] as! Int), 123)
-                XCTAssertEqual((oldObj!["int8Col"] as! Int8), 123)
-                XCTAssertEqual((newObj!["int8Col"] as! Int8), 123)
-                XCTAssertEqual((oldObj!["int16Col"] as! Int16), 123)
-                XCTAssertEqual((newObj!["int16Col"] as! Int16), 123)
-                XCTAssertEqual((oldObj!["int32Col"] as! Int32), 123)
-                XCTAssertEqual((newObj!["int32Col"] as! Int32), 123)
-                XCTAssertEqual((oldObj!["int64Col"] as! Int64), 123)
-                XCTAssertEqual((newObj!["int64Col"] as! Int64), 123)
-                XCTAssertEqual((oldObj!["intEnumCol"] as! Int), 1)
-                XCTAssertEqual((newObj!["intEnumCol"] as! Int), 1)
-                XCTAssertEqual((oldObj!["floatCol"] as! Float), 1.23 as Float)
-                XCTAssertEqual((newObj!["floatCol"] as! Float), 1.23 as Float)
-                XCTAssertEqual((oldObj!["doubleCol"] as! Double), 12.3 as Double)
-                XCTAssertEqual((newObj!["doubleCol"] as! Double), 12.3 as Double)
-                XCTAssertEqual((oldObj!["decimalCol"] as! Decimal128), 123e4 as Decimal128)
-                XCTAssertEqual((newObj!["decimalCol"] as! Decimal128), 123e4 as Decimal128)
+                guard let oldObj = oldObj, let newObj = newObj else {
+                    XCTFail("did not get objects in enumerate")
+                    return
+                }
+                XCTAssertEqual((oldObj["boolCol"] as! Bool), true)
+                XCTAssertEqual((newObj["boolCol"] as! Bool), true)
+                XCTAssertEqual((oldObj["intCol"] as! Int), 123)
+                XCTAssertEqual((newObj["intCol"] as! Int), 123)
+                XCTAssertEqual((oldObj["int8Col"] as! Int8), 123)
+                XCTAssertEqual((newObj["int8Col"] as! Int8), 123)
+                XCTAssertEqual((oldObj["int16Col"] as! Int16), 123)
+                XCTAssertEqual((newObj["int16Col"] as! Int16), 123)
+                XCTAssertEqual((oldObj["int32Col"] as! Int32), 123)
+                XCTAssertEqual((newObj["int32Col"] as! Int32), 123)
+                XCTAssertEqual((oldObj["int64Col"] as! Int64), 123)
+                XCTAssertEqual((newObj["int64Col"] as! Int64), 123)
+                XCTAssertEqual((oldObj["intEnumCol"] as! Int), 1)
+                XCTAssertEqual((newObj["intEnumCol"] as! Int), 1)
+                XCTAssertEqual((oldObj["floatCol"] as! Float), 1.23 as Float)
+                XCTAssertEqual((newObj["floatCol"] as! Float), 1.23 as Float)
+                XCTAssertEqual((oldObj["doubleCol"] as! Double), 12.3 as Double)
+                XCTAssertEqual((newObj["doubleCol"] as! Double), 12.3 as Double)
+                XCTAssertEqual((oldObj["decimalCol"] as! Decimal128), 123e4 as Decimal128)
+                XCTAssertEqual((newObj["decimalCol"] as! Decimal128), 123e4 as Decimal128)
 
                 let binaryCol = "a".data(using: String.Encoding.utf8)!
-                XCTAssertEqual((oldObj!["binaryCol"] as! Data), binaryCol)
-                XCTAssertEqual((newObj!["binaryCol"] as! Data), binaryCol)
+                XCTAssertEqual((oldObj["binaryCol"] as! Data), binaryCol)
+                XCTAssertEqual((newObj["binaryCol"] as! Data), binaryCol)
 
                 let dateCol = Date(timeIntervalSince1970: 1)
-                XCTAssertEqual((oldObj!["dateCol"] as! Date), dateCol)
-                XCTAssertEqual((newObj!["dateCol"] as! Date), dateCol)
+                XCTAssertEqual((oldObj["dateCol"] as! Date), dateCol)
+                XCTAssertEqual((newObj["dateCol"] as! Date), dateCol)
 
                 let objectIdCol = ObjectId("1234567890ab1234567890ab")
-                XCTAssertEqual((oldObj!["objectIdCol"] as! ObjectId), objectIdCol)
-                XCTAssertEqual((newObj!["objectIdCol"] as! ObjectId), objectIdCol)
+                XCTAssertEqual((oldObj["objectIdCol"] as! ObjectId), objectIdCol)
+                XCTAssertEqual((newObj["objectIdCol"] as! ObjectId), objectIdCol)
 
-                // FIXME - test that casting to SwiftBoolObject throws
-                XCTAssertEqual(((oldObj!["objectCol"] as! MigrationObject)["boolCol"] as! Bool), true)
-                XCTAssertEqual(((newObj!["objectCol"] as! MigrationObject)["boolCol"] as! Bool), true)
+                XCTAssertNil(oldObj["objectCol"] as? SwiftBoolObject)
+                XCTAssertNil(newObj["objectCol"] as? SwiftBoolObject)
+                XCTAssertEqual(((oldObj["objectCol"] as! MigrationObject)["boolCol"] as! Bool), true)
+                XCTAssertEqual(((newObj["objectCol"] as! MigrationObject)["boolCol"] as! Bool), true)
 
-                XCTAssertEqual((oldObj!["arrayCol"] as! List<MigrationObject>).count, 1)
-                XCTAssertEqual(((oldObj!["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
-                XCTAssertEqual((newObj!["arrayCol"] as! List<MigrationObject>).count, 1)
-                XCTAssertEqual(((newObj!["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual((oldObj["arrayCol"] as! List<MigrationObject>).count, 1)
+                XCTAssertEqual(((oldObj["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual((newObj["arrayCol"] as! List<MigrationObject>).count, 1)
+                XCTAssertEqual(((newObj["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
 
-                XCTAssertEqual(((newObj!["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual(((newObj["arrayCol"] as! List<MigrationObject>)[0]["boolCol"] as! Bool), false)
 
-                XCTAssertEqual((oldObj!["setCol"] as! MutableSet<MigrationObject>).count, 1)
-                XCTAssertEqual(((oldObj!["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
-                XCTAssertEqual((newObj!["setCol"] as! MutableSet<MigrationObject>).count, 1)
-                XCTAssertEqual(((newObj!["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual((oldObj["setCol"] as! MutableSet<MigrationObject>).count, 1)
+                XCTAssertEqual(((oldObj["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual((newObj["setCol"] as! MutableSet<MigrationObject>).count, 1)
+                XCTAssertEqual(((newObj["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
 
-                XCTAssertEqual(((newObj!["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
+                XCTAssertEqual(((newObj["setCol"] as! MutableSet<MigrationObject>)[0]["boolCol"] as! Bool), false)
 
-                XCTAssertEqual((oldObj!["mapCol"] as! Map<String, MigrationObject>).count, 1)
-                XCTAssertEqual(((oldObj!["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
-                XCTAssertEqual((newObj!["mapCol"] as! Map<String, MigrationObject>).count, 1)
-                XCTAssertEqual(((newObj!["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
+                XCTAssertEqual((oldObj["mapCol"] as! Map<String, MigrationObject>).count, 1)
+                XCTAssertEqual(((oldObj["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
+                XCTAssertEqual((newObj["mapCol"] as! Map<String, MigrationObject>).count, 1)
+                XCTAssertEqual(((newObj["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
 
-                XCTAssertEqual(((newObj!["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
+                XCTAssertEqual(((newObj["mapCol"] as! Map<String, MigrationObject>)["key"]?["boolCol"] as! Bool), false)
 
                 let uuidCol: UUID = UUID(uuidString: "137decc8-b300-4954-a233-f89909f4fd89")!
-                XCTAssertEqual((newObj!["uuidCol"] as! UUID), uuidCol)
-                XCTAssertEqual((oldObj!["uuidCol"] as! UUID), uuidCol)
+                XCTAssertEqual((newObj["uuidCol"] as! UUID), uuidCol)
+                XCTAssertEqual((oldObj["uuidCol"] as! UUID), uuidCol)
 
                 let anyValue = AnyRealmValue.string("hello!")
-                XCTAssertEqual(((newObj!["anyCol"] as! String)), anyValue.stringValue)
-                XCTAssertEqual(((oldObj!["anyCol"] as! String)), anyValue.stringValue)
+                XCTAssertEqual(((newObj["anyCol"] as! String)), anyValue.stringValue)
+                XCTAssertEqual(((oldObj["anyCol"] as! String)), anyValue.stringValue)
 
                 // edit all values
-                newObj!["boolCol"] = false
-                newObj!["intCol"] = 1
-                newObj!["int8Col"] = Int8(1)
-                newObj!["int16Col"] = Int16(1)
-                newObj!["int32Col"] = Int32(1)
-                newObj!["int64Col"] = Int64(1)
-                newObj!["intEnumCol"] = IntEnum.value2.rawValue
-                newObj!["floatCol"] = 1.0
-                newObj!["doubleCol"] = 10.0
-                newObj!["binaryCol"] = Data(bytes: "b", count: 1)
-                newObj!["dateCol"] = Date(timeIntervalSince1970: 2)
-                newObj!["decimalCol"] = Decimal128(number: 567e8)
-                newObj!["objectIdCol"] = ObjectId("abcdef123456abcdef123456")
-                newObj!["anyCol"] = 12345
+                newObj["boolCol"] = false
+                newObj["intCol"] = 1
+                newObj["int8Col"] = Int8(1)
+                newObj["int16Col"] = Int16(1)
+                newObj["int32Col"] = Int32(1)
+                newObj["int64Col"] = Int64(1)
+                newObj["intEnumCol"] = IntEnum.value2.rawValue
+                newObj["floatCol"] = 1.0
+                newObj["doubleCol"] = 10.0
+                newObj["binaryCol"] = Data(bytes: "b", count: 1)
+                newObj["dateCol"] = Date(timeIntervalSince1970: 2)
+                newObj["decimalCol"] = Decimal128(number: 567e8)
+                newObj["objectIdCol"] = ObjectId("abcdef123456abcdef123456")
+                newObj["anyCol"] = 12345
 
                 let falseObj = SwiftBoolObject(value: [false])
-                newObj!["objectCol"] = falseObj
+                newObj["objectCol"] = falseObj
 
-                var list = newObj!["arrayCol"] as! List<MigrationObject>
+                var list = newObj["arrayCol"] as! List<MigrationObject>
                 list[0]["boolCol"] = true
-                list.append(newObj!["objectCol"] as! MigrationObject)
+                list.append(newObj["objectCol"] as! MigrationObject)
 
                 let trueObj = migration.create(SwiftBoolObject.className(), value: [true])
                 list.append(trueObj)
 
-                var set = newObj!["setCol"] as! MutableSet<MigrationObject>
+                var set = newObj["setCol"] as! MutableSet<MigrationObject>
                 set[0]["boolCol"] = true
-                set.insert(newObj!["objectCol"] as! MigrationObject)
+                set.insert(newObj["objectCol"] as! MigrationObject)
                 set.insert(trueObj)
 
                 // verify list property
-                list = newObj!["arrayCol"] as! List<MigrationObject>
+                list = newObj["arrayCol"] as! List<MigrationObject>
                 XCTAssertEqual(list.count, 3)
                 XCTAssertEqual((list[0]["boolCol"] as! Bool), true)
                 XCTAssertEqual((list[1]["boolCol"] as! Bool), false)
                 XCTAssertEqual((list[2]["boolCol"] as! Bool), true)
 
-                list = newObj!.dynamicList("arrayCol")
+                list = newObj.dynamicList("arrayCol")
                 XCTAssertEqual(list.count, 3)
                 XCTAssertEqual((list[0]["boolCol"] as! Bool), true)
                 XCTAssertEqual((list[1]["boolCol"] as! Bool), false)
                 XCTAssertEqual((list[2]["boolCol"] as! Bool), true)
 
                 // verify set property
-                set = newObj!["setCol"] as! MutableSet<MigrationObject>
+                set = newObj["setCol"] as! MutableSet<MigrationObject>
                 XCTAssertEqual(set.count, 3)
                 XCTAssertEqual((set[0]["boolCol"] as! Bool), true)
                 XCTAssertEqual((set[1]["boolCol"] as! Bool), false)
                 XCTAssertEqual((set[2]["boolCol"] as! Bool), true)
 
-                set = newObj!.dynamicMutableSet("setCol")
+                set = newObj.dynamicMutableSet("setCol")
                 XCTAssertEqual(set.count, 3)
                 XCTAssertEqual((set[0]["boolCol"] as! Bool), true)
                 XCTAssertEqual((set[1]["boolCol"] as! Bool), false)
                 XCTAssertEqual((set[2]["boolCol"] as! Bool), true)
 
                 // verify map property
-                var map = newObj!["mapCol"] as! Map<String, MigrationObject>
+                var map = newObj["mapCol"] as! Map<String, MigrationObject>
                 XCTAssertEqual(map["key"]!["boolCol"] as! Bool, false)
                 XCTAssertEqual(map.count, 1)
 
                 map["key"]!["boolCol"] = true
-                map = newObj!.dynamicMap("mapCol")
+                map = newObj.dynamicMap("mapCol")
                 XCTAssertEqual(map.count, 1)
                 XCTAssertEqual((map["key"]!["boolCol"] as! Bool), true)
 
-                self.assertThrows(newObj!.value(forKey: "noSuchKey"))
-                self.assertThrows(newObj!.setValue(1, forKey: "noSuchKey"))
+                self.assertThrows(newObj.value(forKey: "noSuchKey"))
+                self.assertThrows(newObj.setValue(1, forKey: "noSuchKey"))
 
                 // set it again
-                newObj!["arrayCol"] = [falseObj, trueObj]
+                newObj["arrayCol"] = [falseObj, trueObj]
                 XCTAssertEqual(list.count, 2)
 
-                newObj!["arrayCol"] = [SwiftBoolObject(value: [false])]
+                newObj["arrayCol"] = [SwiftBoolObject(value: [false])]
                 XCTAssertEqual(list.count, 1)
                 XCTAssertEqual((list[0]["boolCol"] as! Bool), false)
 
-                newObj!["setCol"] = [falseObj, trueObj]
+                newObj["setCol"] = [falseObj, trueObj]
                 XCTAssertEqual(set.count, 2)
 
-                newObj!["setCol"] = [SwiftBoolObject(value: [false])]
+                newObj["setCol"] = [SwiftBoolObject(value: [false])]
                 XCTAssertEqual(set.count, 1)
                 XCTAssertEqual((set[0]["boolCol"] as! Bool), false)
 
-                newObj!["mapCol"] = ["key": SwiftBoolObject(value: [false])]
+                newObj["mapCol"] = ["key": SwiftBoolObject(value: [false])]
                 XCTAssertEqual(map.count, 1)
                 XCTAssertEqual((map["key"]?["boolCol"] as! Bool), false)
 
-                self.assertMatches(newObj!.description, "SwiftObject \\{\n\tboolCol = 0;\n\tintCol = 1;\n\tint8Col = 1;\n\tint16Col = 1;\n\tint32Col = 1;\n\tint64Col = 1;\n\tintEnumCol = 3;\n\tfloatCol = 1;\n\tdoubleCol = 10;\n\tstringCol = a;\n\tbinaryCol = <.*62.*>;\n\tdateCol = 1970-01-01 00:00:02 \\+0000;\n\tdecimalCol = 5.67E10;\n\tobjectIdCol = abcdef123456abcdef123456;\n\tobjectCol = SwiftBoolObject \\{\n\t\tboolCol = 0;\n\t\\};\n\tuuidCol = 137DECC8-B300-4954-A233-F89909F4FD89;\n\tanyCol = 12345;\n\tarrayCol = List<SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\t\\[0\\] SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\tsetCol = MutableSet<SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\t\\[0\\] SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\tmapCol = Map<string, SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\\[key\\]: SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\\}")
+                self.assertMatches(newObj.description, "SwiftObject \\{\n\tboolCol = 0;\n\tintCol = 1;\n\tint8Col = 1;\n\tint16Col = 1;\n\tint32Col = 1;\n\tint64Col = 1;\n\tintEnumCol = 3;\n\tfloatCol = 1;\n\tdoubleCol = 10;\n\tstringCol = a;\n\tbinaryCol = <.*62.*>;\n\tdateCol = 1970-01-01 00:00:02 \\+0000;\n\tdecimalCol = 5.67E10;\n\tobjectIdCol = abcdef123456abcdef123456;\n\tobjectCol = SwiftBoolObject \\{\n\t\tboolCol = 0;\n\t\\};\n\tuuidCol = 137DECC8-B300-4954-A233-F89909F4FD89;\n\tanyCol = 12345;\n\tarrayCol = List<SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\t\\[0\\] SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\tsetCol = MutableSet<SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\t\\[0\\] SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\tmapCol = Map<string, SwiftBoolObject> <0x[0-9a-f]+> \\(\n\t\\[key\\]: SwiftBoolObject \\{\n\t\t\tboolCol = 0;\n\t\t\\}\n\t\\);\n\\}")
 
                 enumerated = true
             })
@@ -1021,6 +1026,31 @@ class MigrationTests: TestCase {
 
         // make sure we added new bool objects as object property and in the list
         XCTAssertEqual(try! Realm().objects(SwiftBoolObject.self).count, 10)
+    }
+
+    func testMigrationObjectSchema() {
+        let properties: [Property] = autoreleasepool {
+            let realm = try! Realm()
+            return try! realm.write {
+                let obj = SwiftObject()
+                realm.add(obj)
+                return obj.objectSchema.properties
+            }
+        }
+
+        migrateAndTestDefaultRealm { migration, _ in
+            var enumerated = false
+            migration.enumerateObjects(ofType: "SwiftObject") { oldObj, newObj in
+                guard let oldObj = oldObj, let newObj = newObj else {
+                    XCTFail("did not get objects in enumerate")
+                    return
+                }
+                enumerated = true
+                XCTAssertEqual(oldObj.objectSchema.properties, properties)
+                XCTAssertEqual(newObj.objectSchema.properties, properties)
+            }
+            XCTAssertTrue(enumerated)
+        }
     }
 
     func testFailOnSchemaMismatch() {
