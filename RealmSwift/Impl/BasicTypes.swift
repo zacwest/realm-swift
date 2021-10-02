@@ -21,7 +21,7 @@ import Realm.Private
 
 // MARK: - Property Types
 
-extension Int: SchemaDiscoverable {
+extension Int: SchemaDiscoverable, _BasicSnapshottable {
     public static var _rlmType: PropertyType { .int }
 }
 
@@ -53,7 +53,7 @@ extension Double: SchemaDiscoverable {
     public static var _rlmType: PropertyType { .double }
 }
 
-extension String: SchemaDiscoverable {
+extension String: SchemaDiscoverable, _BasicSnapshottable {
     public static var _rlmType: PropertyType { .string }
 }
 

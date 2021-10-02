@@ -78,6 +78,7 @@ NS_RETURNS_RETAINED;
 // promotingExisting should be true if the object was previously used as an
 // unmanaged object, and false if it is a newly created object.
 void RLMInitializeSwiftAccessor(RLMObjectBase *object, bool promotingExisting);
+void RLMDeinitializeSwiftAccessor(RLMObjectBase *object, bool promotingExisting);
 
 #ifdef __cplusplus
 }

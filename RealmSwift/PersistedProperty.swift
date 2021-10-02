@@ -135,7 +135,20 @@ public struct Persisted<Value: _Persistable> {
     internal mutating func initialize(_ object: ObjectBase, key: PropertyKey) {
         storage = .managed(key: key)
     }
-
+    // Called via RLMInitializeSwiftAccessor() to initialize the wrapper on a
+    // newly created managed accessor object.
+    internal mutating func deinitialize(_ object: ObjectBase, key: PropertyKey) {
+        if case .unmanaged(_) = storage {
+//            print(v)
+            return
+        }
+        var v = Value._rlmGetProperty(object, key)
+        if let val = v as? ObjectBase {
+            let snapshot = val.snapshot()
+            v = snapshot.demotedObject as! Value
+        }
+        storage = .unmanaged(value: v)
+    }
     // Collection types use this instead of the above because when promoting a
     // unmanaged object to a managed object we want to reuse the existing collection
     // object if it exists. Currently it always will exist because we read the

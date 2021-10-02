@@ -1914,4 +1914,326 @@ class ObjectTests: TestCase {
         XCTAssertFalse(frozen.thaw()!.boolCol)
         XCTAssertFalse(thawed.boolCol)
     }
+
+    /**
+     class ModernAllTypesObject: Object {
+         @Persisted(primaryKey: true) var pk: ObjectId
+         var ignored: Int = 1
+
+         @Persisted var boolCol: Bool
+         @Persisted var intCol: Int
+         @Persisted var int8Col: Int8 = 1
+         @Persisted var int16Col: Int16 = 2
+         @Persisted var int32Col: Int32 = 3
+         @Persisted var int64Col: Int64 = 4
+         @Persisted var floatCol: Float = 5
+         @Persisted var doubleCol: Double = 6
+         @Persisted var stringCol: String
+         @Persisted var binaryCol: Data
+         @Persisted var dateCol: Date
+         @Persisted var decimalCol: Decimal128
+         @Persisted var objectIdCol: ObjectId
+         @Persisted var objectCol: ModernAllTypesObject?
+         @Persisted var arrayCol: List<ModernAllTypesObject>
+         @Persisted var setCol: MutableSet<ModernAllTypesObject>
+         @Persisted var anyCol: AnyRealmValue
+         @Persisted var uuidCol: UUID
+         @Persisted var intEnumCol: ModernIntEnum
+         @Persisted var stringEnumCol: ModernStringEnum
+
+         @Persisted var optIntCol: Int?
+         @Persisted var optInt8Col: Int8?
+         @Persisted var optInt16Col: Int16?
+         @Persisted var optInt32Col: Int32?
+         @Persisted var optInt64Col: Int64?
+         @Persisted var optFloatCol: Float?
+         @Persisted var optDoubleCol: Double?
+         @Persisted var optBoolCol: Bool?
+         @Persisted var optStringCol: String?
+         @Persisted var optBinaryCol: Data?
+         @Persisted var optDateCol: Date?
+         @Persisted var optDecimalCol: Decimal128?
+         @Persisted var optObjectIdCol: ObjectId?
+         @Persisted var optUuidCol: UUID?
+         @Persisted var optIntEnumCol: ModernIntEnum?
+         @Persisted var optStringEnumCol: ModernStringEnum?
+
+         @Persisted var arrayBool: List<Bool>
+         @Persisted var arrayInt: List<Int>
+         @Persisted var arrayInt8: List<Int8>
+         @Persisted var arrayInt16: List<Int16>
+         @Persisted var arrayInt32: List<Int32>
+         @Persisted var arrayInt64: List<Int64>
+         @Persisted var arrayFloat: List<Float>
+         @Persisted var arrayDouble: List<Double>
+         @Persisted var arrayString: List<String>
+         @Persisted var arrayBinary: List<Data>
+         @Persisted var arrayDate: List<Date>
+         @Persisted var arrayDecimal: List<Decimal128>
+         @Persisted var arrayObjectId: List<ObjectId>
+         @Persisted var arrayAny: List<AnyRealmValue>
+         @Persisted var arrayUuid: List<UUID>
+
+         @Persisted var arrayOptBool: List<Bool?>
+         @Persisted var arrayOptInt: List<Int?>
+         @Persisted var arrayOptInt8: List<Int8?>
+         @Persisted var arrayOptInt16: List<Int16?>
+         @Persisted var arrayOptInt32: List<Int32?>
+         @Persisted var arrayOptInt64: List<Int64?>
+         @Persisted var arrayOptFloat: List<Float?>
+         @Persisted var arrayOptDouble: List<Double?>
+         @Persisted var arrayOptString: List<String?>
+         @Persisted var arrayOptBinary: List<Data?>
+         @Persisted var arrayOptDate: List<Date?>
+         @Persisted var arrayOptDecimal: List<Decimal128?>
+         @Persisted var arrayOptObjectId: List<ObjectId?>
+         @Persisted var arrayOptUuid: List<UUID?>
+
+         @Persisted var setBool: MutableSet<Bool>
+         @Persisted var setInt: MutableSet<Int>
+         @Persisted var setInt8: MutableSet<Int8>
+         @Persisted var setInt16: MutableSet<Int16>
+         @Persisted var setInt32: MutableSet<Int32>
+         @Persisted var setInt64: MutableSet<Int64>
+         @Persisted var setFloat: MutableSet<Float>
+         @Persisted var setDouble: MutableSet<Double>
+         @Persisted var setString: MutableSet<String>
+         @Persisted var setBinary: MutableSet<Data>
+         @Persisted var setDate: MutableSet<Date>
+         @Persisted var setDecimal: MutableSet<Decimal128>
+         @Persisted var setObjectId: MutableSet<ObjectId>
+         @Persisted var setAny: MutableSet<AnyRealmValue>
+         @Persisted var setUuid: MutableSet<UUID>
+
+         @Persisted var setOptBool: MutableSet<Bool?>
+         @Persisted var setOptInt: MutableSet<Int?>
+         @Persisted var setOptInt8: MutableSet<Int8?>
+         @Persisted var setOptInt16: MutableSet<Int16?>
+         @Persisted var setOptInt32: MutableSet<Int32?>
+         @Persisted var setOptInt64: MutableSet<Int64?>
+         @Persisted var setOptFloat: MutableSet<Float?>
+         @Persisted var setOptDouble: MutableSet<Double?>
+         @Persisted var setOptString: MutableSet<String?>
+         @Persisted var setOptBinary: MutableSet<Data?>
+         @Persisted var setOptDate: MutableSet<Date?>
+         @Persisted var setOptDecimal: MutableSet<Decimal128?>
+         @Persisted var setOptObjectId: MutableSet<ObjectId?>
+         @Persisted var setOptUuid: MutableSet<UUID?>
+
+         @Persisted var mapBool: Map<String, Bool>
+         @Persisted var mapInt: Map<String, Int>
+         @Persisted var mapInt8: Map<String, Int8>
+         @Persisted var mapInt16: Map<String, Int16>
+         @Persisted var mapInt32: Map<String, Int32>
+         @Persisted var mapInt64: Map<String, Int64>
+         @Persisted var mapFloat: Map<String, Float>
+         @Persisted var mapDouble: Map<String, Double>
+         @Persisted var mapString: Map<String, String>
+         @Persisted var mapBinary: Map<String, Data>
+         @Persisted var mapDate: Map<String, Date>
+         @Persisted var mapDecimal: Map<String, Decimal128>
+         @Persisted var mapObjectId: Map<String, ObjectId>
+         @Persisted var mapAny: Map<String, AnyRealmValue>
+         @Persisted var mapUuid: Map<String, UUID>
+
+         @Persisted var mapOptBool: Map<String, Bool?>
+         @Persisted var mapOptInt: Map<String, Int?>
+         @Persisted var mapOptInt8: Map<String, Int8?>
+         @Persisted var mapOptInt16: Map<String, Int16?>
+         @Persisted var mapOptInt32: Map<String, Int32?>
+         @Persisted var mapOptInt64: Map<String, Int64?>
+         @Persisted var mapOptFloat: Map<String, Float?>
+         @Persisted var mapOptDouble: Map<String, Double?>
+         @Persisted var mapOptString: Map<String, String?>
+         @Persisted var mapOptBinary: Map<String, Data?>
+         @Persisted var mapOptDate: Map<String, Date?>
+         @Persisted var mapOptDecimal: Map<String, Decimal128?>
+         @Persisted var mapOptObjectId: Map<String, ObjectId?>
+         @Persisted var mapOptUuid: Map<String, UUID?>
+
+         @Persisted(originProperty: "objectCol")
+         var linkingObjects: LinkingObjects<ModernAllTypesObject>
+     }
+     */
+    func testSnapshot() {
+        var ignored: Int = 1
+
+        var snapshottedBoolCol: Bool = true
+        var snapshottedIntCol: Int = 1
+        var snapshottedInt8Col: Int8 = 2
+        var snapshottedInt16Col: Int16 = 3
+        var snapshottedInt32Col: Int32 = 5
+        var snapshottedInt64Col: Int64 = 8
+        var snapshottedFloatCol: Float = 13
+        var snapshottedDoubleCol: Double = 21
+        var snapshottedStringCol: String = "foo"
+        var snapshottedBinaryCol: Data = Data([1, 2, 3])
+        var snapshottedDateCol: Date = Date()
+        var snapshottedDecimalCol: Decimal128 = 34
+        var snapshottedObjectIdCol: ObjectId = ObjectId()
+        var snapshottedObjectCol = ModernAllTypesObject()
+        var snapshottedArrayCol = List<ModernAllTypesObject>()
+        var snapshottedSetCol = MutableSet<ModernAllTypesObject>()
+        var snapshottedAnyCol: AnyRealmValue = .int(55)
+        var snapshottedUuidCol: UUID = UUID()
+        var snapshottedIntEnumCol: ModernIntEnum = .value1
+        var snapshottedStringEnumCol: ModernStringEnum = .value1
+
+//        @Persisted var optIntCol: Int?
+//        @Persisted var optInt8Col: Int8?
+//        @Persisted var optInt16Col: Int16?
+//        @Persisted var optInt32Col: Int32?
+//        @Persisted var optInt64Col: Int64?
+//        @Persisted var optFloatCol: Float?
+//        @Persisted var optDoubleCol: Double?
+//        @Persisted var optBoolCol: Bool?
+//        @Persisted var optStringCol: String?
+//        @Persisted var optBinaryCol: Data?
+//        @Persisted var optDateCol: Date?
+//        @Persisted var optDecimalCol: Decimal128?
+//        @Persisted var optObjectIdCol: ObjectId?
+//        @Persisted var optUuidCol: UUID?
+//        @Persisted var optIntEnumCol: ModernIntEnum?
+//        @Persisted var optStringEnumCol: ModernStringEnum?
+//
+//        @Persisted var arrayBool: List<Bool>
+//        @Persisted var arrayInt: List<Int>
+//        @Persisted var arrayInt8: List<Int8>
+//        @Persisted var arrayInt16: List<Int16>
+//        @Persisted var arrayInt32: List<Int32>
+//        @Persisted var arrayInt64: List<Int64>
+//        @Persisted var arrayFloat: List<Float>
+//        @Persisted var arrayDouble: List<Double>
+//        @Persisted var arrayString: List<String>
+//        @Persisted var arrayBinary: List<Data>
+//        @Persisted var arrayDate: List<Date>
+//        @Persisted var arrayDecimal: List<Decimal128>
+//        @Persisted var arrayObjectId: List<ObjectId>
+//        @Persisted var arrayAny: List<AnyRealmValue>
+//        @Persisted var arrayUuid: List<UUID>
+//
+//        @Persisted var arrayOptBool: List<Bool?>
+//        @Persisted var arrayOptInt: List<Int?>
+//        @Persisted var arrayOptInt8: List<Int8?>
+//        @Persisted var arrayOptInt16: List<Int16?>
+//        @Persisted var arrayOptInt32: List<Int32?>
+//        @Persisted var arrayOptInt64: List<Int64?>
+//        @Persisted var arrayOptFloat: List<Float?>
+//        @Persisted var arrayOptDouble: List<Double?>
+//        @Persisted var arrayOptString: List<String?>
+//        @Persisted var arrayOptBinary: List<Data?>
+//        @Persisted var arrayOptDate: List<Date?>
+//        @Persisted var arrayOptDecimal: List<Decimal128?>
+//        @Persisted var arrayOptObjectId: List<ObjectId?>
+//        @Persisted var arrayOptUuid: List<UUID?>
+//
+//        @Persisted var setBool: MutableSet<Bool>
+//        @Persisted var setInt: MutableSet<Int>
+//        @Persisted var setInt8: MutableSet<Int8>
+//        @Persisted var setInt16: MutableSet<Int16>
+//        @Persisted var setInt32: MutableSet<Int32>
+//        @Persisted var setInt64: MutableSet<Int64>
+//        @Persisted var setFloat: MutableSet<Float>
+//        @Persisted var setDouble: MutableSet<Double>
+//        @Persisted var setString: MutableSet<String>
+//        @Persisted var setBinary: MutableSet<Data>
+//        @Persisted var setDate: MutableSet<Date>
+//        @Persisted var setDecimal: MutableSet<Decimal128>
+//        @Persisted var setObjectId: MutableSet<ObjectId>
+//        @Persisted var setAny: MutableSet<AnyRealmValue>
+//        @Persisted var setUuid: MutableSet<UUID>
+//
+//        @Persisted var setOptBool: MutableSet<Bool?>
+//        @Persisted var setOptInt: MutableSet<Int?>
+//        @Persisted var setOptInt8: MutableSet<Int8?>
+//        @Persisted var setOptInt16: MutableSet<Int16?>
+//        @Persisted var setOptInt32: MutableSet<Int32?>
+//        @Persisted var setOptInt64: MutableSet<Int64?>
+//        @Persisted var setOptFloat: MutableSet<Float?>
+//        @Persisted var setOptDouble: MutableSet<Double?>
+//        @Persisted var setOptString: MutableSet<String?>
+//        @Persisted var setOptBinary: MutableSet<Data?>
+//        @Persisted var setOptDate: MutableSet<Date?>
+//        @Persisted var setOptDecimal: MutableSet<Decimal128?>
+//        @Persisted var setOptObjectId: MutableSet<ObjectId?>
+//        @Persisted var setOptUuid: MutableSet<UUID?>
+//
+//        @Persisted var mapBool: Map<String, Bool>
+//        @Persisted var mapInt: Map<String, Int>
+//        @Persisted var mapInt8: Map<String, Int8>
+//        @Persisted var mapInt16: Map<String, Int16>
+//        @Persisted var mapInt32: Map<String, Int32>
+//        @Persisted var mapInt64: Map<String, Int64>
+//        @Persisted var mapFloat: Map<String, Float>
+//        @Persisted var mapDouble: Map<String, Double>
+//        @Persisted var mapString: Map<String, String>
+//        @Persisted var mapBinary: Map<String, Data>
+//        @Persisted var mapDate: Map<String, Date>
+//        @Persisted var mapDecimal: Map<String, Decimal128>
+//        @Persisted var mapObjectId: Map<String, ObjectId>
+//        @Persisted var mapAny: Map<String, AnyRealmValue>
+//        @Persisted var mapUuid: Map<String, UUID>
+//
+//        @Persisted var mapOptBool: Map<String, Bool?>
+//        @Persisted var mapOptInt: Map<String, Int?>
+//        @Persisted var mapOptInt8: Map<String, Int8?>
+//        @Persisted var mapOptInt16: Map<String, Int16?>
+//        @Persisted var mapOptInt32: Map<String, Int32?>
+//        @Persisted var mapOptInt64: Map<String, Int64?>
+//        @Persisted var mapOptFloat: Map<String, Float?>
+//        @Persisted var mapOptDouble: Map<String, Double?>
+//        @Persisted var mapOptString: Map<String, String?>
+//        @Persisted var mapOptBinary: Map<String, Data?>
+//        @Persisted var mapOptDate: Map<String, Date?>
+//        @Persisted var mapOptDecimal: Map<String, Decimal128?>
+//        @Persisted var mapOptObjectId: Map<String, ObjectId?>
+//        @Persisted var mapOptUuid: Map<String, UUID?>
+//
+//        @Persisted(originProperty: "objectCol")
+//        var linkingObjects: LinkingObjects<ModernAllTypesObject>
+        let realm = try! Realm()
+
+        let managedObject = ModernAllTypesObject()
+        try! realm.write {
+            realm.add(managedObject)
+            managedObject.boolCol = snapshottedBoolCol
+            managedObject.intCol = snapshottedIntCol
+            managedObject.int8Col = snapshottedInt8Col
+            managedObject.int16Col = snapshottedInt16Col
+            managedObject.int32Col = snapshottedInt32Col
+            managedObject.int64Col = snapshottedInt64Col
+            managedObject.floatCol = snapshottedFloatCol
+            managedObject.doubleCol = snapshottedDoubleCol
+            managedObject.stringCol = snapshottedStringCol
+            managedObject.binaryCol = snapshottedBinaryCol
+            managedObject.dateCol = snapshottedDateCol
+            managedObject.decimalCol = snapshottedDecimalCol
+            managedObject.objectIdCol = snapshottedObjectIdCol
+            managedObject.objectCol = snapshottedObjectCol
+            managedObject.arrayCol = snapshottedArrayCol
+            managedObject.setCol = snapshottedSetCol
+            managedObject.anyCol = snapshottedAnyCol
+            managedObject.uuidCol = snapshottedUuidCol
+            managedObject.intEnumCol = snapshottedIntEnumCol
+            managedObject.stringEnumCol = snapshottedStringEnumCol
+
+            managedObject.objectCol?.stringCol = "bar"
+            managedObject.arrayCol.append(ModernAllTypesObject())
+            managedObject.arrayCol.first!.stringCol = "baz"
+        }
+
+        let snapshot = managedObject.snapshot()
+        XCTAssertEqual(snapshot.stringCol, snapshottedStringCol)
+//        XCTAssertEqual(snapshot.arrayCol.first, snapshottedArrayCol.first)
+        try! realm.write {
+            managedObject.arrayCol.first!.stringCol = "qux"
+            managedObject.objectCol?.stringCol = "quux"
+//            obj.stringCol = "Thomas"
+//            obj2.stringCol = "Caoimhe"
+        }
+//        XCTAssertEqual(snapshot.arrayCol.first!.stringCol, "baz")
+        XCTAssertEqual(snapshot.objectCol?.stringCol, "bar")
+//        XCTAssertEqual(snapshot.stringCol, "Jay")
+//        XCTAssertEqual(snapshot.objectCol?.stringCol, "Aoife")
+    }
 }

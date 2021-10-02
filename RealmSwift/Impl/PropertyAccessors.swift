@@ -203,6 +203,10 @@ internal class PersistedPropertyAccessor<T: _Persistable>: RLMManagedPropertyAcc
         bound(property, parent).pointee.initialize(parent, key: PropertyKey(property.index))
     }
 
+    @objc override class func deinitialize(_ property: RLMProperty, on parent: RLMObjectBase) {
+        bound(property, parent).pointee.deinitialize(parent, key: PropertyKey(property.index))
+    }
+
     @objc override class func observe(_ property: RLMProperty, on parent: RLMObjectBase) {
         bound(property, parent).pointee.observe(parent, property: property)
     }
@@ -244,6 +248,22 @@ internal class PersistedListAccessor<Element: _Persistable>: PersistedPropertyAc
             existing._rlmCollection = RLMGetSwiftPropertyArray(parent, key)
         }
     }
+
+    override class func demote(_ property: RLMProperty, on parent: RLMObjectBase) {
+        let key = PropertyKey(property.index)
+        if let existing = bound(property, parent).pointee.initializeCollection(parent, key: key) {
+            let array = RLMArray<AnyObject>(objectType: property.type, optional: property.optional)
+            if property.type == .object {
+                for object in existing {
+                    let snapshot = (object as! RLMObjectBase).snapshot().demotedObject
+                    array.add(snapshot)
+                }
+            } else {
+                array.addObjects(existing)
+            }
+            existing._rlmCollection = array
+        }
+    }
 }
 
 internal class PersistedSetAccessor<Element: _Persistable>: PersistedPropertyAccessor<MutableSet<Element>>
@@ -277,7 +297,9 @@ internal class PersistedLinkingObjectsAccessor<Element: ObjectBase>: RLMManagedP
     private static func bound(_ property: RLMProperty, _ obj: RLMObjectBase) -> UnsafeMutablePointer<Persisted<LinkingObjects<Element>>> {
         return ptr(property, obj).assumingMemoryBound(to: Persisted<LinkingObjects<Element>>.self)
     }
-
+    override class func deinitialize(_ property: RLMProperty, on parent: RLMObjectBase) {
+        bound(property, parent).pointee.deinitialize(parent, key: PropertyKey(property.index))
+    }
     @objc override class func initialize(_ property: RLMProperty, on parent: RLMObjectBase) {
         bound(property, parent).pointee.initialize(parent, key: PropertyKey(property.index))
     }

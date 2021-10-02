@@ -157,3 +157,112 @@ extension ObjectBase {
         }
     }
 }
+
+public protocol _BasicSnapshottable {}
+public protocol _ComplexSnapshottable {}
+public protocol _CollectionSnapshottable {}
+
+extension _CollectionSnapshottable where Self: RealmCollection {
+    public func snapshot() -> Snapshot<Self> {
+        return Snapshot(self)
+    }
+}
+extension _ComplexSnapshottable where Self: ObjectBase {
+    public func snapshot() -> Snapshot<Self> {
+        return Snapshot(self)
+    }
+}
+
+extension ObjectBase: _ComplexSnapshottable, ThreadConfined {
+    /// The Realm which manages the object, or `nil` if the object is unmanaged.
+    public var realm: Realm? {
+        if let rlmReam = RLMObjectBaseRealm(self) {
+            return Realm(rlmReam)
+        }
+        return nil
+    }
+    /**
+     Indicates if this object is frozen.
+
+     - see: `Object.freeze()`
+     */
+    public var isFrozen: Bool { return realm?.isFrozen ?? false }
+
+    /**
+     Returns a frozen (immutable) snapshot of this object.
+
+     The frozen copy is an immutable object which contains the same data as this
+     object currently contains, but will not update when writes are made to the
+     containing Realm. Unlike live objects, frozen objects can be accessed from any
+     thread.
+
+     - warning: Holding onto a frozen object for an extended period while performing write
+     transaction on the Realm may result in the Realm file growing to large sizes. See
+     `Realm.Configuration.maximumNumberOfActiveVersions` for more information.
+     - warning: This method can only be called on a managed object.
+     */
+    public func freeze() -> Self {
+        guard let realm = realm else { throwRealmException("Unmanaged objects cannot be frozen.") }
+        return realm.freeze(self)
+    }
+
+    /**
+     Returns a live (mutable) reference of this object.
+
+     This method creates a managed accessor to a live copy of the same frozen object.
+     Will return self if called on an already live object.
+     */
+    public func thaw() -> Self? {
+        guard let realm = realm else { throwRealmException("Unmanaged objects cannot be thawed.") }
+        return realm.thaw(self)
+    }
+}
+
+class Person: Object {
+    @Persisted var name: String
+}
+@dynamicMemberLookup
+public struct Snapshot<T: ThreadConfined> {
+    internal var demotedObject: T
+
+    init(_ object: T) where T: ObjectBase {
+        Person().observe { change in
+            switch change {
+            case .error(_):
+                break
+            case .change(let object, let property):
+                break
+            case .deleted:
+                break
+            }
+        }
+        if object.isInvalidated || object.realm == nil {
+            demotedObject = object
+        } else {
+            demotedObject = RLMObjectMove(object, object.realm!.rlmRealm) as! T
+        }
+    }
+    init(_ object: T) where T: RealmCollection {
+//        if object.isInvalidated || object.realm == nil {
+            demotedObject = object
+//        } else {
+////            demotedObject = RLMObjectMove(object, object.realm!.rlmRealm) as! T
+//            PersistedListAccessor<T.Element>.demote(<#T##RLMProperty#>, on: <#T##RLMObjectBase#>)
+//        }
+    }
+    public subscript<V>(dynamicMember keyPath: KeyPath<T, V>) -> V where V: _BasicSnapshottable {
+        demotedObject[keyPath: keyPath]
+    }
+    public subscript<V>(dynamicMember keyPath: KeyPath<T, V?>) -> Snapshot<V>? where V: ObjectBase {
+        demotedObject[keyPath: keyPath]?.snapshot()
+    }
+    public subscript<V>(dynamicMember keyPath: KeyPath<T, V>) -> Snapshot<V> where V: RealmCollection {
+        Snapshot<V>(
+        demotedObject[keyPath: keyPath]//.snapshot()
+        )
+    }
+}
+
+extension List: _CollectionSnapshottable {
+
+}

@@ -522,6 +522,18 @@ id RLMObjectThaw(RLMObjectBase *obj) {
     return resolveObject(obj, obj->_realm.thaw);
 }
 
+id RLMObjectMove(RLMObjectBase *obj, RLMRealm *realm) {
+    RLMObjectBase *resolved = RLMCreateManagedAccessor(obj.class, &realm->_info[obj->_info->rlmObjectSchema.className]);
+    resolved->_row = realm->_realm->import_copy_of(obj->_row);
+    if (!resolved->_row.is_valid()) {
+        return nil;
+    }
+//    RLMInitializeSwiftAccessor(resolved, false);
+    RLMDeinitializeSwiftAccessor(resolved, false);
+
+    return resolved;
+ }
+
 id RLMValidatedValueForProperty(id object, NSString *key, NSString *className) {
     @try {
         return [object valueForKey:key];

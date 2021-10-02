@@ -103,6 +103,32 @@ void RLMInitializeSwiftAccessor(__unsafe_unretained RLMObjectBase *const object,
     }
 }
 
+void RLMDeinitializeSwiftAccessor(__unsafe_unretained RLMObjectBase *const object, bool promoteExisting) {
+    if (!object || !object->_row || !object->_objectSchema->_isSwiftClass) {
+        return;
+    }
+    if (![object isKindOfClass:object->_objectSchema.objectClass]) {
+        // It can be a different class if it's a dynamic object, and those don't
+        // require any init here (and would crash since they don't have the ivars)
+        return;
+    }
+
+//    if (promoteExisting) {
+        for (RLMProperty *prop in object->_objectSchema.swiftGenericProperties) {
+            [prop.swiftAccessor demote:prop on:object];
+        }
+//    }
+//    else {
+        for (RLMProperty *prop in object->_objectSchema.swiftGenericProperties) {
+            [prop.swiftAccessor deinitialize:prop on:object];
+        }
+//    }
+    object_setClass(object, object->_objectSchema.unmanagedClass);
+    object->_info = nil;
+    object->_realm = nil;
+    object->_row = realm::Obj();
+}
+
 void RLMVerifyHasPrimaryKey(Class cls) {
     RLMObjectSchema *schema = [cls sharedSchema];
     if (!schema.primaryKeyProperty) {

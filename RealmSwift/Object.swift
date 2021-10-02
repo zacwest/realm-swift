@@ -107,14 +107,6 @@ extension Object: RealmCollectionValue {
 
     // MARK: Properties
 
-    /// The Realm which manages the object, or `nil` if the object is unmanaged.
-    public var realm: Realm? {
-        if let rlmReam = RLMObjectBaseRealm(self) {
-            return Realm(rlmReam)
-        }
-        return nil
-    }
-
     /// The object schema which lists the managed properties for the object.
     public var objectSchema: ObjectSchema {
         return ObjectSchema(RLMObjectBaseObjectSchema(self)!)
@@ -442,44 +434,6 @@ extension Object: RealmCollectionValue {
      */
     public func isSameObject(as object: Object?) -> Bool {
         return RLMObjectBaseAreEqual(self, object)
-    }
-}
-
-extension Object: ThreadConfined {
-    /**
-     Indicates if this object is frozen.
-
-     - see: `Object.freeze()`
-     */
-    public var isFrozen: Bool { return realm?.isFrozen ?? false }
-
-    /**
-     Returns a frozen (immutable) snapshot of this object.
-
-     The frozen copy is an immutable object which contains the same data as this
-     object currently contains, but will not update when writes are made to the
-     containing Realm. Unlike live objects, frozen objects can be accessed from any
-     thread.
-
-     - warning: Holding onto a frozen object for an extended period while performing write
-     transaction on the Realm may result in the Realm file growing to large sizes. See
-     `Realm.Configuration.maximumNumberOfActiveVersions` for more information.
-     - warning: This method can only be called on a managed object.
-     */
-    public func freeze() -> Self {
-        guard let realm = realm else { throwRealmException("Unmanaged objects cannot be frozen.") }
-        return realm.freeze(self)
-    }
-
-    /**
-     Returns a live (mutable) reference of this object.
-
-     This method creates a managed accessor to a live copy of the same frozen object.
-     Will return self if called on an already live object.
-     */
-    public func thaw() -> Self? {
-        guard let realm = realm else { throwRealmException("Unmanaged objects cannot be thawed.") }
-        return realm.thaw(self)
     }
 }
 

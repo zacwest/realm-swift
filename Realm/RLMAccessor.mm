@@ -1184,5 +1184,8 @@ bool RLMStatelessAccessorContext::is_same_dictionary(realm::object_store::Dictio
 + (void)promote:(RLMProperty *)property on:(RLMObjectBase *)parent {
     [self initialize:property on:parent];
 }
++ (void)demote:(RLMProperty *)property on:(RLMObjectBase *)parent {
+    [self deinitialize:property on:parent];
+}
 @end
 #pragma clang diagnostic pop
