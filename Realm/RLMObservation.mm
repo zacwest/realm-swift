@@ -482,10 +482,10 @@ std::vector<realm::BindingContext::ObserverState> RLMGetObservedRows(RLMSchemaIn
             auto const& row = info->getRow();
             if (!row.is_valid())
                 continue;
-            observers.push_back({
-                row.get_table()->get_key(),
-                row.get_key().value,
-                info});
+//            observers.push_back({
+//                row.get_table()->get_key(),
+//                row.get_key().value,
+//                info});
         }
     }
     sort(begin(observers), end(observers));

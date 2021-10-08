@@ -78,13 +78,13 @@ struct CocoaSyncLogger : public realm::util::RootLogger {
     }
 };
 
-struct CocoaSyncLoggerFactory : public realm::SyncLoggerFactory {
-    std::unique_ptr<realm::util::Logger> make_logger(realm::util::Logger::Level level) override {
-        auto logger = std::make_unique<CocoaSyncLogger>();
-        logger->set_level_threshold(level);
-        return std::move(logger);
-    }
-} s_syncLoggerFactory;
+//struct CocoaSyncLoggerFactory : public realm::SyncLoggerFactory {
+//    std::unique_ptr<realm::util::Logger> make_logger(realm::util::Logger::Level level) override {
+//        auto logger = std::make_unique<CocoaSyncLogger>();
+//        logger->set_level_threshold(level);
+//        return std::move(logger);
+//    }
+//} s_syncLoggerFactory;
 
 struct CallbackLogger : public realm::util::RootLogger {
     RLMSyncLogFunction logFn;
@@ -94,17 +94,17 @@ struct CallbackLogger : public realm::util::RootLogger {
         }
     }
 };
-struct CallbackLoggerFactory : public realm::SyncLoggerFactory {
-    RLMSyncLogFunction logFn;
-    std::unique_ptr<realm::util::Logger> make_logger(realm::util::Logger::Level level) override {
-        auto logger = std::make_unique<CallbackLogger>();
-        logger->logFn = logFn;
-        logger->set_level_threshold(level);
-        return std::move(logger); // not a redundant move because it's a different type
-    }
-
-    CallbackLoggerFactory(RLMSyncLogFunction logFn) : logFn(logFn) { }
-};
+//struct CallbackLoggerFactory : public realm::SyncLoggerFactory {
+//    RLMSyncLogFunction logFn;
+//    std::unique_ptr<realm::util::Logger> make_logger(realm::util::Logger::Level level) override {
+//        auto logger = std::make_unique<CallbackLogger>();
+//        logger->logFn = logFn;
+//        logger->set_level_threshold(level);
+//        return std::move(logger); // not a redundant move because it's a different type
+//    }
+//
+//    CallbackLoggerFactory(RLMSyncLogFunction logFn) : logFn(logFn) { }
+//};
 
 } // anonymous namespace
 
@@ -117,7 +117,7 @@ struct CallbackLoggerFactory : public realm::SyncLoggerFactory {
 @end
 
 @implementation RLMSyncManager {
-    std::unique_ptr<CallbackLoggerFactory> _loggerFactory;
+//    std::unique_ptr<CallbackLoggerFactory> _loggerFactory;
     std::shared_ptr<SyncManager> _syncManager;
 }
 
@@ -133,7 +133,7 @@ struct CallbackLoggerFactory : public realm::SyncLoggerFactory {
 + (SyncClientConfig)configurationWithRootDirectory:(NSURL *)rootDirectory appId:(NSString *)appId {
     SyncClientConfig config;
     bool should_encrypt = !getenv("REALM_DISABLE_METADATA_ENCRYPTION") && !RLMIsRunningInPlayground();
-    config.logger_factory = &s_syncLoggerFactory;
+//    config.logger_factory = &s_syncLoggerFactory;
     config.metadata_mode = should_encrypt ? SyncManager::MetadataMode::Encryption
                                           : SyncManager::MetadataMode::NoEncryption;
     @autoreleasepool {
@@ -183,14 +183,6 @@ struct CallbackLoggerFactory : public realm::SyncLoggerFactory {
 
 - (void)setLogger:(RLMSyncLogFunction)logFn {
     _logger = logFn;
-    if (_logger) {
-        _loggerFactory = std::make_unique<CallbackLoggerFactory>(logFn);
-        _syncManager->set_logger_factory(*_loggerFactory);
-    }
-    else {
-        _loggerFactory = nullptr;
-        _syncManager->set_logger_factory(s_syncLoggerFactory);
-    }
 }
 
 - (void)setTimeoutOptions:(RLMSyncTimeoutOptions *)timeoutOptions {
