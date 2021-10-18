@@ -415,7 +415,18 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
     public var projectedValue: Self {
         return self
     }
-    /// :nodoc:
+
+    /// `@ObservedResults` gives a live, auto updating Realm Results
+    /// Collection that will refresh the SwiftUI View when a change occurs for a given
+    /// object type.
+    /// - Parameters:
+    ///   - type: The type of observe results for.
+    ///   - configuration: The Realm configuration. If no configuration is provided then the
+    ///     configuration stored in the Enviornment Value will be used instead.
+    ///   - filter: An NSPredicate used to query the results.
+    ///   - keyPaths: Only properties contained in the key paths array will trigger
+    ///     the view refresh when they are modified.
+    ///   - sortDescriptor: A SortDescriptor to sort by.
     public init(_ type: ResultType.Type,
                 configuration: Realm.Configuration? = nil,
                 filter: NSPredicate? = nil,
@@ -430,7 +441,7 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
     public mutating func update() {
         // When the view updates, it will inject the @Environment
         // into the propertyWrapper
-        if storage.configuration == nil || storage.configuration != configuration {
+        if storage.configuration == nil {
             storage.configuration = configuration
         }
     }
