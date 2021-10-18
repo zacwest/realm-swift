@@ -755,8 +755,6 @@ class SwiftObjectServerTests: SwiftSyncTestCase {
 
     // MARK: - App tests
 
-    let appName = "translate-utwuv"
-
     private func appConfig() -> AppConfiguration {
         return AppConfiguration(baseURL: "http://localhost:9090",
                                 transport: nil,
@@ -765,6 +763,8 @@ class SwiftObjectServerTests: SwiftSyncTestCase {
     }
 
     func testAppInit() {
+        let appName = "translate-utwuv"
+
         let appWithNoConfig = App(id: appName)
         XCTAssertEqual(appWithNoConfig.allUsers.count, 0)
 
