@@ -1195,6 +1195,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testLinkPropertyKeyPathNotifications1() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1212,6 +1213,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testLinkPropertyKeyPathNotifications2() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1230,6 +1232,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testLinkPropertyKeyPathNotifications3() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1251,6 +1254,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testLinkPropertyKeyPathNotifications4() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1272,6 +1276,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testBacklinkPropertyKeyPathNotifications1() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1293,6 +1298,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testBacklinkPropertyKeyPathNotifications2() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1315,6 +1321,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testBacklinkPropertyKeyPathNotifications3() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1333,6 +1340,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testBacklinkPropertyKeyPathNotifications4() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1352,6 +1360,7 @@ class ObjectTests: TestCase {
         token.invalidate()
     }
 
+    // TODO: rename
     func testBacklinkPropertyKeyPathNotifications5() {
         let realm = try! Realm()
         realm.beginWrite()
@@ -1369,7 +1378,35 @@ class ObjectTests: TestCase {
         }
         waitForExpectations(timeout: 0.1, handler: nil)
         token.invalidate()
-}
+    }
+
+    func testBacklinkPropertyKeyPathToSameClass() {
+        var parent: ModernAllTypesObject!
+        var child: ModernAllTypesObject!
+
+        let realm = try! Realm()
+        try! realm.write {
+            parent = realm.create(ModernAllTypesObject.self)
+            child = realm.create(ModernAllTypesObject.self)
+        }
+        let ex1 = expectation(description: "linking object notification")
+        let token1 = child.observe(keyPaths: ["linkingObjects"]) { _ in
+            ex1.fulfill()
+        }
+
+        let ex2 = expectation(description: "forward link notification")
+        let token2 = parent.observe(keyPaths: ["objectCol"]) { _ in
+            ex2.fulfill()
+        }
+
+        try! realm.write {
+            parent.objectCol = child
+        }
+
+        waitForExpectations(timeout: 2, handler: nil)
+        token1.invalidate()
+        token2.invalidate()
+    }
 
     func testMutableSetPropertyNotifications() {
         let realm = try! Realm()
