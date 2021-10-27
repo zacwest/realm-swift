@@ -101,13 +101,14 @@ open class SwiftSyncTestCase: RLMSyncTestCase {
         return realm
     }
 
-    public func immediatelyOpenRealm(partitionValue: String, user: User) throws -> Realm {
+    public func immediatelyOpenRealm(partitionValue: String, user: User, fileURL: URL? = nil) throws -> Realm {
         var configuration = user.configuration(partitionValue: partitionValue)
         if configuration.objectTypes == nil {
             configuration.objectTypes = [SwiftPerson.self,
                                          SwiftHugeSyncObject.self,
                                          SwiftTypesSyncObject.self]
         }
+        if fileURL != nil { configuration.fileURL = fileURL }
         return try Realm(configuration: configuration)
     }
 

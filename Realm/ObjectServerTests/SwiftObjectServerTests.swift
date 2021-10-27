@@ -692,6 +692,177 @@ class SwiftObjectServerTests: SwiftSyncTestCase {
         XCTAssertEqual(ObjectiveCSupport.convert(object: Credentials.anonymous),
                        RLMCredentials.anonymous())
     }
+    
+    // MARK: - Bundled Sync Realm
+    
+    // TODO test with encryption keys
+    
+    func testWriteCopyNoRedownload() {
+        do {
+            let user = try logInUser(for: basicCredentials())
+            if !isParent {
+                populateRealm(user: user, partitionValue: #function)
+                return
+            }
+
+            // Wait for the child process to upload all the data.
+            executeChild()
+
+            let realm = try immediatelyOpenRealm(partitionValue: #function, user: user)
+            // TODO: remove comments below
+            // Removing these two waits will crash like realm-cocoa#7486
+            // Should the method be updated to do this for the developer?
+            waitForUploads(for: realm)
+            waitForDownloads(for: realm)
+
+            // Create config for where the sync realm will be copied to.
+            var copiedConfig = user.configuration(testName: #function)
+            let customFileURL = realmURLForFile("copy")
+            copiedConfig.fileURL = customFileURL
+            let pathOnDisk = ObjectiveCSupport.convert(object: copiedConfig).pathOnDisk
+            XCTAssertEqual(pathOnDisk, customFileURL.path)
+
+            XCTAssertFalse(FileManager.default.fileExists(atPath: pathOnDisk))
+            try realm.writeCopy(toFile: copiedConfig.fileURL!)
+
+            // Open the copied realm then immediately check count
+            let copiedRealm = try! Realm(configuration: copiedConfig)
+            checkCount(expected: SwiftSyncTestCase.bigObjectCount, copiedRealm, SwiftHugeSyncObject.self)
+
+//            waitForUploads(for: copiedRealm)
+//            waitForDownloads(for: copiedRealm)
+
+            // How to check realm sync history version?
+            // The version of the copied realm before and after waiting for upload/download should be the same(?)
+            // Should this check be added?
+        } catch {
+            XCTFail("Got an error: \(error) (process: \(isParent ? "parent" : "child"))")
+        }
+    }
+    
+    func testWriteCopySynchronizeData() {
+        do {
+            let user = try logInUser(for: basicCredentials())
+            if !isParent {
+                populateRealm(user: user, partitionValue: #function)
+                return
+            }
+
+            // Wait for the child process to upload all the data.
+            executeChild()
+
+            let realm = try immediatelyOpenRealm(partitionValue: #function, user: user)
+            waitForUploads(for: realm)
+            waitForDownloads(for: realm)
+
+            // Create config for where the sync realm will be copied to.
+            var copiedConfig = user.configuration(testName: #function)
+            let customFileURL = realmURLForFile("copy")
+            copiedConfig.fileURL = customFileURL
+            let pathOnDisk = ObjectiveCSupport.convert(object: copiedConfig).pathOnDisk
+            XCTAssertEqual(pathOnDisk, customFileURL.path)
+            
+            XCTAssertFalse(FileManager.default.fileExists(atPath: pathOnDisk))
+            try realm.writeCopy(toFile: copiedConfig.fileURL!)
+
+            let copiedRealm = try immediatelyOpenRealm(partitionValue: #function, user: user, fileURL: customFileURL)
+//            let copiedRealm = try! Realm(configuration: copiedConfig)
+            checkCount(expected: SwiftSyncTestCase.bigObjectCount, copiedRealm, SwiftHugeSyncObject.self)
+            // This test is exactly the same as testCopyNoRedownload. Might as well get rid of that one.
+            
+//            waitForDownloads(for: copiedRealm)
+//            waitForUploads(for: copiedRealm)
+            
+            copiedRealm.beginWrite()
+            let obj1 = SwiftHugeSyncObject.create()
+            copiedRealm.add(obj1)
+            try copiedRealm.commitWrite()
+
+            waitForUploads(for: copiedRealm)
+            waitForDownloads(for: realm)
+
+            // Check if an object created in the copied realm is synced to the original realm
+            let cres = copiedRealm.objects(SwiftHugeSyncObject.self)
+            let res = realm.objects(SwiftHugeSyncObject.self)
+            let obj2 = realm.objects(SwiftHugeSyncObject.self).filter("_id == %@", obj1._id).first
+            XCTAssertNotNil(obj2)
+            XCTAssertEqual(obj1.data, obj2?.data)
+            
+            realm.beginWrite()
+            let obj3 = SwiftHugeSyncObject.create()
+            realm.add(obj3)
+            try realm.commitWrite()
+
+            waitForUploads(for: realm)
+            waitForDownloads(for: copiedRealm)
+
+            let obj4 = copiedRealm.objects(SwiftHugeSyncObject.self).filter("_id == %@", obj3._id).first
+            XCTAssertNotNil(obj4)
+            XCTAssertEqual(obj3.data, obj4?.data)
+        } catch {
+            XCTFail("Got an error: \(error) (process: \(isParent ? "parent" : "child"))")
+        }
+    }
+    
+    // Bundling a sync realm and opening it with a different partition is not supported
+    // But writeCopy takes a file path, not a configuration. So in theory someone could copy a realm, then
+    // open the new path with a configuration that has a different partition. But there's no way to check if partitions
+    // are different when writeCopy is called(?)
+    func testWriteCopyDifferentPartition() {
+        do {
+            let user = try logInUser(for: basicCredentials())
+            if !isParent {
+                populateRealm(user: user, partitionValue: #function)
+                return
+            }
+            
+            let realm = try immediatelyOpenRealm(partitionValue: #function, user: user)
+            waitForUploads(for: realm)
+            waitForDownloads(for: realm)
+
+            // Create copied config but a different partition
+            var copiedConfig = user.configuration(partitionValue: "different-partition-value")
+            let customFileURL = realmURLForFile("copy")
+            copiedConfig.fileURL = customFileURL
+            let pathOnDisk = ObjectiveCSupport.convert(object: copiedConfig).pathOnDisk
+            XCTAssertEqual(pathOnDisk, customFileURL.path)
+            XCTAssertNotEqual(realm.configuration.syncConfiguration?.partitionValue,
+                              copiedConfig.syncConfiguration?.partitionValue)
+            
+            XCTAssertFalse(FileManager.default.fileExists(atPath: pathOnDisk))
+            XCTAssertThrowsError(try realm.writeCopy(toFile: copiedConfig.fileURL!))
+        } catch {
+            XCTFail("Got an error: \(error) (process: \(isParent ? "parent" : "child"))")
+        }
+    }
+    
+    func testWriteFailBeforeSynced() {
+        do {
+            let user = try logInUser(for: basicCredentials())
+            if !isParent {
+                populateRealm(user: user, partitionValue: #function)
+                return
+            }
+
+            // Wait for the child process to upload all the data.
+            executeChild()
+
+            let realm = try immediatelyOpenRealm(partitionValue: #function, user: user)
+
+            // Create config for where the sync realm will be copied to.
+            var copiedConfig = user.configuration(testName: #function)
+            let customFileURL = realmURLForFile("copy")
+            copiedConfig.fileURL = customFileURL
+            let pathOnDisk = ObjectiveCSupport.convert(object: copiedConfig).pathOnDisk
+            XCTAssertEqual(pathOnDisk, customFileURL.path)
+
+            // Write copy is called before original realm is fully synced
+            XCTAssertFalse(FileManager.default.fileExists(atPath: pathOnDisk))
+            XCTAssertThrowsError(try realm.writeCopy(toFile: copiedConfig.fileURL!), "Could not write file as not all client changes are integrated in server")
+        } catch {
+            XCTFail("Got an error: \(error) (process: \(isParent ? "parent" : "child"))")
+        }
+    }
 
     // MARK: - Authentication
 

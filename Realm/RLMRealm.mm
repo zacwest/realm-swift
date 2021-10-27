@@ -947,6 +947,8 @@ REALM_NOINLINE void RLMRealmTranslateException(NSError **error) {
     key = RLMRealmValidatedEncryptionKey(key);
     NSString *path = fileURL.path;
 
+    // add check to see partition has not changed
+    
     try {
         _realm->write_copy(path.UTF8String, {static_cast<const char *>(key.bytes), key.length});
         return YES;

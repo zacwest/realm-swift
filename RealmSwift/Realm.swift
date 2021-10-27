@@ -911,6 +911,8 @@ import Realm.Private
      - throws: An `NSError` if the copy could not be written.
      */
     public func writeCopy(toFile fileURL: URL, encryptionKey: Data? = nil) throws {
+        // if new config partition and old config partition are not equal throw error
+//        if (configuration.syncConfiguration && )
         try rlmRealm.writeCopy(to: fileURL, encryptionKey: encryptionKey)
     }
 
