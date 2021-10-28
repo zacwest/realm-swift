@@ -151,7 +151,7 @@ static RLMSyncConnectionState convertConnectionState(SyncSession::ConnectionStat
 
 - (RLMSyncSessionState)state {
     if (auto session = _session.lock()) {
-        if (session->state() == SyncSession::PublicState::Inactive) {
+        if (session->state() == SyncSession::State::Inactive) {
             return RLMSyncSessionStateInactive;
         }
         return RLMSyncSessionStateActive;
