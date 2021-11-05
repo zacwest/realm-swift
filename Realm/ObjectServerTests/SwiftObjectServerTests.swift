@@ -33,6 +33,55 @@ import RealmTestSupport
 @available(OSX 10.14, *)
 @objc(SwiftObjectServerTests)
 class SwiftObjectServerTests: SwiftSyncTestCase {
+
+    func testConvertToSyncedRealm() {
+        autoreleasepool {
+            var config = Realm.Configuration()
+            config.objectTypes = [SwiftPerson.self]
+            config.fileURL = realmURLForFile("test.realm")
+            let realm = try! Realm(configuration: config)
+            try! realm.write {
+                realm.add(SwiftPerson())
+            }
+        }
+
+        autoreleasepool {
+            let user = try! logInUser(for: basicCredentials())
+            var config = user.configuration(partitionValue: .null)
+            config.objectTypes = [SwiftPerson.self]
+            config.fileURL = realmURLForFile("test.realm")
+            let realm = try! Realm(configuration: config)
+            XCTAssertTrue(realm.objects(SwiftPerson.self).count == 1)
+            waitForDownloads(for: realm)
+
+            try! realm.write {
+                realm.add(SwiftPerson())
+            }
+
+            waitForUploads(for: realm)
+
+            XCTAssertTrue(realm.objects(SwiftPerson.self).count == 2)
+        }
+
+        autoreleasepool {
+            let user = try! logInUser(for: .anonymous)
+            var config = user.configuration(partitionValue: .null)
+            config.objectTypes = [SwiftPerson.self]
+            config.fileURL = realmURLForFile("test.realm")
+            let realm = try! Realm(configuration: config)
+            XCTAssertTrue(realm.objects(SwiftPerson.self).count == 1)
+            waitForDownloads(for: realm)
+
+            try! realm.write {
+                realm.add(SwiftPerson())
+            }
+
+            waitForUploads(for: realm)
+            // Should sync with the other users realm and get their `SwiftPerson`
+            XCTAssertTrue(realm.objects(SwiftPerson.self).count == 3)
+        }
+    }
+
     /// It should be possible to successfully open a Realm configured for sync.
     func testBasicSwiftSync() {
         do {
@@ -748,7 +797,8 @@ class SwiftObjectServerTests: SwiftSyncTestCase {
     }
 
     private func realmURLForFile(_ fileName: String) -> URL {
-        let testDir = RLMRealmPathForFile("mongodb-realm")
+//        let testDir = RLMRealmPathForFile("mongodb-realm")
+        let testDir = RLMRealmPathForFile("")
         let directory = URL(fileURLWithPath: testDir, isDirectory: true)
         return directory.appendingPathComponent(fileName, isDirectory: false)
     }
