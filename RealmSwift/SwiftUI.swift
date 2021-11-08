@@ -368,6 +368,9 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
             if let filter = filter {
                 value = value.filter(filter)
             }
+            if let `where` = `where` {
+                value = value.where(`where`)
+            }
             setupHasRun = true
         }
 
@@ -378,6 +381,12 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
         }
 
         var filter: NSPredicate? {
+            didSet {
+                didSet()
+            }
+        }
+
+        var `where`: ((Query<ResultType>) -> Query<ResultType>)? {
             didSet {
                 didSet()
             }
@@ -396,6 +405,12 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
     @State public var filter: NSPredicate? {
         willSet {
             storage.filter = newValue
+        }
+    }
+    /// :nodoc:
+    @State public var `where`: ((Query<ResultType>) -> Query<ResultType>)? {
+        willSet {
+            storage.where = newValue
         }
     }
     /// :nodoc:
@@ -424,6 +439,26 @@ private class ObservableStorage<ObservedType>: ObservableObject where ObservedTy
         self.storage = Storage(Results(RLMResults.emptyDetached()), keyPaths)
         self.storage.configuration = configuration
         self.filter = filter
+        self.sortDescriptor = sortDescriptor
+    }
+    /// :nodoc:
+    public init(_ type: ResultType.Type,
+                configuration: Realm.Configuration? = nil,
+                where: ((Query<ResultType>) -> Query<ResultType>)? = nil,
+                keyPaths: [String]? = nil,
+                sortDescriptor: SortDescriptor? = nil) {
+        self.storage = Storage(Results(RLMResults.emptyDetached()), keyPaths)
+        self.storage.configuration = configuration
+        self.where = `where`
+        self.sortDescriptor = sortDescriptor
+    }
+    /// :nodoc:
+    public init(_ type: ResultType.Type,
+                keyPaths: [String]? = nil,
+                configuration: Realm.Configuration? = nil,
+                sortDescriptor: SortDescriptor? = nil) {
+        self.storage = Storage(Results(RLMResults.emptyDetached()), keyPaths)
+        self.storage.configuration = configuration
         self.sortDescriptor = sortDescriptor
     }
 

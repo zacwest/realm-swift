@@ -22,13 +22,13 @@ import RealmSwift
 import SwiftUI
 import Combine
 
-@objcMembers class SwiftUIObject: Object, ObjectKeyIdentifiable {
-    var list = RealmSwift.List<SwiftBoolObject>()
-    var map = Map<String, SwiftBoolObject?>()
-    var primitiveList = RealmSwift.List<Int>()
-    var primitiveMap = Map<String, Int>()
-    dynamic var str = "foo"
-    dynamic var int = 0
+class SwiftUIObject: Object, ObjectKeyIdentifiable {
+    @Persisted var list: RealmSwift.List<SwiftBoolObject>
+    @Persisted var map: Map<String, SwiftBoolObject?>
+    @Persisted var primitiveList: RealmSwift.List<Int>
+    @Persisted var primitiveMap: Map<String, Int>
+    @Persisted var str = "foo"
+    @Persisted var int = 0
 
     convenience init(str: String = "foo") {
         self.init()
@@ -285,6 +285,28 @@ class SwiftUITests: TestCase {
         XCTAssertEqual(state.wrappedValue.count, 1)
         state.projectedValue.remove(object)
         XCTAssertEqual(state.wrappedValue.count, 0)
+    }
+    func testSwiftQuerySyntax() throws {
+        let obj = SwiftUIObject()
+        obj.str = "foo"
+        let realm = inMemoryRealm(inMemoryIdentifier)
+        try! realm.write {
+            realm.add(obj)
+        }
+
+        var filteredResults = ObservedResults(SwiftUIObject.self,
+                                              configuration: inMemoryRealm(inMemoryIdentifier).configuration,
+                                              where: { $0.str == "foo" },
+                                              sortDescriptor: SortDescriptor.init(keyPath: \SwiftUIObject.str, ascending: true))
+        XCTAssertEqual(filteredResults.wrappedValue.count, 1)
+        XCTAssertEqual(filteredResults.wrappedValue[0].str, "foo")
+
+        filteredResults = ObservedResults(SwiftUIObject.self,
+                                              configuration: inMemoryRealm(inMemoryIdentifier).configuration,
+                                              where: { $0.str != "foo" },
+                                              sortDescriptor: SortDescriptor.init(keyPath: \SwiftUIObject.str, ascending: true))
+        XCTAssertEqual(filteredResults.wrappedValue.count, 0)
+
     }
     // MARK: Object Operations
     func testUnmanagedObjectModification() throws {
