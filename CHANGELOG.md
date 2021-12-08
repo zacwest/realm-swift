@@ -58,6 +58,8 @@ let people: Results<PersonProjection> = realm.objects(PersonProjection.self)
 * Case-insensitive and diacritic-insensitive modifiers were ignored when
   comparing the result of an aggregate operation to another property in a
   query.
+* `Object.init(value:)` did not allow initializing `RLMDictionary<NSString, RLMObject>`/`Map<String, Object?>`
+  properties with null values for map entries (since v10.8.0).
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
