@@ -7,8 +7,10 @@ Xcode 12.4 is now the minimum supported version of Xcode.
 * None.
 
 ### Fixed
-* Add missing `Indexable` support for UUID. 
+* Add missing `Indexable` support for UUID.
   ([Cocoa #7545](https://github.com/realm/realm-cocoa/issues/7545), since v10.10.0)
+* `Object.init(value:)` did not allow initializing `RLMDictionary<NSString, RLMObject>`/`Map<String, Object?>`
+  properties with null values for map entries (since v10.8.0).
 
 <!-- ### Breaking Changes - ONLY INCLUDE FOR NEW MAJOR version -->
 
