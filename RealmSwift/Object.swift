@@ -81,7 +81,7 @@ import Realm.Private
  See our [Cocoa guide](http://realm.io/docs/cocoa) for more details.
  */
 public typealias Object = RealmSwiftObject
-extension Object: RealmCollectionValue {
+extension Object: _RealmCollectionValueInsideOptional {
     // MARK: Initializers
 
     /**
