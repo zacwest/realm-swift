@@ -117,6 +117,9 @@ public protocol ProjectionObservable: AnyObject {
     init(projecting object: Root)
 }
 
+internal protocol AnyProjection {
+    var objectBase: ObjectBase { get }
+}
 extension ObjectChange {
     fileprivate static func processChange(_ objectChange: ObjectChange<T.Root>,
                                           _ projection: T) -> ObjectChange<T> where T: ProjectionObservable {
@@ -207,10 +210,13 @@ extension ObjectChange {
 /// let personObject = realm.create(Person.self)
 /// let singleProjection = PersonProjection(projecting: personObject)
 /// ```
-open class Projection<Root: ObjectBase>: RealmCollectionValue, ProjectionObservable {
+open class Projection<Root: ObjectBase>: RealmCollectionValue, ProjectionObservable, AnyProjection {
     /// The object being projected
     public fileprivate(set) var rootObject: Root
 
+    var objectBase: ObjectBase {
+        return rootObject
+    }
     /**
      Create a new projection.
      - parameter object: The object to project.
