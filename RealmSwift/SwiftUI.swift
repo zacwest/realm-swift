@@ -183,7 +183,7 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
     init(_ value: ObjectType, _ keyPaths: [String]? = nil) {
         self.value = value
         self.keyPaths = keyPaths
-        versionRefreshToken = self.value.realm!.observe { _, _ in
+        versionRefreshToken = self.value.realm?.observe { _, _ in
             self.versionInc += 1
             if self.versionInc >= 10 {
                 self.send()
