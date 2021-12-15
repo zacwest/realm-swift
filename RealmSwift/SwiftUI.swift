@@ -182,7 +182,7 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
     private let unwrappedValue: ObjectBase?
 
     private func observeVersionChanges() {
-        versionRefreshToken = self.value.realm?.observe { _, _ in
+        versionRefreshToken = self.value.realm?.thaw().observe { _, _ in
             self.versionInc += 1
             if self.versionInc >= 10 {
                 self.send()
