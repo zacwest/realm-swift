@@ -179,10 +179,9 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
 
     private var versionInc = 0
     private var versionRefreshToken: NotificationToken?
+    private let unwrappedValue: ObjectBase?
 
-    init(_ value: ObjectType, _ keyPaths: [String]? = nil) {
-        self.value = value
-        self.keyPaths = keyPaths
+    private func observeVersionChanges() {
         versionRefreshToken = self.value.realm?.observe { _, _ in
             self.versionInc += 1
             if self.versionInc >= 10 {
@@ -190,6 +189,27 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
                 self.versionInc = 0
             }
         }
+    }
+
+    init(_ value: ObjectType, _ keyPaths: [String]? = nil) {
+        self.value = value
+        self.keyPaths = keyPaths
+        self.unwrappedValue = nil
+        observeVersionChanges()
+    }
+
+    init(_ value: ObjectType, _ keyPaths: [String]? = nil) where ObjectType: ObjectBase {
+        self.value = value
+        self.keyPaths = keyPaths
+        self.unwrappedValue = value
+        observeVersionChanges()
+    }
+
+    init(_ value: ObjectType, _ keyPaths: [String]? = nil) where ObjectType: ProjectionObservable {
+        self.value = value
+        self.keyPaths = keyPaths
+        self.unwrappedValue = value.rootObject
+        observeVersionChanges()
     }
 
     func send() {
@@ -205,13 +225,7 @@ private final class ObservableStoragePublisher<ObjectType>: Publisher where Obje
             // unmanaged object becomes managed it will continue to use KVO.
             let token =  value._observe(keyPaths, subscriber)
             subscriber.receive(subscription: ObservationSubscription(token: token))
-        } else if !value.isInvalidated {
-            var value: ObjectBase
-            if let v = self.value as? AnyProjection {
-                value = v.objectBase
-            } else {
-                value = self.value as! ObjectBase
-            }
+        } else if let value = unwrappedValue, !value.isInvalidated {
             // else if the value is unmanaged
             let schema = ObjectSchema(RLMObjectBaseObjectSchema(value)!)
             let kvo = SwiftUIKVO(subscriber: subscriber)
